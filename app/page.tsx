@@ -454,6 +454,14 @@ export default function LandingPage() {
             <a href="#faq" className="hover:text-forest-700">
               FAQ
             </a>
+            <Link
+              href="/api/health"
+              target="_blank"
+              className="inline-flex items-center gap-1.5 text-forest-700 hover:text-forest-800"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              System Status
+            </Link>
           </div>
         </div>
       </footer>
