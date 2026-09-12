@@ -85,8 +85,22 @@ export default function RegisterPage() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-6 sm:px-10 rounded-3xl shadow-elevated border border-gray-100">
           {error && (
-            <div className="mb-4 p-3 rounded-xl bg-red-50 text-red-700 text-xs font-semibold border border-red-200">
-              {error}
+            <div className="mb-4 p-3.5 rounded-xl bg-red-50 text-red-700 text-xs font-semibold border border-red-200">
+              <p className="font-bold mb-1">Registration Issue:</p>
+              <p className="font-medium text-red-800">{error}</p>
+              {(error.toLowerCase().includes("mongo") ||
+                error.toLowerCase().includes("timeout") ||
+                error.toLowerCase().includes("whitelist") ||
+                error.toLowerCase().includes("connection") ||
+                error.toLowerCase().includes("timed out") ||
+                error.toLowerCase().includes("cluster")) && (
+                <div className="mt-2.5 pt-2 border-t border-red-200 text-[11px] font-normal text-red-800 space-y-1">
+                  <p className="font-semibold text-red-900">💡 MongoDB Atlas Connection Check:</p>
+                  <p>1. Open <strong>MongoDB Atlas → Network Access</strong>.</p>
+                  <p>2. Add IP <code>0.0.0.0/0</code> (Allow Access from Anywhere).</p>
+                  <p>3. Ensure <code>MONGODB_URI</code> &amp; <code>AUTH_SECRET</code> are set in Vercel.</p>
+                </div>
+              )}
             </div>
           )}
 
