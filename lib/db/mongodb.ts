@@ -1,10 +1,13 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/habittrack";
-
-if (!MONGODB_URI) {
-  throw new Error("Please define the MONGODB_URI environment variable inside .env");
-}
+// Import all models to guarantee Mongoose schema registration in serverless lambdas
+import "@/lib/models/User";
+import "@/lib/models/Habit";
+import "@/lib/models/HabitCompletion";
+import "@/lib/models/Goal";
+import "@/lib/models/FocusSession";
+import "@/lib/models/Note";
+import "@/lib/models/Activity";
 
 interface MongooseCache {
   conn: typeof mongoose | null;
@@ -23,25 +26,33 @@ if (!cached) {
 }
 
 export async function connectToDatabase(): Promise<typeof mongoose> {
-  if (cached!.conn) {
+  if (cached!.conn && mongoose.connection.readyState === 1) {
     return cached!.conn;
   }
 
-  if (!cached!.promise) {
-    const opts = {
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    console.error("CRITICAL: MONGODB_URI is not defined in environment variables");
+    throw new Error("MONGODB_URI environment variable is missing. Please configure it in Vercel Project Settings.");
+  }
+
+  if (!cached!.promise || mongoose.connection.readyState === 0) {
+    const opts: mongoose.ConnectOptions = {
       bufferCommands: false,
       maxPoolSize: 10,
+      serverSelectionTimeoutMS: 8000, // 8 seconds timeout to prevent lambda hanging
     };
 
-    cached!.promise = mongoose.connect(MONGODB_URI, opts).then((mongooseInstance) => {
+    cached!.promise = mongoose.connect(uri, opts).then((mongooseInstance) => {
       return mongooseInstance;
     });
   }
 
   try {
     cached!.conn = await cached!.promise;
-  } catch (e) {
+  } catch (e: any) {
     cached!.promise = null;
+    console.error("MongoDB Connection Failed:", e.message || e);
     throw e;
   }
 

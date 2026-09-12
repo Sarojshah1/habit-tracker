@@ -70,8 +70,9 @@ export async function POST(req: NextRequest) {
     );
   } catch (error: any) {
     console.error("Registration error:", error);
+    const errorMessage = error?.message || "Internal server error during registration";
     return NextResponse.json(
-      { success: false, message: "Internal server error during registration" },
+      { success: false, message: errorMessage },
       { status: 500 }
     );
   }
