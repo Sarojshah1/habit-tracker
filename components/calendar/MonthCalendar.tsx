@@ -10,6 +10,7 @@ import {
   Flame,
   Calendar as CalendarIcon,
   Check,
+  Target,
 } from "lucide-react";
 import { HabitIcon } from "../ui/HabitIcon";
 
@@ -325,6 +326,21 @@ export function MonthCalendar({
                             <Clock className="w-3 h-3" />
                             {h.schedule?.time || "Anytime"}
                           </span>
+
+                          {/* Contributing goal badge */}
+                          {h.contributingGoals && h.contributingGoals.length > 0 && isCompleted && (
+                            <div className="mt-1 flex items-center gap-1 flex-wrap">
+                              {h.contributingGoals.map((cg: any) => (
+                                <span
+                                  key={cg.id}
+                                  className="inline-flex items-center gap-1 text-[10px] font-bold text-forest-800 bg-forest-100/90 px-1.5 py-0.5 rounded-md"
+                                  title={`Contributes to: ${cg.title}`}
+                                >
+                                  🎯 {cg.title} +1
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
 

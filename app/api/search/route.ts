@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
           id: g._id.toString(),
           title: g.title,
           subtitle: `${g.currentValue}/${g.targetValue} ${g.unit} (${g.status})`,
-          url: `/dashboard`,
+          url: `/goals/${g._id}`,
           type: "goal",
         })),
       },

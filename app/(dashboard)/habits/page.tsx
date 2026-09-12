@@ -20,6 +20,7 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { HabitFormModal } from "@/components/habits/HabitFormModal";
 import { HabitDetailModal } from "@/components/habits/HabitDetailModal";
+import { GoalFormModal } from "@/components/goals/GoalFormModal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export default function HabitsPage() {
@@ -31,6 +32,8 @@ export default function HabitsPage() {
 
   // Modals
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+  const [goalPreselectedHabitId, setGoalPreselectedHabitId] = useState<string | undefined>(undefined);
   const [editingHabit, setEditingHabit] = useState<any>(null);
   const [selectedHabitDetail, setSelectedHabitDetail] = useState<any>(null);
   const [deletingHabit, setDeletingHabit] = useState<any>(null);
@@ -327,6 +330,21 @@ export default function HabitsPage() {
           setSelectedHabitDetail(null);
           setDeletingHabit(h);
         }}
+        onCreateGoal={(h) => {
+          setGoalPreselectedHabitId(h._id);
+          setIsGoalModalOpen(true);
+        }}
+      />
+
+      {/* Goal Form Modal preselected with habit */}
+      <GoalFormModal
+        isOpen={isGoalModalOpen}
+        onClose={() => {
+          setIsGoalModalOpen(false);
+          setGoalPreselectedHabitId(undefined);
+        }}
+        onSuccess={fetchHabits}
+        initialHabitId={goalPreselectedHabitId}
       />
 
       {/* Delete Confirmation */}

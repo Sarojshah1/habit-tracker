@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   BarChart3,
   TrendingUp,
@@ -9,6 +10,8 @@ import {
   Clock,
   Filter,
   Award,
+  Target,
+  ArrowRight,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -383,6 +386,105 @@ export default function AnalyticsPage() {
           </div>
         </div>
       </div>
+
+      {/* Goal Performance Analytics Section */}
+      {data.goalMetrics && (
+        <div className="bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="flex items-center justify-between pb-4 border-b border-gray-100 flex-wrap gap-2">
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 tracking-tight flex items-center gap-2">
+                <Target className="w-5 h-5 text-forest-700" />
+                Goal Performance &amp; Milestones
+              </h3>
+              <p className="text-xs text-gray-400 font-medium mt-0.5">
+                Target tracking derived directly from habit completion milestones
+              </p>
+            </div>
+            <Link
+              href="/goals"
+              className="text-xs font-bold text-forest-700 hover:text-forest-800 inline-flex items-center gap-1 group"
+            >
+              View All Goals
+              <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+          </div>
+
+          {/* Goal Summary Pills */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="p-3.5 rounded-2xl bg-forest-50/60 border border-forest-100 text-center">
+              <p className="text-xs text-gray-500 font-semibold">Active Goals</p>
+              <p className="text-2xl font-black text-forest-900 mt-1">
+                {data.goalMetrics.activeGoals}
+              </p>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-100 text-center">
+              <p className="text-xs text-gray-500 font-semibold">Completed Goals</p>
+              <p className="text-2xl font-black text-emerald-700 mt-1">
+                {data.goalMetrics.completedGoals}
+              </p>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-blue-50/60 border border-blue-100 text-center">
+              <p className="text-xs text-gray-500 font-semibold">Average Progress</p>
+              <p className="text-2xl font-black text-blue-900 mt-1">
+                {data.goalMetrics.averageProgress}
+              </p>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-gray-50/60 border border-gray-100 text-center">
+              <p className="text-xs text-gray-500 font-semibold">Total Tracked</p>
+              <p className="text-2xl font-black text-gray-900 mt-1">
+                {data.goalMetrics.totalGoals}
+              </p>
+            </div>
+          </div>
+
+          {/* Goals Progress Breakdown List */}
+          {data.goalMetrics.goals && data.goalMetrics.goals.length > 0 && (
+            <div className="space-y-3 pt-2">
+              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                Ongoing Milestones
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {data.goalMetrics.goals.map((g: any) => (
+                  <Link
+                    key={g.id}
+                    href={`/goals/${g.id}`}
+                    className="p-3.5 rounded-2xl bg-gray-50/60 hover:bg-gray-50 border border-gray-100 transition-all flex flex-col justify-between group"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5 gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <HabitIcon name={g.icon || "target"} color={g.color || "#1B4332"} size="sm" />
+                          <p className="text-sm font-bold text-gray-900 group-hover:text-forest-700 truncate">
+                            {g.title}
+                          </p>
+                        </div>
+                        <span className="text-xs font-black text-forest-800 shrink-0">
+                          {g.percentage}%
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden mt-2">
+                        <div
+                          className="bg-forest-600 h-full rounded-full transition-all duration-500"
+                          style={{ width: `${g.percentage}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-gray-400 font-medium mt-2 pt-1 border-t border-gray-100/60">
+                      <span>
+                        {g.currentValue} / {g.targetValue} {g.unit}
+                      </span>
+                      <span className="capitalize">{g.effectiveStatus}</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

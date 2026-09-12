@@ -1,19 +1,27 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
-export type GoalStatus = "active" | "completed" | "paused" | "cancelled";
+export type GoalStatus = "active" | "completed" | "paused" | "archived" | "cancelled";
+export type GoalType = "habit_completion" | "consistency" | "weekly_frequency" | "custom";
+export type GoalTrackingMode = "automatic" | "manual";
 
 export interface IGoal extends Document {
   _id: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
   title: string;
   description?: string;
+  type: GoalType;
+  trackingMode: GoalTrackingMode;
   targetValue: number;
   currentValue: number;
   unit: string;
   startDate: string; // YYYY-MM-DD
   endDate: string; // YYYY-MM-DD
   status: GoalStatus;
-  associatedHabitIds: mongoose.Types.ObjectId[];
+  habitIds: mongoose.Types.ObjectId[];
+  associatedHabitIds?: mongoose.Types.ObjectId[]; // Backward compatibility
+  icon: string;
+  color: string;
+  completedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -37,6 +45,16 @@ const GoalSchema = new Schema<IGoal>(
       trim: true,
       default: "",
     },
+    type: {
+      type: String,
+      enum: ["habit_completion", "consistency", "weekly_frequency", "custom"],
+      default: "habit_completion",
+    },
+    trackingMode: {
+      type: String,
+      enum: ["automatic", "manual"],
+      default: "automatic",
+    },
     targetValue: {
       type: Number,
       required: [true, "Target value is required"],
@@ -49,7 +67,7 @@ const GoalSchema = new Schema<IGoal>(
     },
     unit: {
       type: String,
-      default: "days",
+      default: "completions",
     },
     startDate: {
       type: String,
@@ -61,22 +79,51 @@ const GoalSchema = new Schema<IGoal>(
     },
     status: {
       type: String,
-      enum: ["active", "completed", "paused", "cancelled"],
+      enum: ["active", "completed", "paused", "archived", "cancelled"],
       default: "active",
     },
+    habitIds: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Habit",
+      },
+    ],
     associatedHabitIds: [
       {
         type: Schema.Types.ObjectId,
         ref: "Habit",
       },
     ],
+    icon: {
+      type: String,
+      default: "target",
+    },
+    color: {
+      type: String,
+      default: "#1B4332",
+    },
+    completedAt: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
   }
 );
 
+// Pre-save hook to ensure habitIds and associatedHabitIds stay synchronized
+GoalSchema.pre("save", function (next) {
+  if (this.habitIds && this.habitIds.length > 0 && (!this.associatedHabitIds || this.associatedHabitIds.length === 0)) {
+    this.associatedHabitIds = this.habitIds;
+  } else if (this.associatedHabitIds && this.associatedHabitIds.length > 0 && (!this.habitIds || this.habitIds.length === 0)) {
+    this.habitIds = this.associatedHabitIds;
+  }
+  next();
+});
+
 GoalSchema.index({ userId: 1, status: 1 });
+GoalSchema.index({ userId: 1, endDate: 1 });
+GoalSchema.index({ userId: 1, habitIds: 1 });
 
 export const Goal: Model<IGoal> =
   mongoose.models.Goal || mongoose.model<IGoal>("Goal", GoalSchema);

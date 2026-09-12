@@ -4,6 +4,7 @@ import { Habit } from "@/lib/models/Habit";
 import { HabitCompletion } from "@/lib/models/HabitCompletion";
 import { Goal } from "@/lib/models/Goal";
 import { logActivity } from "@/lib/services/activity";
+import { calculateGoalProgress, syncGoalCompletionIfTargetReached } from "@/lib/services/goal";
 
 export const dynamic = "force-dynamic";
 
@@ -70,11 +71,28 @@ export async function POST(req: NextRequest) {
     if (action === "toggle" && existing && existing.status === status) {
       await HabitCompletion.deleteOne({ _id: existing._id });
 
-      // If habit was linked to goals, decrement goal progress
-      await Goal.updateMany(
-        { userId: user._id, associatedHabitIds: habit._id, status: "active", currentValue: { $gt: 0 } },
-        { $inc: { currentValue: -1 } }
-      );
+      // Synchronize associated active goals
+      const goals = await Goal.find({
+        userId: user._id,
+        $or: [{ habitIds: habit._id }, { associatedHabitIds: habit._id }],
+      });
+
+      const timezone = user.timezone || "UTC";
+      const remainingCompletions = await HabitCompletion.find({
+        userId: user._id,
+        status: "completed",
+      }).select("habitId date status");
+
+      for (const g of goals) {
+        if (g.trackingMode === "automatic") {
+          const prog = calculateGoalProgress(g, remainingCompletions, timezone);
+          g.currentValue = prog.currentValue;
+          if (g.status === "completed" && prog.currentValue < g.targetValue) {
+            g.status = "active";
+          }
+          await g.save();
+        }
+      }
 
       return NextResponse.json({
         success: true,
@@ -87,10 +105,28 @@ export async function POST(req: NextRequest) {
     if (action === "remove" || status === "pending" || status === "uncompleted") {
       if (existing) {
         await HabitCompletion.deleteOne({ _id: existing._id });
-        await Goal.updateMany(
-          { userId: user._id, associatedHabitIds: habit._id, status: "active", currentValue: { $gt: 0 } },
-          { $inc: { currentValue: -1 } }
-        );
+
+        const goals = await Goal.find({
+          userId: user._id,
+          $or: [{ habitIds: habit._id }, { associatedHabitIds: habit._id }],
+        });
+
+        const timezone = user.timezone || "UTC";
+        const remainingCompletions = await HabitCompletion.find({
+          userId: user._id,
+          status: "completed",
+        }).select("habitId date status");
+
+        for (const g of goals) {
+          if (g.trackingMode === "automatic") {
+            const prog = calculateGoalProgress(g, remainingCompletions, timezone);
+            g.currentValue = prog.currentValue;
+            if (g.status === "completed" && prog.currentValue < g.targetValue) {
+              g.status = "active";
+            }
+            await g.save();
+          }
+        }
       }
       return NextResponse.json({
         success: true,
@@ -113,30 +149,31 @@ export async function POST(req: NextRequest) {
       { upsert: true, new: true }
     );
 
-    // Update associated goals progress if status is completed
-    if (status === "completed" && (!existing || existing.status !== "completed")) {
-      const goals = await Goal.find({
-        userId: user._id,
-        associatedHabitIds: habit._id,
-        status: "active",
-      });
+    // Update associated goals dynamically from completions
+    const goals = await Goal.find({
+      userId: user._id,
+      $or: [{ habitIds: habit._id }, { associatedHabitIds: habit._id }],
+    });
 
-      for (const g of goals) {
-        const newVal = g.currentValue + 1;
-        g.currentValue = newVal;
-        if (newVal >= g.targetValue && g.status === "active") {
-          g.status = "completed";
-          await logActivity({
-            userId: user._id,
-            type: "goal_completed",
-            entityId: g._id,
-            entityType: "goal",
-            metadata: { goalTitle: g.title },
-          });
+    const timezone = user.timezone || "UTC";
+    const currentCompletions = await HabitCompletion.find({
+      userId: user._id,
+      status: "completed",
+    }).select("habitId date status");
+
+    for (const g of goals) {
+      if (g.trackingMode === "automatic") {
+        const prog = calculateGoalProgress(g, currentCompletions, timezone);
+        g.currentValue = prog.currentValue;
+        if (prog.effectiveStatus === "completed" && g.status === "active") {
+          await syncGoalCompletionIfTargetReached(g, prog.currentValue, user._id);
+        } else {
+          await g.save();
         }
-        await g.save();
       }
+    }
 
+    if (status === "completed" && (!existing || existing.status !== "completed")) {
       await logActivity({
         userId: user._id,
         type: "habit_completed",

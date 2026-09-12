@@ -34,6 +34,7 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { HabitFormModal } from "@/components/habits/HabitFormModal";
 import { HabitDetailModal } from "@/components/habits/HabitDetailModal";
+import { GoalFormModal } from "@/components/goals/GoalFormModal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { getGreeting } from "@/lib/utils/date";
 
@@ -44,6 +45,8 @@ export default function DashboardPage() {
 
   // Modals
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreateGoalModalOpen, setIsCreateGoalModalOpen] = useState(false);
+  const [goalPreselectedHabitId, setGoalPreselectedHabitId] = useState<string | undefined>(undefined);
   const [editingHabit, setEditingHabit] = useState<any>(null);
   const [selectedHabitDetail, setSelectedHabitDetail] = useState<any>(null);
   const [deletingHabit, setDeletingHabit] = useState<any>(null);
@@ -503,47 +506,106 @@ export default function DashboardPage() {
       {/* Secondary Row: Active Goals & Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Active Goals (7 cols) */}
-        <div className="lg:col-span-7 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-          <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-4">
-            <div>
-              <h3 className="text-base font-bold text-gray-900 tracking-tight">Active Goals</h3>
-              <p className="text-xs text-gray-400 font-medium">Your ongoing milestones and targets</p>
+        <div className="lg:col-span-7 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-4 gap-2 flex-wrap">
+              <div>
+                <h3 className="text-base font-bold text-gray-900 tracking-tight">Active Goals</h3>
+                <p className="text-xs text-gray-400 font-medium">Your ongoing milestones and targets</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateGoalModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-forest-700 hover:bg-forest-800 text-white text-xs font-bold shadow-xs transition-all"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Add Goal
+                </button>
+                <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full">
+                  {data.goals.length} active
+                </span>
+              </div>
             </div>
-            <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full">
-              {data.goals.length} in progress
-            </span>
+
+            {data.goals.length === 0 ? (
+              <div className="p-8 text-center text-xs text-gray-400 font-medium space-y-3">
+                <p>No active goals yet. Create targets like reading 5 books or a 30-day study streak!</p>
+                <button
+                  type="button"
+                  onClick={() => setIsCreateGoalModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-forest-600 text-forest-700 hover:bg-forest-50 text-xs font-bold transition-all"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Create Your First Goal
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {data.goals.map((goal: any) => {
+                  const pct = Math.min(
+                    100,
+                    Math.round(((goal.currentValue || 0) / (goal.targetValue || 1)) * 100)
+                  );
+                  const deadlineText = goal.progress?.deadlineText || "In progress";
+
+                  return (
+                    <Link
+                      key={goal._id}
+                      href={`/goals/${goal._id}`}
+                      className="block p-4 rounded-2xl bg-gray-50/70 hover:bg-gray-50 border border-gray-100 transition-all hover:shadow-xs group"
+                    >
+                      <div className="flex items-center justify-between mb-1.5 gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <HabitIcon name={goal.icon || "target"} color={goal.color || "#1B4332"} size="sm" />
+                          <p className="text-sm font-bold text-gray-900 group-hover:text-forest-700 transition-colors truncate">
+                            {goal.title}
+                          </p>
+                        </div>
+                        <span className="text-xs font-extrabold text-forest-700 shrink-0">
+                          {goal.currentValue} / {goal.targetValue} {goal.unit}
+                        </span>
+                      </div>
+
+                      {goal.description && (
+                        <p className="text-xs text-gray-500 mb-2.5 font-medium line-clamp-1">
+                          {goal.description}
+                        </p>
+                      )}
+
+                      <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden mb-2">
+                        <div
+                          className="bg-forest-600 h-full rounded-full transition-all duration-500"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between text-[11px] text-gray-400 font-medium">
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {deadlineText}
+                        </span>
+                        <span className="font-bold text-gray-600">{pct}%</span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          {data.goals.length === 0 ? (
-            <div className="p-8 text-center text-xs text-gray-400 font-medium">
-              No active goals yet. Create targets like reading 5 books or a 30-day study streak!
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {data.goals.map((goal: any) => {
-                const pct = Math.min(100, Math.round((goal.currentValue / goal.targetValue) * 100));
-                return (
-                  <div key={goal._id} className="p-4 rounded-2xl bg-gray-50/70 border border-gray-100">
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm font-bold text-gray-900">{goal.title}</p>
-                      <span className="text-xs font-extrabold text-forest-700">
-                        {goal.currentValue} / {goal.targetValue} {goal.unit}
-                      </span>
-                    </div>
-                    {goal.description && (
-                      <p className="text-xs text-gray-500 mb-3 font-medium">{goal.description}</p>
-                    )}
-                    <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                      <div
-                        className="bg-forest-600 h-full rounded-full transition-all duration-500"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          <div className="pt-4 mt-6 border-t border-gray-100 flex items-center justify-between text-xs">
+            <Link
+              href="/goals"
+              className="font-bold text-forest-700 hover:text-forest-800 inline-flex items-center gap-1 group"
+            >
+              View All Goals
+              <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <span className="text-gray-400 font-medium">
+              {data.goals.length} tracked milestone{data.goals.length === 1 ? "" : "s"}
+            </span>
+          </div>
         </div>
 
         {/* Recent Activity Feed (5 cols) */}
@@ -633,6 +695,17 @@ export default function DashboardPage() {
         initialData={editingHabit}
       />
 
+      {/* Add Goal Modal */}
+      <GoalFormModal
+        isOpen={isCreateGoalModalOpen}
+        onClose={() => {
+          setIsCreateGoalModalOpen(false);
+          setGoalPreselectedHabitId(undefined);
+        }}
+        onSuccess={fetchDashboardData}
+        initialHabitId={goalPreselectedHabitId}
+      />
+
       {/* Habit Detail Modal */}
       <HabitDetailModal
         isOpen={!!selectedHabitDetail}
@@ -647,6 +720,10 @@ export default function DashboardPage() {
         onDelete={(h) => {
           setSelectedHabitDetail(null);
           setDeletingHabit(h);
+        }}
+        onCreateGoal={(h) => {
+          setGoalPreselectedHabitId(h._id);
+          setIsCreateGoalModalOpen(true);
         }}
       />
 

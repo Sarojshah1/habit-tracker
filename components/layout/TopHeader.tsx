@@ -15,6 +15,7 @@ import {
   BookOpen,
   Calendar,
   Flame,
+  Target,
   X,
 } from "lucide-react";
 
@@ -219,11 +220,11 @@ export function TopHeader({ user, onOpenMobileMenu }: TopHeaderProps) {
                       {searchResults.goals.map((item) => (
                         <Link
                           key={item.id}
-                          href="/dashboard"
+                          href={`/goals/${item.id}`}
                           onClick={() => setShowSearchDropdown(false)}
                           className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-forest-50 text-gray-800 hover:text-forest-900 transition-colors text-sm"
                         >
-                          <Flame className="w-4 h-4 text-orange-500 shrink-0" />
+                          <Target className="w-4 h-4 text-forest-600 shrink-0" />
                           <div className="truncate">
                             <p className="font-semibold truncate">{item.title}</p>
                             <p className="text-xs text-gray-400 truncate">{item.subtitle}</p>
