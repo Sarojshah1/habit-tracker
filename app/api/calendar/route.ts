@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUser, unauthorizedResponse } from "@/lib/auth/middleware";
 import { Habit } from "@/lib/models/Habit";
 import { HabitCompletion } from "@/lib/models/HabitCompletion";
+import { Goal } from "@/lib/models/Goal";
 import { getUserTodayDateString, getUserDayOfWeek } from "@/lib/utils/date";
 import { isHabitScheduledForDate } from "@/lib/services/streak";
 
@@ -39,6 +40,14 @@ export async function GET(req: NextRequest) {
       date: { $gte: startDate, $lte: endDate },
     });
 
+    // Active goals that overlap with this month
+    const activeGoals = await Goal.find({
+      userId: user._id,
+      status: { $in: ["active", "completed"] },
+      startDate: { $lte: endDate },
+      endDate: { $gte: startDate },
+    }).select("title icon color habitIds associatedHabitIds startDate endDate");
+
     // Map completions by date -> habitId -> status
     const completionByDateAndHabit = new Map<string, Map<string, { status: string; notes?: string }>>();
     completions.forEach((c) => {
@@ -63,6 +72,22 @@ export async function GET(req: NextRequest) {
         .map((h) => {
           const completionInfo = dayHabitMap.get(h._id.toString());
           const status = completionInfo ? completionInfo.status : dateStr < todayDateStr ? "missed" : "pending";
+
+          // Find active goals that this habit contributes to on this date
+          const contributingGoals = activeGoals
+            .filter((g) => {
+              const ids = (g.habitIds && g.habitIds.length > 0 ? g.habitIds : g.associatedHabitIds || []).map(
+                (id: any) => id.toString()
+              );
+              return ids.includes(h._id.toString()) && dateStr >= g.startDate && dateStr <= g.endDate;
+            })
+            .map((g) => ({
+              id: g._id.toString(),
+              title: g.title,
+              icon: g.icon,
+              color: g.color,
+            }));
+
           return {
             _id: h._id,
             name: h.name,
@@ -72,6 +97,7 @@ export async function GET(req: NextRequest) {
             frequency: h.frequency,
             status,
             notes: completionInfo ? completionInfo.notes : "",
+            contributingGoals,
           };
         });
 

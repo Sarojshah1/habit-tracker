@@ -6,6 +6,7 @@ import { Goal } from "@/lib/models/Goal";
 import { Activity } from "@/lib/models/Activity";
 import { getUserTodayDateString, getDateDaysAgoFrom, formatFriendlyDate, getUserDayOfWeek } from "@/lib/utils/date";
 import { calculateOverallStreaks, isHabitScheduledForDate, calculateHabitStats } from "@/lib/services/streak";
+import { calculateGoalProgress } from "@/lib/services/goal";
 
 export const dynamic = "force-dynamic";
 
@@ -108,11 +109,33 @@ export async function GET(req: NextRequest) {
     const weeklyCompletionRate =
       totalWeeklyExpected > 0 ? Math.min(100, Math.round((totalWeeklyCompleted / totalWeeklyExpected) * 100)) : 0;
 
-    // 6. Active Goals
-    const activeGoals = await Goal.find({
+    // 6. Active Goals with dynamic progress
+    const allUserCompletions = await HabitCompletion.find({
+       userId: user._id,
+       status: "completed",
+    }).select("habitId date status");
+
+    const rawGoals = await Goal.find({
       userId: user._id,
       status: "active",
-    }).sort({ createdAt: -1 });
+    })
+      .populate("habitIds", "name icon color")
+      .populate("associatedHabitIds", "name icon color")
+      .sort({ createdAt: -1 });
+
+    const activeGoals = rawGoals.map((g) => {
+      const progress = calculateGoalProgress(g, allUserCompletions, timezone, todayDateStr);
+      const habits =
+        g.habitIds && g.habitIds.length > 0
+          ? g.habitIds
+          : g.associatedHabitIds || [];
+      return {
+        ...g.toObject(),
+        habitIds: habits,
+        currentValue: progress.currentValue,
+        progress,
+      };
+    });
 
     // 7. Recent Activity
     const recentActivity = await Activity.find({

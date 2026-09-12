@@ -3,8 +3,10 @@ import { getAuthenticatedUser, unauthorizedResponse } from "@/lib/auth/middlewar
 import { Habit } from "@/lib/models/Habit";
 import { HabitCompletion } from "@/lib/models/HabitCompletion";
 import { FocusSession } from "@/lib/models/FocusSession";
+import { Goal } from "@/lib/models/Goal";
 import { getUserTodayDateString, getDateDaysAgoFrom, getUserDayOfWeek } from "@/lib/utils/date";
 import { calculateOverallStreaks, isHabitScheduledForDate, calculateHabitStats } from "@/lib/services/streak";
+import { calculateGoalProgress } from "@/lib/services/goal";
 
 export const dynamic = "force-dynamic";
 
@@ -175,6 +177,55 @@ export async function GET(req: NextRequest) {
       scheduled: d.scheduled,
     }));
 
+    // 7. Goal Performance Analytics
+    const userGoals = await Goal.find({
+      userId: user._id,
+      status: { $ne: "archived" },
+    })
+      .populate("habitIds", "name icon color")
+      .populate("associatedHabitIds", "name icon color");
+
+    const goalsWithProgress = userGoals.map((g) => {
+      const progress = calculateGoalProgress(g, allCompletions, timezone, todayDateStr);
+      return {
+        id: g._id.toString(),
+        title: g.title,
+        icon: g.icon,
+        color: g.color,
+        type: g.type,
+        currentValue: progress.currentValue,
+        targetValue: progress.targetValue,
+        unit: g.unit,
+        percentage: progress.percentage,
+        effectiveStatus: progress.effectiveStatus,
+        status: g.status,
+      };
+    });
+
+    const activeGoalsCount = goalsWithProgress.filter(
+      (g) => g.effectiveStatus === "active" || g.effectiveStatus === "overdue"
+    ).length;
+    const completedGoalsCount = goalsWithProgress.filter(
+      (g) => g.effectiveStatus === "completed"
+    ).length;
+    const activeProgressAvg =
+      activeGoalsCount > 0
+        ? Math.round(
+            goalsWithProgress
+              .filter((g) => g.effectiveStatus === "active" || g.effectiveStatus === "overdue")
+              .reduce((sum, g) => sum + g.percentage, 0) / activeGoalsCount
+          )
+        : 0;
+
+    const goalMetrics = {
+      activeGoals: activeGoalsCount,
+      completedGoals: completedGoalsCount,
+      totalGoals: goalsWithProgress.length,
+      averageProgress: `${activeProgressAvg}%`,
+      averageProgressNum: activeProgressAvg,
+      goals: goalsWithProgress,
+    };
+
     return NextResponse.json({
       success: true,
       summary: {
@@ -188,6 +239,7 @@ export async function GET(req: NextRequest) {
       breakdown: breakdownData,
       rankedHabits: habitStatsList,
       weeklyActivity,
+      goalMetrics,
     });
   } catch (error) {
     console.error("GET /api/analytics error:", error);

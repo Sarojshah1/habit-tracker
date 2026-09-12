@@ -1,6 +1,5 @@
-"use client";
-
-import React from "react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { Modal } from "../ui/Modal";
 import { HabitIcon } from "../ui/HabitIcon";
 import {
@@ -12,6 +11,9 @@ import {
   Trash2,
   Edit,
   Clock,
+  Target,
+  Plus,
+  ArrowRight,
 } from "lucide-react";
 
 interface HabitDetailModalProps {
@@ -21,6 +23,7 @@ interface HabitDetailModalProps {
   onEdit: (habit: any) => void;
   onArchive: (habit: any) => void;
   onDelete: (habit: any) => void;
+  onCreateGoal?: (habit: any) => void;
 }
 
 export function HabitDetailModal({
@@ -30,7 +33,31 @@ export function HabitDetailModal({
   onEdit,
   onArchive,
   onDelete,
+  onCreateGoal,
 }: HabitDetailModalProps) {
+  const [linkedGoals, setLinkedGoals] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (isOpen && habit) {
+      fetch("/api/goals?filter=all")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.goals) {
+            const related = data.goals.filter((g: any) => {
+              const ids = (g.habitIds || g.associatedHabitIds || []).map((h: any) =>
+                typeof h === "object" ? h._id : h
+              );
+              return ids.includes(habit._id);
+            });
+            setLinkedGoals(related);
+          }
+        })
+        .catch((err) => console.error("Failed to load linked goals for habit:", err));
+    } else {
+      setLinkedGoals([]);
+    }
+  }, [isOpen, habit]);
+
   if (!habit) return null;
 
   const stats = habit.stats || {
@@ -128,6 +155,70 @@ export function HabitDetailModal({
             {habit.reminder}
           </div>
         )}
+
+        {/* Linked Goals Section */}
+        <div className="space-y-3 pt-2 border-t border-gray-100">
+          <div className="flex items-center justify-between">
+            <h5 className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+              <Target className="w-3.5 h-3.5 text-forest-700" />
+              Linked Goals
+            </h5>
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                if (onCreateGoal) onCreateGoal(habit);
+              }}
+              className="inline-flex items-center gap-1 text-xs font-bold text-forest-700 hover:text-forest-800 transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Create Goal with this Habit
+            </button>
+          </div>
+
+          {linkedGoals.length === 0 ? (
+            <div className="p-3 bg-gray-50/70 rounded-xl border border-gray-100 text-xs text-gray-500 flex items-center justify-between">
+              <span>This habit does not contribute to any goals yet.</span>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  if (onCreateGoal) onCreateGoal(habit);
+                }}
+                className="font-bold text-forest-700 hover:underline ml-2 shrink-0"
+              >
+                + Connect to Goal
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-xs text-gray-500 font-medium">This habit contributes to:</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {linkedGoals.map((g) => (
+                  <Link
+                    key={g._id}
+                    href={`/goals/${g._id}`}
+                    onClick={onClose}
+                    className="p-2.5 rounded-xl bg-gray-50 hover:bg-forest-50/60 border border-gray-100 transition-colors flex items-center justify-between gap-2 group"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <HabitIcon name={g.icon || "target"} color={g.color || "#1B4332"} size="sm" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-gray-900 group-hover:text-forest-700 truncate">
+                          {g.title}
+                        </p>
+                        <p className="text-[10px] text-gray-400">
+                          {g.progress?.currentValue || g.currentValue} / {g.targetValue} {g.unit} ({g.progress?.percentage || 0}%)
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-forest-700 shrink-0" />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Actions Bar */}
         <div className="flex items-center justify-between pt-4 border-t border-gray-100">

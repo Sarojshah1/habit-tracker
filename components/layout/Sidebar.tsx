@@ -12,6 +12,7 @@ import {
   FileText,
   Settings,
   Sparkles,
+  Target,
   X,
 } from "lucide-react";
 import { Logo } from "../ui/Logo";
@@ -25,6 +26,7 @@ const NAV_ITEMS = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "My Habits", href: "/habits", icon: CheckSquare },
   { name: "Calendar", href: "/calendar", icon: Calendar },
+  { name: "Goals", href: "/goals", icon: Target },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
   { name: "Focus Mode", href: "/focus", icon: Timer },
   { name: "Notes", href: "/notes", icon: FileText },
