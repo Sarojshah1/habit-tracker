@@ -1,10 +1,76 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://habittrack.vercel.app";
+
+export const viewport: Viewport = {
+  themeColor: "#1B4332",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export const metadata: Metadata = {
-  title: "HabitTrack — Build Habits That Shape Your Future",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "HabitTrack — Free Habit Tracker & Study Focus for Students",
+    template: "%s | HabitTrack",
+  },
   description:
-    "A modern, productivity-focused habit tracking application designed for students to build streaks, schedule habits, focus, and achieve goals.",
+    "HabitTrack is a free full-stack productivity web application designed for students. Schedule study routines, build streaks, focus with Pomodoro timers, and track performance analytics.",
+  keywords: [
+    "habit tracker",
+    "habit tracker for students",
+    "student habit tracking app",
+    "study habit tracker",
+    "daily routine tracker",
+    "pomodoro timer for students",
+    "study streak tracker",
+    "academic habit planner",
+    "student productivity dashboard",
+    "free habit tracker web app",
+    "habit calendar",
+    "consistency tracker",
+    "college productivity tool",
+    "study notes and habits",
+  ],
+  authors: [{ name: "HabitTrack Team" }],
+  creator: "HabitTrack",
+  publisher: "HabitTrack",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "HabitTrack — Free Habit Tracker & Study Focus for Students",
+    description:
+      "Build habits that shape your future. HabitTrack helps students maintain streaks, manage study schedules, and achieve academic goals with Pomodoro timers.",
+    url: siteUrl,
+    siteName: "HabitTrack",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "HabitTrack — Student Habit Tracker & Study Focus",
+    description:
+      "Build habits that shape your future. Schedule routines, track streaks, and master deep focus for academic success.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   icons: {
     icon: "/favicon.ico",
   },
@@ -16,7 +82,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="h-full scroll-smooth">
       <body className="h-full font-sans bg-[#F8FAF9] text-gray-900 antialiased">
         {children}
       </body>
