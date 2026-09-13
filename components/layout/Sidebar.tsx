@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   CheckSquare,
+  ListTodo,
   Calendar,
   BarChart3,
   Timer,
@@ -25,6 +26,7 @@ interface SidebarProps {
 const NAV_ITEMS = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "My Habits", href: "/habits", icon: CheckSquare },
+  { name: "Tasks", href: "/tasks", icon: ListTodo },
   { name: "Calendar", href: "/calendar", icon: Calendar },
   { name: "Goals", href: "/goals", icon: Target },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },

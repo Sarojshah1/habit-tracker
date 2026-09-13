@@ -1,13 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Timer, Sparkles, Clock, CheckCircle2 } from "lucide-react";
 import { FocusTimer } from "@/components/focus/FocusTimer";
 import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
 import { ErrorState } from "@/components/ui/ErrorState";
 
-export default function FocusPage() {
+function FocusContent() {
+  const searchParams = useSearchParams();
+  const initialTaskId = searchParams.get("taskId") || undefined;
+
   const [habits, setHabits] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<any[]>([]);
   const [sessions, setSessions] = useState<any[]>([]);
   const [totalMinutes, setTotalMinutes] = useState(0);
   const [totalSessions, setTotalSessions] = useState(0);
@@ -17,17 +22,20 @@ export default function FocusPage() {
   const fetchData = async () => {
     try {
       setError(false);
-      const [habitsRes, sessionsRes] = await Promise.all([
+      const [habitsRes, sessionsRes, tasksRes] = await Promise.all([
         fetch("/api/habits?filter=active"),
         fetch("/api/focus/sessions"),
+        fetch("/api/tasks?status=all"),
       ]);
 
       if (!habitsRes.ok || !sessionsRes.ok) throw new Error("Failed to load data");
 
       const habitsJson = await habitsRes.json();
       const sessionsJson = await sessionsRes.json();
+      const tasksJson = tasksRes.ok ? await tasksRes.json() : { success: false };
 
       if (habitsJson.success) setHabits(habitsJson.habits);
+      if (tasksJson.success) setTasks(tasksJson.tasks || []);
       if (sessionsJson.success) {
         setSessions(sessionsJson.sessions);
         setTotalMinutes(sessionsJson.totalMinutes);
@@ -82,7 +90,13 @@ export default function FocusPage() {
       </div>
 
       {/* Focus Timer */}
-      <FocusTimer habits={habits} onSessionComplete={handleSessionComplete} />
+      <FocusTimer
+        habits={habits}
+        tasks={tasks}
+        initialTaskId={initialTaskId}
+        onSessionComplete={handleSessionComplete}
+        onTaskCompleted={() => fetchData()}
+      />
 
       {/* Focus Stats & Recent History */}
       <div className="max-w-2xl mx-auto pt-8 border-t border-gray-100">
@@ -142,5 +156,13 @@ export default function FocusPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function FocusPage() {
+  return (
+    <Suspense fallback={<LoadingSkeleton count={3} />}>
+      <FocusContent />
+    </Suspense>
   );
 }

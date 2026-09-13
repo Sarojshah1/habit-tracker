@@ -8,6 +8,12 @@ import "@/lib/models/Goal";
 import "@/lib/models/FocusSession";
 import "@/lib/models/Note";
 import "@/lib/models/Activity";
+import "@/lib/models/Task";
+import "@/lib/models/TimeBlock";
+import "@/lib/models/DailyPlan";
+import "@/lib/models/DailyReview";
+import "@/lib/models/Routine";
+import "@/lib/models/Notification";
 
 interface MongooseCache {
   conn: typeof mongoose | null;

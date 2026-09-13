@@ -3,6 +3,7 @@ import { getAuthenticatedUser, unauthorizedResponse } from "@/lib/auth/middlewar
 import { Habit } from "@/lib/models/Habit";
 import { Note } from "@/lib/models/Note";
 import { Goal } from "@/lib/models/Goal";
+import { Task } from "@/lib/models/Task";
 
 export const dynamic = "force-dynamic";
 
@@ -17,13 +18,13 @@ export async function GET(req: NextRequest) {
     if (!query || query.length < 2) {
       return NextResponse.json({
         success: true,
-        results: { habits: [], notes: [], goals: [] },
+        results: { habits: [], notes: [], goals: [], tasks: [] },
       });
     }
 
     const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
 
-    const [habits, notes, goals] = await Promise.all([
+    const [habits, notes, goals, tasks] = await Promise.all([
       Habit.find({
         userId: user._id,
         $or: [{ name: regex }, { description: regex }],
@@ -42,6 +43,12 @@ export async function GET(req: NextRequest) {
       })
         .limit(5)
         .select("title description targetValue currentValue unit status"),
+      Task.find({
+        userId: user._id,
+        $or: [{ title: regex }, { description: regex }],
+      })
+        .limit(5)
+        .select("title description priority status dueDate"),
     ]);
 
     return NextResponse.json({
@@ -55,6 +62,13 @@ export async function GET(req: NextRequest) {
           color: h.color,
           url: `/habits?id=${h._id}`,
           type: "habit",
+        })),
+        tasks: tasks.map((t) => ({
+          id: t._id.toString(),
+          title: t.title,
+          subtitle: `Due ${t.dueDate} • ${t.priority} priority (${t.status})`,
+          url: `/tasks`,
+          type: "task",
         })),
         notes: notes.map((n) => ({
           id: n._id.toString(),

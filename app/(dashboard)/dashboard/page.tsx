@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
   Flame,
@@ -17,6 +18,13 @@ import {
   XCircle,
   TrendingUp,
   Award,
+  Sun,
+  Moon,
+  CheckSquare,
+  Play,
+  Zap,
+  ChevronRight,
+  ListTodo,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -35,10 +43,14 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { HabitFormModal } from "@/components/habits/HabitFormModal";
 import { HabitDetailModal } from "@/components/habits/HabitDetailModal";
 import { GoalFormModal } from "@/components/goals/GoalFormModal";
+import { TaskFormModal } from "@/components/tasks/TaskFormModal";
+import { DailyPlanModal } from "@/components/planner/DailyPlanModal";
+import { DailyReviewModal } from "@/components/planner/DailyReviewModal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { getGreeting } from "@/lib/utils/date";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -50,6 +62,11 @@ export default function DashboardPage() {
   const [editingHabit, setEditingHabit] = useState<any>(null);
   const [selectedHabitDetail, setSelectedHabitDetail] = useState<any>(null);
   const [deletingHabit, setDeletingHabit] = useState<any>(null);
+
+  // Planner & Task Modals
+  const [isDailyPlanModalOpen, setIsDailyPlanModalOpen] = useState(false);
+  const [isDailyReviewModalOpen, setIsDailyReviewModalOpen] = useState(false);
+  const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false);
 
   const fetchDashboardData = async () => {
     try {
@@ -169,6 +186,41 @@ export default function DashboardPage() {
     }
   };
 
+  const handleToggleTask = async (task: any) => {
+    const isCompleted = task.status === "completed";
+    const endpoint = isCompleted ? `/api/tasks/${task._id}` : `/api/tasks/${task._id}/complete`;
+    const method = isCompleted ? "PATCH" : "POST";
+    const body = isCompleted ? JSON.stringify({ status: "todo" }) : JSON.stringify({});
+
+    // Optimistic update
+    setData((prev: any) => {
+      if (!prev) return prev;
+      const updatedTasks = (prev.todayTasks || []).map((t: any) =>
+        t._id === task._id ? { ...t, status: isCompleted ? "todo" : "completed" } : t
+      );
+      const updatedPriorities = (prev.todayPriorities || []).map((t: any) =>
+        t._id === task._id ? { ...t, status: isCompleted ? "todo" : "completed" } : t
+      );
+      return {
+        ...prev,
+        todayTasks: updatedTasks,
+        todayPriorities: updatedPriorities,
+      };
+    });
+
+    try {
+      await fetch(endpoint, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body,
+      });
+      fetchDashboardData();
+    } catch (err) {
+      console.error("Failed to toggle task:", err);
+      fetchDashboardData();
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -194,7 +246,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      {/* Dashboard Greeting Header */}
+      {/* Dashboard Greeting Header & Planner Triggers */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
@@ -207,17 +259,37 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {/* Motivational Quote pill */}
-        {data.today?.quote && (
-          <div className="bg-white rounded-2xl border border-gray-100/90 px-4 py-2.5 shadow-xs max-w-sm">
-            <p className="text-xs text-gray-700 italic font-medium">
-              &ldquo;{data.today.quote.text}&rdquo;
-            </p>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider text-right mt-1">
-              — {data.today.quote.author}
-            </p>
-          </div>
-        )}
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <button
+            type="button"
+            onClick={() => setIsDailyPlanModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-forest-700 hover:bg-forest-800 text-white text-xs font-bold shadow-xs transition-all hover:shadow"
+          >
+            <Sun className="w-3.5 h-3.5" />
+            {data.todayPlan ? "Edit Morning Plan" : "Plan Your Day"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsDailyReviewModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-gray-200 hover:border-forest-600 text-gray-700 hover:text-forest-700 text-xs font-bold transition-all shadow-xs"
+          >
+            <Moon className="w-3.5 h-3.5 text-indigo-600" />
+            {data.todayReview ? "Review Completed" : "Daily Review"}
+          </button>
+
+          {/* Motivational Quote pill */}
+          {data.today?.quote && (
+            <div className="hidden lg:block bg-white rounded-2xl border border-gray-100/90 px-4 py-2 shadow-xs max-w-xs">
+              <p className="text-[11px] text-gray-700 italic font-medium line-clamp-1">
+                &ldquo;{data.today.quote.text}&rdquo;
+              </p>
+              <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider text-right">
+                — {data.today.quote.author}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 4 Stat Cards */}
@@ -255,6 +327,193 @@ export default function DashboardPage() {
           icon={Target}
           colorClass="text-blue-600 bg-blue-50"
         />
+      </div>
+
+      {/* Today's Priorities & Deep Work Focus Banner */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Top 3 Priorities (7 cols) */}
+        <div className="lg:col-span-7 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base font-bold text-gray-900 tracking-tight">Today&apos;s Priorities</h2>
+                  <span className="text-[10px] font-bold text-forest-700 bg-forest-50 px-2 py-0.5 rounded-full">
+                    Focus Targets
+                  </span>
+                </div>
+                <p className="text-xs text-gray-400 font-medium mt-0.5">
+                  Complete your essential student milestones for today.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateTaskModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-forest-50 hover:bg-forest-100 text-forest-800 text-xs font-bold transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Add Task
+                </button>
+                <Link
+                  href="/tasks"
+                  className="text-xs font-bold text-forest-700 hover:text-forest-800 hover:underline"
+                >
+                  View All
+                </Link>
+              </div>
+            </div>
+
+            {(!data.todayPriorities || data.todayPriorities.length === 0) ? (
+              <div className="py-8 text-center text-xs text-gray-400">
+                <CheckSquare className="w-8 h-8 text-forest-200 mx-auto mb-2" />
+                <p className="font-semibold text-gray-700">No priority tasks selected</p>
+                <p className="text-[11px] mt-0.5 mb-3">Set your top 3 daily priorities in morning planning.</p>
+                <button
+                  type="button"
+                  onClick={() => setIsDailyPlanModalOpen(true)}
+                  className="px-3.5 py-1.5 rounded-xl bg-forest-700 hover:bg-forest-800 text-white text-xs font-bold transition-all"
+                >
+                  Set Daily Priorities
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {data.todayPriorities.map((task: any) => {
+                  const isCompleted = task.status === "completed";
+                  return (
+                    <div
+                      key={task._id}
+                      className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
+                        isCompleted
+                          ? "bg-forest-50/40 border-forest-100"
+                          : "bg-white border-gray-100 hover:border-gray-200"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleTask(task)}
+                          className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all shrink-0 ${
+                            isCompleted
+                              ? "bg-forest-700 text-white shadow-xs"
+                              : "border-2 border-gray-300 hover:border-forest-600 bg-white"
+                          }`}
+                        >
+                          {isCompleted && <Check className="w-3.5 h-3.5" strokeWidth={3} />}
+                        </button>
+                        <div className="min-w-0 flex-1">
+                          <p className={`text-xs font-bold truncate ${isCompleted ? "line-through text-gray-400 font-medium" : "text-gray-900"}`}>
+                            {task.title}
+                          </p>
+                          <div className="flex items-center gap-2 mt-0.5 text-[11px] text-gray-400">
+                            <span className="capitalize text-forest-700 font-semibold">{task.priority} Priority</span>
+                            {task.estimatedMinutes && (
+                              <>
+                                <span>•</span>
+                                <span>{task.estimatedMinutes} min</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {!isCompleted && (
+                        <button
+                          type="button"
+                          onClick={() => router.push(`/focus?taskId=${task._id}`)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-forest-700 hover:bg-forest-800 text-white text-[11px] font-bold transition-all shrink-0 shadow-xs"
+                        >
+                          <Play className="w-3 h-3 fill-current" />
+                          Focus
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Daily Focus & Productivity Target (5 cols) */}
+        <div className="lg:col-span-5 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-3">
+              <div>
+                <h3 className="text-base font-bold text-gray-900 tracking-tight">Focus &amp; Productivity</h3>
+                <p className="text-xs text-gray-400 font-medium">Daily study target &amp; score</p>
+              </div>
+              <span className="text-xs font-black text-forest-800 bg-forest-50 px-3 py-1 rounded-xl">
+                Score: {data.productivityScore?.overallScore ?? 0}%
+              </span>
+            </div>
+
+            <div className="space-y-4 pt-1">
+              <div>
+                <div className="flex items-center justify-between text-xs font-bold text-gray-700 mb-1.5">
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-forest-700" />
+                    Deep Work Completed
+                  </span>
+                  <span className="text-forest-700">
+                    {data.focusStatus?.completedMinutes ?? 0} / {data.focusStatus?.targetMinutes ?? 120} min
+                  </span>
+                </div>
+                <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                  <div
+                    className="bg-forest-700 h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        Math.round(
+                          ((data.focusStatus?.completedMinutes ?? 0) /
+                            Math.max(1, data.focusStatus?.targetMinutes ?? 120)) *
+                            100
+                        )
+                      )}%`,
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Today's Schedule Snapshot */}
+              <div>
+                <div className="flex items-center justify-between text-xs font-bold text-gray-700 mb-2">
+                  <span>Today&apos;s Schedule</span>
+                  <Link href="/calendar" className="text-[11px] text-forest-700 hover:underline">
+                    Full Calendar
+                  </Link>
+                </div>
+                {(!data.todaySchedule || data.todaySchedule.length === 0) ? (
+                  <p className="text-[11px] text-gray-400 py-2">No time blocks scheduled for today.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {data.todaySchedule.slice(0, 2).map((b: any) => {
+                      const startTime = new Date(b.start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+                      return (
+                        <div key={b._id} className="p-2 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between text-xs">
+                          <span className="font-semibold text-gray-800 truncate">{b.title}</span>
+                          <span className="text-[11px] text-gray-400 shrink-0 font-medium">{startTime}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-4 mt-4 border-t border-gray-100 flex items-center justify-between">
+            <Link
+              href="/focus"
+              className="w-full py-2.5 rounded-xl bg-forest-700 hover:bg-forest-800 text-white text-xs font-bold text-center transition-colors shadow-xs"
+            >
+              Start Focus Timer
+            </Link>
+          </div>
+        </div>
       </div>
 
       {/* Main Grid: Today's Habits (7 cols) & Weekly Progress / Mini Calendar (5 cols) */}
@@ -736,6 +995,40 @@ export default function DashboardPage() {
         message={`Are you sure you want to delete "${deletingHabit?.name}"? All historical completion logs for this habit will also be permanently removed.`}
         isDestructive={true}
         confirmText="Delete Habit"
+      />
+
+      {/* Morning Plan Modal */}
+      <DailyPlanModal
+        isOpen={isDailyPlanModalOpen}
+        onClose={() => setIsDailyPlanModalOpen(false)}
+        onSuccess={fetchDashboardData}
+        todayDateStr={data.today?.date || new Date().toISOString().split("T")[0]}
+        tasks={data.todayTasks || []}
+        initialPlan={data.todayPlan}
+      />
+
+      {/* Evening Review Modal */}
+      <DailyReviewModal
+        isOpen={isDailyReviewModalOpen}
+        onClose={() => setIsDailyReviewModalOpen(false)}
+        onSuccess={fetchDashboardData}
+        todayDateStr={data.today?.date || new Date().toISOString().split("T")[0]}
+        metrics={{
+          habitsCompleted: data.stats?.habitsCompleted?.completed ?? 0,
+          habitsTotal: data.stats?.habitsCompleted?.total ?? 0,
+          tasksCompleted: data.stats?.tasksCompleted?.completed ?? 0,
+          tasksTotal: data.stats?.tasksCompleted?.total ?? 0,
+          focusMinutes: data.focusStatus?.completedMinutes ?? 0,
+          productivityScore: data.productivityScore?.overallScore ?? 0,
+        }}
+        initialReview={data.todayReview}
+      />
+
+      {/* Task Form Modal */}
+      <TaskFormModal
+        isOpen={isCreateTaskModalOpen}
+        onClose={() => setIsCreateTaskModalOpen(false)}
+        onSuccess={fetchDashboardData}
       />
     </div>
   );

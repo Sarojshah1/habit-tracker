@@ -70,8 +70,41 @@ export async function PATCH(req: NextRequest) {
           ...preferences.habitPreferences,
         };
       }
+      if (preferences.taskDefaults) {
+        user.preferences.taskDefaults = {
+          defaultDurationMinutes:
+            preferences.taskDefaults.defaultDurationMinutes ??
+            user.preferences.taskDefaults?.defaultDurationMinutes ??
+            30,
+        };
+      }
+      if (preferences.productivityScoreWeights) {
+        user.preferences.productivityScoreWeights = {
+          habits:
+            preferences.productivityScoreWeights.habits ??
+            user.preferences.productivityScoreWeights?.habits ??
+            40,
+          tasks:
+            preferences.productivityScoreWeights.tasks ??
+            user.preferences.productivityScoreWeights?.tasks ??
+            40,
+          focus:
+            preferences.productivityScoreWeights.focus ??
+            user.preferences.productivityScoreWeights?.focus ??
+            20,
+        };
+      }
+      if (preferences.dashboardPreferences) {
+        user.preferences.dashboardPreferences = {
+          widgets:
+            preferences.dashboardPreferences.widgets ??
+            user.preferences.dashboardPreferences?.widgets ??
+            ["priorities", "tasks", "habits", "schedule", "focus", "goals", "weekly", "activity", "insights"],
+        };
+      }
     }
 
+    user.markModified("preferences");
     await user.save();
 
     return NextResponse.json({
