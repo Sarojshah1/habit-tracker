@@ -364,3 +364,194 @@ export async function syncGoalCompletionIfTargetReached(
     }
   }
 }
+
+export const completeGoalIfTargetReached = syncGoalCompletionIfTargetReached;
+
+export async function createGoal(userId: string | mongoose.Types.ObjectId, data: any) {
+  const rawHabitIds = data.habitIds && data.habitIds.length > 0 ? data.habitIds : data.associatedHabitIds || [];
+  
+  if (rawHabitIds.length > 0) {
+    const userHabits = await Habit.find({ _id: { $in: rawHabitIds }, userId });
+    if (userHabits.length !== rawHabitIds.length) {
+      throw new Error("Unauthorized: One or more selected habits do not belong to you");
+    }
+  }
+
+  const goal = await Goal.create({
+    ...data,
+    userId,
+    habitIds: rawHabitIds,
+    associatedHabitIds: rawHabitIds,
+  });
+
+  await logActivity({
+    userId,
+    type: "goal_created",
+    entityId: goal._id,
+    entityType: "goal",
+    metadata: { goalTitle: goal.title, goalType: goal.type },
+  });
+
+  return goal;
+}
+
+export async function getUserGoals(
+  userId: string | mongoose.Types.ObjectId,
+  filter: string = "all",
+  timezone: string = "UTC"
+) {
+  const allGoals = await Goal.find({ userId })
+    .populate("habitIds", "name icon color frequency schedule")
+    .populate("associatedHabitIds", "name icon color frequency schedule")
+    .populate("taskIds", "title status priority dueDate estimatedMinutes actualMinutes")
+    .sort({ createdAt: -1 });
+
+  const completions = await HabitCompletion.find({
+    userId,
+    status: "completed",
+  }).select("habitId date status");
+
+  const goalsWithProgress = [];
+  for (const goal of allGoals) {
+    const progress = calculateGoalProgress(goal, completions, timezone);
+
+    if (progress.effectiveStatus === "completed" && goal.status === "active") {
+      await syncGoalCompletionIfTargetReached(goal, progress.currentValue, userId);
+      goal.status = "completed";
+    }
+
+    const populatedHabits =
+      goal.habitIds && goal.habitIds.length > 0 ? goal.habitIds : goal.associatedHabitIds || [];
+
+    goalsWithProgress.push({
+      ...goal.toObject(),
+      habitIds: populatedHabits,
+      progress,
+    });
+  }
+
+  const stats = calculateGoalStats(
+    goalsWithProgress.map((g) => ({ goal: g, progress: g.progress }))
+  );
+
+  let filteredGoals = goalsWithProgress;
+  if (filter === "active") {
+    filteredGoals = goalsWithProgress.filter(
+      (g) =>
+        g.status !== "archived" &&
+        (g.progress.effectiveStatus === "active" || g.progress.effectiveStatus === "overdue")
+    );
+  } else if (filter === "completed") {
+    filteredGoals = goalsWithProgress.filter(
+      (g) => g.progress.effectiveStatus === "completed" && g.status !== "archived"
+    );
+  } else if (filter === "paused") {
+    filteredGoals = goalsWithProgress.filter((g) => g.status === "paused");
+  } else if (filter === "archived") {
+    filteredGoals = goalsWithProgress.filter((g) => g.status === "archived");
+  }
+
+  return { goals: filteredGoals, stats, allGoalsWithProgress: goalsWithProgress };
+}
+
+export async function getGoal(
+  userId: string | mongoose.Types.ObjectId,
+  goalId: string,
+  timezone: string = "UTC"
+) {
+  const goal = await Goal.findOne({ _id: goalId, userId })
+    .populate("habitIds", "name icon color frequency schedule")
+    .populate("associatedHabitIds", "name icon color frequency schedule")
+    .populate("taskIds", "title status priority dueDate estimatedMinutes actualMinutes");
+
+  if (!goal) return null;
+
+  const populatedHabits =
+    goal.habitIds && goal.habitIds.length > 0 ? goal.habitIds : goal.associatedHabitIds || [];
+
+  const completions = await HabitCompletion.find({
+    userId,
+    habitId: { $in: populatedHabits.map((h: any) => h._id) },
+    status: "completed",
+  }).select("habitId date status");
+
+  const progress = calculateGoalProgress(goal, completions, timezone);
+
+  if (progress.effectiveStatus === "completed" && goal.status === "active") {
+    await syncGoalCompletionIfTargetReached(goal, progress.currentValue, userId);
+    goal.status = "completed";
+  }
+
+  const history = calculateGoalHistory(goal, completions, timezone);
+
+  const activities = await Activity.find({
+    userId,
+    entityId: goal._id,
+  })
+    .sort({ createdAt: -1 })
+    .limit(10);
+
+  return {
+    ...goal.toObject(),
+    habitIds: populatedHabits,
+    progress,
+    history,
+    activities,
+  };
+}
+
+export async function updateGoal(
+  userId: string | mongoose.Types.ObjectId,
+  goalId: string,
+  data: any,
+  timezone: string = "UTC"
+) {
+  const rawHabitIds = data.habitIds || data.associatedHabitIds;
+
+  if (rawHabitIds !== undefined && rawHabitIds.length > 0) {
+    const userHabits = await Habit.find({ _id: { $in: rawHabitIds }, userId });
+    if (userHabits.length !== rawHabitIds.length) {
+      throw new Error("Unauthorized: One or more selected habits do not belong to you");
+    }
+    data.habitIds = rawHabitIds;
+    data.associatedHabitIds = rawHabitIds;
+  }
+
+  const goal = await Goal.findOneAndUpdate(
+    { _id: goalId, userId },
+    { $set: data },
+    { new: true }
+  )
+    .populate("habitIds", "name icon color frequency schedule")
+    .populate("associatedHabitIds", "name icon color frequency schedule")
+    .populate("taskIds", "title status priority dueDate estimatedMinutes actualMinutes");
+
+  if (!goal) return null;
+
+  const populatedHabits =
+    goal.habitIds && goal.habitIds.length > 0 ? goal.habitIds : goal.associatedHabitIds || [];
+
+  const completions = await HabitCompletion.find({
+    userId,
+    habitId: { $in: populatedHabits.map((h: any) => h._id) },
+    status: "completed",
+  }).select("habitId date status");
+
+  const progress = calculateGoalProgress(goal, completions, timezone);
+
+  if (progress.effectiveStatus === "completed" && goal.status === "active") {
+    await syncGoalCompletionIfTargetReached(goal, progress.currentValue, userId);
+    goal.status = "completed";
+  }
+
+  return {
+    ...goal.toObject(),
+    habitIds: populatedHabits,
+    progress,
+  };
+}
+
+export async function deleteGoal(userId: string | mongoose.Types.ObjectId, goalId: string) {
+  return await Goal.findOneAndDelete({ _id: goalId, userId });
+}
+

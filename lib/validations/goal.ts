@@ -18,6 +18,7 @@ export const goalSchema = z
       .default("active"),
     habitIds: z.array(z.string()).optional().default([]),
     associatedHabitIds: z.array(z.string()).optional().default([]),
+    taskIds: z.array(z.string()).optional().default([]),
     icon: z.string().default("target"),
     color: z.string().default("#1B4332"),
   })
@@ -48,6 +49,7 @@ export const goalUpdateSchema = z
     status: z.enum(["active", "completed", "paused", "archived", "cancelled"]).optional(),
     habitIds: z.array(z.string()).optional(),
     associatedHabitIds: z.array(z.string()).optional(),
+    taskIds: z.array(z.string()).optional(),
     icon: z.string().optional(),
     color: z.string().optional(),
   })

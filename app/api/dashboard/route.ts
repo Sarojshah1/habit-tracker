@@ -4,9 +4,15 @@ import { Habit } from "@/lib/models/Habit";
 import { HabitCompletion } from "@/lib/models/HabitCompletion";
 import { Goal } from "@/lib/models/Goal";
 import { Activity } from "@/lib/models/Activity";
+import { Task } from "@/lib/models/Task";
+import { TimeBlock } from "@/lib/models/TimeBlock";
+import { DailyPlan } from "@/lib/models/DailyPlan";
+import { DailyReview } from "@/lib/models/DailyReview";
+import { FocusSession } from "@/lib/models/FocusSession";
 import { getUserTodayDateString, getDateDaysAgoFrom, formatFriendlyDate, getUserDayOfWeek } from "@/lib/utils/date";
 import { calculateOverallStreaks, isHabitScheduledForDate, calculateHabitStats } from "@/lib/services/streak";
 import { calculateGoalProgress } from "@/lib/services/goal";
+import { calculateDailyScore } from "@/lib/services/productivity";
 
 export const dynamic = "force-dynamic";
 
@@ -191,9 +197,97 @@ export async function GET(req: NextRequest) {
       });
     }
 
+    // 9. Today's Tasks & Priorities
+    const [todayTasksRaw, todayPlan, todayReview, todayTimeBlocks, todayFocusSessions] = await Promise.all([
+      Task.find({ userId: user._id, dueDate: todayDateStr })
+        .populate("goalId", "title icon color")
+        .populate("habitId", "name icon color")
+        .sort({ priority: -1, createdAt: 1 }),
+      DailyPlan.findOne({ userId: user._id, date: todayDateStr }).populate({
+        path: "priorityTaskIds",
+        select: "title priority status dueDate estimatedMinutes actualMinutes",
+      }),
+      DailyReview.findOne({ userId: user._id, date: todayDateStr }),
+      TimeBlock.find({
+        userId: user._id,
+        start: {
+          $gte: new Date(`${todayDateStr}T00:00:00.000Z`),
+          $lte: new Date(`${todayDateStr}T23:59:59.999Z`),
+        },
+      }).sort({ start: 1 }),
+      FocusSession.find({
+        userId: user._id,
+        status: "completed",
+        startedAt: {
+          $gte: new Date(`${todayDateStr}T00:00:00.000Z`),
+          $lte: new Date(`${todayDateStr}T23:59:59.999Z`),
+        },
+      }),
+    ]);
+
+    const todayTasks = todayTasksRaw.filter((t) => t.status !== "cancelled");
+    const completedTasksCount = todayTasks.filter((t) => t.status === "completed").length;
+
+    // Top priorities: From dailyPlan if exists, or top high/medium priority tasks
+    let todayPriorities: any[] = [];
+    if (todayPlan?.priorityTaskIds && todayPlan.priorityTaskIds.length > 0) {
+      const priorityIds = new Set(todayPlan.priorityTaskIds.map((id) => id.toString()));
+      todayPriorities = todayTasks.filter((t) => priorityIds.has(t._id.toString()));
+    }
+    if (todayPriorities.length === 0) {
+      todayPriorities = todayTasks.slice(0, 3);
+    }
+
+    // Today's schedule: Combine user TimeBlocks + tasks that have scheduledStart/End
+    const scheduledTasksAsBlocks = todayTasks
+      .filter((t) => t.scheduledStart && t.scheduledEnd)
+      .map((t) => ({
+        _id: `task-sched-${t._id}`,
+        title: t.title,
+        start: t.scheduledStart!,
+        end: t.scheduledEnd!,
+        type: "task",
+        taskId: t,
+        color: "#2563EB",
+      }));
+
+    const todaySchedule = [...todayTimeBlocks, ...scheduledTasksAsBlocks].sort(
+      (a: any, b: any) => new Date(a.start || 0).getTime() - new Date(b.start || 0).getTime()
+    );
+
+    // Focus Target & Completed Focus Time
+    const focusTargetMinutes = todayPlan?.focusTargetMinutes || 120;
+    const focusCompletedMinutes = todayFocusSessions.reduce(
+      (acc, s) => acc + (s.duration || 0),
+      0
+    );
+
+    // Daily Productivity Score
+    const productivityScore = calculateDailyScore(
+      completedTodayCount,
+      totalTodayHabits,
+      completedTasksCount,
+      todayTasks.length,
+      focusCompletedMinutes,
+      focusTargetMinutes
+    );
+
     // Random quote based on day of month
     const quoteIndex = (new Date(todayDateStr).getDate() || 0) % MOTIVATIONAL_QUOTES.length;
     const motivationalQuote = MOTIVATIONAL_QUOTES[quoteIndex];
+
+    const dashboardWidgets =
+      user.preferences?.dashboardPreferences?.widgets || [
+        "priorities",
+        "tasks",
+        "habits",
+        "schedule",
+        "focus",
+        "goals",
+        "weekly",
+        "activity",
+        "insights",
+      ];
 
     return NextResponse.json({
       success: true,
@@ -204,6 +298,7 @@ export async function GET(req: NextRequest) {
           email: user.email,
           avatar: user.avatar,
           timezone: user.timezone,
+          widgets: dashboardWidgets,
         },
         today: {
           date: todayDateStr,
@@ -229,8 +324,29 @@ export async function GET(req: NextRequest) {
             count: activeGoals.length,
             label: `${activeGoals.length}`,
           },
+          tasksCompleted: {
+            completed: completedTasksCount,
+            total: todayTasks.length,
+            label: `${completedTasksCount}/${todayTasks.length}`,
+          },
+          focusTime: {
+            completedMinutes: focusCompletedMinutes,
+            targetMinutes: focusTargetMinutes,
+            label: `${Math.floor(focusCompletedMinutes / 60)}h ${focusCompletedMinutes % 60}m`,
+          },
+          productivityScore: productivityScore.overallScore,
         },
         todayHabits,
+        todayTasks,
+        todayPriorities,
+        todaySchedule,
+        todayPlan,
+        todayReview,
+        focusStatus: {
+          targetMinutes: focusTargetMinutes,
+          completedMinutes: focusCompletedMinutes,
+        },
+        productivityScore,
         weeklyProgress,
         monthCalendar: {
           year: currYear,

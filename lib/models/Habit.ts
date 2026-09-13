@@ -19,6 +19,7 @@ export interface IHabit extends Document {
   schedule: IHabitSchedule;
   reminder?: string;
   startDate: string; // YYYY-MM-DD
+  habitStackAfterHabitId?: mongoose.Types.ObjectId;
   archived: boolean;
   active: boolean;
   createdAt: Date;
@@ -70,6 +71,10 @@ const HabitSchema = new Schema<IHabit>(
     startDate: {
       type: String,
       required: [true, "Start date is required"],
+    },
+    habitStackAfterHabitId: {
+      type: Schema.Types.ObjectId,
+      ref: "Habit",
     },
     archived: {
       type: Boolean,

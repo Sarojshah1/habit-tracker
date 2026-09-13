@@ -17,6 +17,7 @@ export const habitSchema = z.object({
   reminder: z.string().optional().default(""),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid start date format (YYYY-MM-DD)"),
   goalId: z.string().optional(),
+  habitStackAfterHabitId: z.string().optional().nullable(),
 });
 
 export const habitUpdateSchema = habitSchema.partial().extend({

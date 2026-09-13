@@ -8,6 +8,14 @@ import { Goal } from "@/lib/models/Goal";
 import { FocusSession } from "@/lib/models/FocusSession";
 import { Note } from "@/lib/models/Note";
 import { Activity } from "@/lib/models/Activity";
+import { Task } from "@/lib/models/Task";
+import { TimeBlock } from "@/lib/models/TimeBlock";
+import { DailyPlan } from "@/lib/models/DailyPlan";
+import { DailyReview } from "@/lib/models/DailyReview";
+import { Routine } from "@/lib/models/Routine";
+import { Notification } from "@/lib/models/Notification";
+
+export const dynamic = "force-dynamic";
 
 export async function DELETE(req: NextRequest) {
   try {
@@ -24,6 +32,12 @@ export async function DELETE(req: NextRequest) {
       FocusSession.deleteMany({ userId }),
       Note.deleteMany({ userId }),
       Activity.deleteMany({ userId }),
+      Task.deleteMany({ userId }),
+      TimeBlock.deleteMany({ userId }),
+      DailyPlan.deleteMany({ userId }),
+      DailyReview.deleteMany({ userId }),
+      Routine.deleteMany({ userId }),
+      Notification.deleteMany({ userId }),
       User.deleteOne({ _id: userId }),
     ]);
 

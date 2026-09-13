@@ -19,6 +19,7 @@ export interface IGoal extends Document {
   status: GoalStatus;
   habitIds: mongoose.Types.ObjectId[];
   associatedHabitIds?: mongoose.Types.ObjectId[]; // Backward compatibility
+  taskIds?: mongoose.Types.ObjectId[];
   icon: string;
   color: string;
   completedAt?: Date;
@@ -92,6 +93,12 @@ const GoalSchema = new Schema<IGoal>(
       {
         type: Schema.Types.ObjectId,
         ref: "Habit",
+      },
+    ],
+    taskIds: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Task",
       },
     ],
     icon: {

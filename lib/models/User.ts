@@ -7,12 +7,26 @@ export interface IUserPreferences {
     streakReminders: boolean;
     goalReminders: boolean;
     focusNotifications: boolean;
+    taskReminders?: boolean;
+    dailyReview?: boolean;
+    weeklyReview?: boolean;
   };
   appearance: "light" | "dark" | "system";
   habitPreferences: {
     defaultReminderTime: string;
     weekStartsOn: "monday" | "sunday";
     defaultHabitView: "grid" | "list";
+  };
+  dashboardPreferences?: {
+    widgets: string[];
+  };
+  taskDefaults?: {
+    defaultDurationMinutes: number;
+  };
+  productivityScoreWeights?: {
+    habits: number;
+    tasks: number;
+    focus: number;
   };
 }
 
@@ -73,6 +87,9 @@ const UserSchema = new Schema<IUser>(
         streakReminders: { type: Boolean, default: true },
         goalReminders: { type: Boolean, default: true },
         focusNotifications: { type: Boolean, default: true },
+        taskReminders: { type: Boolean, default: true },
+        dailyReview: { type: Boolean, default: true },
+        weeklyReview: { type: Boolean, default: true },
       },
       appearance: {
         type: String,
@@ -83,6 +100,20 @@ const UserSchema = new Schema<IUser>(
         defaultReminderTime: { type: String, default: "08:00" },
         weekStartsOn: { type: String, enum: ["monday", "sunday"], default: "monday" },
         defaultHabitView: { type: String, enum: ["grid", "list"], default: "list" },
+      },
+      dashboardPreferences: {
+        widgets: {
+          type: [String],
+          default: ["priorities", "tasks", "habits", "schedule", "focus", "goals", "weekly", "activity", "insights"],
+        },
+      },
+      taskDefaults: {
+        defaultDurationMinutes: { type: Number, default: 30 },
+      },
+      productivityScoreWeights: {
+        habits: { type: Number, default: 40 },
+        tasks: { type: Number, default: 40 },
+        focus: { type: Number, default: 20 },
       },
     },
     resetPasswordToken: {

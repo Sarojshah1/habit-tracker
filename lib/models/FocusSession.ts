@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
-export type FocusSessionStatus = "completed" | "abandoned";
+export type FocusSessionStatus = "completed" | "interrupted" | "abandoned" | "cancelled";
 
 export interface IFocusSession extends Document {
   _id: mongoose.Types.ObjectId;
@@ -9,7 +9,9 @@ export interface IFocusSession extends Document {
   startedAt: Date;
   completedAt: Date;
   status: FocusSessionStatus;
+  taskId?: mongoose.Types.ObjectId;
   habitId?: mongoose.Types.ObjectId;
+  goalId?: mongoose.Types.ObjectId;
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -38,12 +40,20 @@ const FocusSessionSchema = new Schema<IFocusSession>(
     },
     status: {
       type: String,
-      enum: ["completed", "abandoned"],
+      enum: ["completed", "interrupted", "abandoned", "cancelled"],
       default: "completed",
+    },
+    taskId: {
+      type: Schema.Types.ObjectId,
+      ref: "Task",
     },
     habitId: {
       type: Schema.Types.ObjectId,
       ref: "Habit",
+    },
+    goalId: {
+      type: Schema.Types.ObjectId,
+      ref: "Goal",
     },
     notes: {
       type: String,

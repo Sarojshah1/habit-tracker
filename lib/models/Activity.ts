@@ -8,7 +8,14 @@ export type ActivityType =
   | "habit_archived"
   | "goal_created"
   | "goal_completed"
+  | "goal_paused"
+  | "task_created"
+  | "task_completed"
+  | "task_cancelled"
   | "focus_session_completed"
+  | "focus_completed"
+  | "daily_plan_created"
+  | "daily_review_completed"
   | "note_created"
   | "note_updated";
 

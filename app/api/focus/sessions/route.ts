@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUser, unauthorizedResponse } from "@/lib/auth/middleware";
 import { FocusSession } from "@/lib/models/FocusSession";
 import { Habit } from "@/lib/models/Habit";
+import { Task } from "@/lib/models/Task";
 import { focusSessionSchema } from "@/lib/validations/focus";
 import { logActivity } from "@/lib/services/activity";
 
@@ -14,6 +15,7 @@ export async function GET(req: NextRequest) {
 
     const sessions = await FocusSession.find({ userId: user._id })
       .populate("habitId", "name icon color")
+      .populate("taskId", "title priority dueDate estimatedMinutes actualMinutes")
       .sort({ startedAt: -1 })
       .limit(30);
 
@@ -51,7 +53,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { duration, status, habitId, notes, startedAt, completedAt } = parsed.data;
+    const { duration, status, habitId, taskId, goalId, notes, startedAt, completedAt } = parsed.data;
 
     let habitName = "";
     if (habitId) {
@@ -59,11 +61,26 @@ export async function POST(req: NextRequest) {
       if (habit) habitName = habit.name;
     }
 
+    let taskTitle = "";
+    if (taskId) {
+      const task = await Task.findOne({ _id: taskId, userId: user._id });
+      if (task) {
+        taskTitle = task.title;
+        // Update task's actual minutes idempotently if session is completed
+        if (status === "completed") {
+          task.actualMinutes = (task.actualMinutes || 0) + duration;
+          await task.save();
+        }
+      }
+    }
+
     const session = await FocusSession.create({
       userId: user._id,
       duration,
       status,
       habitId: habitId || undefined,
+      taskId: taskId || undefined,
+      goalId: goalId || undefined,
       notes,
       startedAt: startedAt ? new Date(startedAt) : new Date(Date.now() - duration * 60 * 1000),
       completedAt: completedAt ? new Date(completedAt) : new Date(),
@@ -77,7 +94,9 @@ export async function POST(req: NextRequest) {
         entityType: "focus",
         metadata: {
           duration,
-          habitName: habitName || "General Focus",
+          habitName: habitName || undefined,
+          taskTitle: taskTitle || undefined,
+          description: taskTitle ? `Focus on: ${taskTitle}` : habitName ? `Habit: ${habitName}` : "General Focus",
         },
       });
     }
