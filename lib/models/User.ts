@@ -39,6 +39,10 @@ export interface IUser extends Document {
   timezone: string;
   language: string;
   preferences: IUserPreferences;
+  streakFreezes?: {
+    available: number;
+    usedDates: string[];
+  };
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
   createdAt: Date;
@@ -115,6 +119,10 @@ const UserSchema = new Schema<IUser>(
         tasks: { type: Number, default: 40 },
         focus: { type: Number, default: 20 },
       },
+    },
+    streakFreezes: {
+      available: { type: Number, default: 3 },
+      usedDates: { type: [String], default: [] },
     },
     resetPasswordToken: {
       type: String,

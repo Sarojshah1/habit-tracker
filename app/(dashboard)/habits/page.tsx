@@ -13,6 +13,7 @@ import {
   Edit,
   TrendingUp,
   RotateCcw,
+  Shield,
 } from "lucide-react";
 import { HabitIcon } from "@/components/ui/HabitIcon";
 import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
@@ -21,6 +22,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { HabitFormModal } from "@/components/habits/HabitFormModal";
 import { HabitDetailModal } from "@/components/habits/HabitDetailModal";
 import { GoalFormModal } from "@/components/goals/GoalFormModal";
+import { StreakFreezeModal } from "@/components/habits/StreakFreezeModal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export default function HabitsPage() {
@@ -33,6 +35,7 @@ export default function HabitsPage() {
   // Modals
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+  const [isFreezeModalOpen, setIsFreezeModalOpen] = useState(false);
   const [goalPreselectedHabitId, setGoalPreselectedHabitId] = useState<string | undefined>(undefined);
   const [editingHabit, setEditingHabit] = useState<any>(null);
   const [selectedHabitDetail, setSelectedHabitDetail] = useState<any>(null);
@@ -110,17 +113,29 @@ export default function HabitsPage() {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            setEditingHabit(null);
-            setIsFormModalOpen(true);
-          }}
-          className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-forest-700 hover:bg-forest-800 text-white font-bold text-sm shadow-sm transition-all hover:shadow hover:-translate-y-0.5"
-        >
-          <Plus className="w-4 h-4" strokeWidth={2.5} />
-          Add Habit
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setIsFreezeModalOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-cyan-50 dark:bg-cyan-950/50 hover:bg-cyan-100 dark:hover:bg-cyan-900/50 text-cyan-700 dark:text-cyan-300 font-bold text-sm border border-cyan-200 dark:border-cyan-800 shadow-xs transition-all hover:-translate-y-0.5"
+            title="Protect streak during busy exam days"
+          >
+            <Shield className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+            Streak Freeze
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setEditingHabit(null);
+              setIsFormModalOpen(true);
+            }}
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-forest-700 hover:bg-forest-800 text-white font-bold text-sm shadow-sm transition-all hover:shadow hover:-translate-y-0.5"
+          >
+            <Plus className="w-4 h-4" strokeWidth={2.5} />
+            Add Habit
+          </button>
+        </div>
       </div>
 
       {/* Filter Tabs */}
@@ -345,6 +360,13 @@ export default function HabitsPage() {
         }}
         onSuccess={fetchHabits}
         initialHabitId={goalPreselectedHabitId}
+      />
+
+      {/* Streak Freeze Modal */}
+      <StreakFreezeModal
+        isOpen={isFreezeModalOpen}
+        onClose={() => setIsFreezeModalOpen(false)}
+        onSuccess={fetchHabits}
       />
 
       {/* Delete Confirmation */}

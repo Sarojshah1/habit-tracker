@@ -47,6 +47,7 @@ import { TaskFormModal } from "@/components/tasks/TaskFormModal";
 import { DailyPlanModal } from "@/components/planner/DailyPlanModal";
 import { DailyReviewModal } from "@/components/planner/DailyReviewModal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { ConsistencyHeatmap } from "@/components/dashboard/ConsistencyHeatmap";
 import { getGreeting } from "@/lib/utils/date";
 
 export default function DashboardPage() {
@@ -516,12 +517,12 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Main Grid: Today's Habits (7 cols) & Weekly Progress / Mini Calendar (5 cols) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Today's Habits Card (7 cols) */}
-        <div className="lg:col-span-7 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800 mb-4">
+      {/* Main Grid: Today's Habits (7 cols) & Weekly Progress / Discipline Heatmap (5 cols) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        {/* Today's Habits Card (7 cols) - scrollable with fixed max height matching right column */}
+        <div className="lg:col-span-7 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm flex flex-col justify-between h-full max-h-[640px]">
+          <div className="flex flex-col min-h-0 flex-1">
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800 mb-4 shrink-0">
               <div>
                 <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 tracking-tight">Today&apos;s Habits</h2>
                 <p className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">
@@ -554,7 +555,7 @@ export default function DashboardPage() {
                 }}
               />
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3 overflow-y-auto pr-1 flex-1 min-h-0">
                 {data.todayHabits.map((habit: any) => {
                   const isCompleted = habit.todayStatus === "completed";
                   const isSkipped = habit.todayStatus === "skipped";
@@ -640,7 +641,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Quick Action Footer */}
-          <div className="pt-4 mt-6 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs">
+          <div className="pt-4 mt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs shrink-0">
             <Link
               href="/habits"
               className="font-bold text-forest-700 dark:text-forest-400 hover:text-forest-800 dark:hover:text-forest-300 inline-flex items-center gap-1 group"
@@ -654,8 +655,8 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Weekly Progress & Mini Calendar (5 cols) */}
-        <div className="lg:col-span-5 space-y-6">
+        {/* Weekly Progress & Discipline Heatmap (5 cols) */}
+        <div className="lg:col-span-5 space-y-6 flex flex-col justify-between">
           {/* Weekly Progress Bar Chart */}
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm">
             <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-100 dark:border-gray-800">
@@ -716,49 +717,12 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Mini Monthly Calendar Preview */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm">
-            <div className="flex items-center justify-between pb-3 mb-4 border-b border-gray-100 dark:border-gray-800">
-              <div>
-                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 tracking-tight">Month Overview</h3>
-                <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">Monthly consistency grid</p>
-              </div>
-              <Link
-                href="/calendar"
-                className="text-xs font-bold text-forest-700 dark:text-forest-400 hover:text-forest-800 dark:hover:text-forest-300 inline-flex items-center gap-1 group"
-              >
-                Full Calendar
-                <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-7 gap-1.5 text-center">
-              {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
-                <span key={i} className="text-[10px] font-bold text-gray-400 dark:text-gray-500">
-                  {d}
-                </span>
-              ))}
-
-              {data.monthCalendar.days.map((day: any) => {
-                let dotColor = "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400";
-                if (day.status === "completed") dotColor = "bg-forest-600 dark:bg-forest-500 text-white font-bold";
-                else if (day.status === "partial") dotColor = "bg-orange-500 text-white font-bold";
-                else if (day.status === "missed") dotColor = "bg-red-200 dark:bg-red-950/60 text-red-800 dark:text-red-300";
-
-                return (
-                  <div
-                    key={day.date}
-                    className={`h-7 rounded-lg flex items-center justify-center text-[10px] transition-all ${dotColor} ${
-                      day.isToday ? "ring-2 ring-forest-700 dark:ring-forest-400 font-black" : ""
-                    }`}
-                    title={`${day.date}: ${day.status}`}
-                  >
-                    {day.day}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          {/* Discipline Heatmap (replaces Month Overview) */}
+          <ConsistencyHeatmap
+            matrix={data.consistencyMatrix || []}
+            currentStreak={data.stats?.currentStreak?.count || 0}
+            longestStreak={data.stats?.currentStreak?.longest || 0}
+          />
         </div>
       </div>
 

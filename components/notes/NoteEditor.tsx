@@ -14,7 +14,9 @@ import {
   Clock,
   Pin,
   Trash2,
+  Brain,
 } from "lucide-react";
+import { FlashcardFormModal } from "@/components/flashcards/FlashcardFormModal";
 
 interface Note {
   _id: string;
@@ -42,6 +44,7 @@ export function NoteEditor({
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "error">("saved");
+  const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -224,6 +227,16 @@ export function NoteEditor({
 
           <button
             type="button"
+            onClick={() => setIsFlashcardModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-forest-50 dark:bg-forest-950/60 hover:bg-forest-100 dark:hover:bg-forest-900/60 text-forest-700 dark:text-forest-400 font-semibold text-xs border border-forest-200 dark:border-forest-800 transition-colors"
+            title="Convert note or selection into a Spaced Repetition Flashcard"
+          >
+            <Brain className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Make Flashcard</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => onTogglePin(note._id, note.pinned)}
             className={`p-1.5 rounded-lg transition-colors ${
               note.pinned
@@ -269,6 +282,16 @@ export function NoteEditor({
           className="w-full h-full min-h-[400px] text-sm text-gray-800 dark:text-gray-200 bg-transparent leading-relaxed border-none outline-none resize-none focus:ring-0 placeholder:text-gray-300 dark:placeholder:text-gray-600 font-sans"
         />
       </div>
+
+      {/* Convert Note to Flashcard Modal */}
+      <FlashcardFormModal
+        isOpen={isFlashcardModalOpen}
+        onClose={() => setIsFlashcardModalOpen(false)}
+        defaultDeck={note.tags && note.tags.length > 0 ? note.tags[0] : "Study Notes"}
+        defaultFront={title || "Key Concept"}
+        defaultBack={content || ""}
+        noteId={note._id}
+      />
     </div>
   );
 }

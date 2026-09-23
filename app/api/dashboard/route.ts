@@ -272,6 +272,30 @@ export async function GET(req: NextRequest) {
       focusTargetMinutes
     );
 
+    // 90-Day Discipline Matrix for Habit Heatmap
+    const ninetyDaysAgo = getDateDaysAgoFrom(todayDateStr, 89);
+    const ninetyDayCompletions = await HabitCompletion.find({
+      userId: user._id,
+      date: { $gte: ninetyDaysAgo, $lte: todayDateStr },
+      status: { $in: ["completed", "frozen"] },
+    }).select("date");
+
+    const countByDateMap = new Map<string, number>();
+    ninetyDayCompletions.forEach((c) => {
+      countByDateMap.set(c.date, (countByDateMap.get(c.date) || 0) + 1);
+    });
+
+    const consistencyMatrix = [];
+    for (let i = 89; i >= 0; i--) {
+      const dStr = getDateDaysAgoFrom(todayDateStr, i);
+      const count = countByDateMap.get(dStr) || 0;
+      consistencyMatrix.push({
+        date: dStr,
+        count,
+        level: count === 0 ? 0 : count <= 2 ? 1 : count <= 4 ? 2 : count <= 6 ? 3 : 4,
+      });
+    }
+
     // Random quote based on day of month
     const quoteIndex = (new Date(todayDateStr).getDate() || 0) % MOTIVATIONAL_QUOTES.length;
     const motivationalQuote = MOTIVATIONAL_QUOTES[quoteIndex];
@@ -355,6 +379,7 @@ export async function GET(req: NextRequest) {
         },
         goals: activeGoals,
         recentActivity,
+        consistencyMatrix,
       },
     });
   } catch (error) {
