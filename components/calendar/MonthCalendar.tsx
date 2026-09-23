@@ -101,14 +101,14 @@ export function MonthCalendar({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
       {/* Calendar Grid Container (8 cols) */}
-      <div className="lg:col-span-8 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+      <div className="lg:col-span-8 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm">
         {/* Calendar Navigation Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-100">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-100 dark:border-gray-800">
           <div>
-            <h2 className="text-xl font-extrabold text-gray-900 tracking-tight">
+            <h2 className="text-xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
               {MONTH_NAMES[month - 1]} {year}
             </h2>
-            <p className="text-xs text-gray-400 font-medium mt-0.5">
+            <p className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">
               Select any date to view and track scheduled habits.
             </p>
           </div>
@@ -117,15 +117,15 @@ export function MonthCalendar({
             <button
               type="button"
               onClick={handleTodayClick}
-              className="px-3 py-1.5 text-xs font-bold rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+              className="px-3 py-1.5 text-xs font-bold rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               Today
             </button>
-            <div className="flex items-center gap-1 border border-gray-200 rounded-xl p-0.5">
+            <div className="flex items-center gap-1 border border-gray-200 dark:border-gray-700 rounded-xl p-0.5">
               <button
                 type="button"
                 onClick={handlePrevMonth}
-                className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 aria-label="Previous Month"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -133,7 +133,7 @@ export function MonthCalendar({
               <button
                 type="button"
                 onClick={handleNextMonth}
-                className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 aria-label="Next Month"
               >
                 <ChevronRight className="w-4 h-4" />
@@ -143,7 +143,7 @@ export function MonthCalendar({
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap items-center gap-4 py-3 text-xs text-gray-500 font-medium">
+        <div className="flex flex-wrap items-center gap-4 py-3 text-xs text-gray-500 dark:text-gray-400 font-medium">
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-forest-600" />
             <span>Completed</span>
@@ -157,13 +157,13 @@ export function MonthCalendar({
             <span>Missed</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-gray-200" />
+            <span className="w-2.5 h-2.5 rounded-full bg-gray-200 dark:bg-gray-700" />
             <span>No Activity</span>
           </div>
         </div>
 
         {/* Days of week header */}
-        <div className="grid grid-cols-7 gap-2 text-center text-xs font-bold text-gray-400 py-2">
+        <div className="grid grid-cols-7 gap-2 text-center text-xs font-bold text-gray-400 dark:text-gray-500 py-2">
           {WEEKDAY_NAMES.map((name) => (
             <div key={name}>{name}</div>
           ))}
@@ -173,20 +173,20 @@ export function MonthCalendar({
         <div className="grid grid-cols-7 gap-2 mt-1">
           {/* Padding blanks for previous month */}
           {paddingDays.map((_, i) => (
-            <div key={`pad-${i}`} className="h-20 sm:h-24 rounded-xl bg-gray-50/40 opacity-40" />
+            <div key={`pad-${i}`} className="h-20 sm:h-24 rounded-xl bg-gray-50/40 dark:bg-gray-800/40 opacity-40" />
           ))}
 
           {/* Actual days */}
           {days.map((day) => {
             const isSelected = day.date === selectedDate;
 
-            let badgeColor = "bg-gray-100 text-gray-400";
+            let badgeColor = "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500";
             if (day.indicator === "completed") {
-              badgeColor = "bg-forest-100 text-forest-800 border-forest-200";
+              badgeColor = "bg-forest-100 dark:bg-forest-900/40 text-forest-800 dark:text-forest-300 border-forest-200 dark:border-forest-800";
             } else if (day.indicator === "partial") {
-              badgeColor = "bg-orange-100 text-orange-800 border-orange-200";
+              badgeColor = "bg-orange-100 dark:bg-orange-900/40 text-orange-800 dark:text-orange-300 border-orange-200 dark:border-orange-800";
             } else if (day.indicator === "missed") {
-              badgeColor = "bg-red-100 text-red-800 border-red-200";
+              badgeColor = "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 border-red-200 dark:border-red-800";
             }
 
             return (
@@ -196,9 +196,9 @@ export function MonthCalendar({
                 onClick={() => setSelectedDate(day.date)}
                 className={`h-20 sm:h-24 p-2 rounded-xl text-left flex flex-col justify-between transition-all duration-150 relative ${
                   isSelected
-                    ? "ring-2 ring-forest-700 bg-forest-50/40 shadow-xs"
-                    : "hover:bg-gray-50 border border-gray-100/70"
-                } ${day.isToday ? "bg-forest-50/20" : "bg-white"}`}
+                    ? "ring-2 ring-forest-700 bg-forest-50/40 dark:bg-forest-900/20 shadow-xs"
+                    : "hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-100/70 dark:border-gray-800"
+                } ${day.isToday ? "bg-forest-50/20 dark:bg-forest-900/10" : "bg-white dark:bg-gray-900"}`}
               >
                 <div className="flex items-center justify-between">
                   <span
@@ -206,14 +206,14 @@ export function MonthCalendar({
                       day.isToday
                         ? "bg-forest-700 text-white shadow-xs"
                         : isSelected
-                        ? "text-forest-900 font-extrabold"
-                        : "text-gray-700"
+                        ? "text-forest-900 dark:text-forest-300 font-extrabold"
+                        : "text-gray-700 dark:text-gray-300"
                     }`}
                   >
                     {day.dayNumber}
                   </span>
                   {day.totalScheduled > 0 && (
-                    <span className="text-[10px] font-semibold text-gray-400">
+                    <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500">
                       {day.completedCount}/{day.totalScheduled}
                     </span>
                   )}
@@ -222,7 +222,7 @@ export function MonthCalendar({
                 {/* Status Indicator Bar / Pill */}
                 {day.totalScheduled > 0 ? (
                   <div className="mt-auto">
-                    <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden mb-1">
+                    <div className="w-full bg-gray-100 dark:bg-gray-800 h-1.5 rounded-full overflow-hidden mb-1">
                       <div
                         className={`h-full rounded-full transition-all ${
                           day.completionPercentage === 100
@@ -239,7 +239,7 @@ export function MonthCalendar({
                     </span>
                   </div>
                 ) : (
-                  <span className="text-[10px] text-gray-300 font-medium mt-auto block">—</span>
+                  <span className="text-[10px] text-gray-300 dark:text-gray-600 font-medium mt-auto block">—</span>
                 )}
               </button>
             );
@@ -248,35 +248,35 @@ export function MonthCalendar({
       </div>
 
       {/* Selected Day Inspector Panel (4 cols) */}
-      <div className="lg:col-span-4 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm flex flex-col">
+      <div className="lg:col-span-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm flex flex-col">
         {selectedDayData ? (
           <>
-            <div className="pb-4 border-b border-gray-100">
+            <div className="pb-4 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-forest-700">
+                <span className="text-xs font-bold uppercase tracking-wider text-forest-700 dark:text-forest-400">
                   Day Inspector
                 </span>
                 {selectedDayData.isToday && (
-                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-forest-100 text-forest-800">
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-forest-100 dark:bg-forest-900/40 text-forest-800 dark:text-forest-300">
                     Today
                   </span>
                 )}
               </div>
-              <h3 className="text-lg font-black text-gray-900 mt-1">
+              <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 mt-1">
                 {selectedDayData.date}
               </h3>
 
               {/* Day stats card */}
               <div className="grid grid-cols-2 gap-2 mt-4">
-                <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                  <p className="text-[11px] text-gray-400 font-semibold">Scheduled</p>
-                  <p className="text-base font-black text-gray-900 mt-0.5">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500 font-semibold">Scheduled</p>
+                  <p className="text-base font-black text-gray-900 dark:text-gray-100 mt-0.5">
                     {selectedDayData.totalScheduled} Habits
                   </p>
                 </div>
-                <div className="p-3 bg-forest-50/60 rounded-xl border border-forest-100">
-                  <p className="text-[11px] text-forest-600 font-semibold">Completed</p>
-                  <p className="text-base font-black text-forest-900 mt-0.5">
+                <div className="p-3 bg-forest-50/60 dark:bg-forest-900/20 rounded-xl border border-forest-100 dark:border-forest-800">
+                  <p className="text-[11px] text-forest-600 dark:text-forest-400 font-semibold">Completed</p>
+                  <p className="text-base font-black text-forest-900 dark:text-forest-300 mt-0.5">
                     {selectedDayData.completedCount} ({selectedDayData.completionPercentage}%)
                   </p>
                 </div>
@@ -285,12 +285,12 @@ export function MonthCalendar({
 
             {/* Scheduled Habits List */}
             <div className="flex-1 py-4 space-y-2.5 overflow-y-auto max-h-[450px]">
-              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+              <h4 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                 Habits for this date
               </h4>
 
               {selectedDayData.habits.length === 0 ? (
-                <div className="p-8 text-center text-gray-400 text-xs font-medium">
+                <div className="p-8 text-center text-gray-400 dark:text-gray-500 text-xs font-medium">
                   No habits scheduled for this day.
                 </div>
               ) : (
@@ -303,10 +303,10 @@ export function MonthCalendar({
                       key={h._id}
                       className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
                         isCompleted
-                          ? "bg-forest-50/50 border-forest-200"
+                          ? "bg-forest-50/50 dark:bg-forest-900/20 border-forest-200 dark:border-forest-800"
                           : isSkipped
-                          ? "bg-orange-50/40 border-orange-200"
-                          : "bg-white border-gray-100 hover:border-gray-200"
+                          ? "bg-orange-50/40 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800"
+                          : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700"
                       }`}
                     >
                       <div
@@ -317,12 +317,12 @@ export function MonthCalendar({
                         <div className="truncate">
                           <p
                             className={`text-sm font-bold truncate ${
-                              isCompleted ? "line-through text-gray-400" : "text-gray-900"
+                              isCompleted ? "line-through text-gray-400 dark:text-gray-500" : "text-gray-900 dark:text-gray-100"
                             }`}
                           >
                             {h.name}
                           </p>
-                          <span className="text-[11px] text-gray-400 font-medium flex items-center gap-1">
+                          <span className="text-[11px] text-gray-400 dark:text-gray-500 font-medium flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             {h.schedule?.time || "Anytime"}
                           </span>
@@ -333,7 +333,7 @@ export function MonthCalendar({
                               {h.contributingGoals.map((cg: any) => (
                                 <span
                                   key={cg.id}
-                                  className="inline-flex items-center gap-1 text-[10px] font-bold text-forest-800 bg-forest-100/90 px-1.5 py-0.5 rounded-md"
+                                  className="inline-flex items-center gap-1 text-[10px] font-bold text-forest-800 dark:text-forest-300 bg-forest-100/90 dark:bg-forest-900/50 px-1.5 py-0.5 rounded-md"
                                   title={`Contributes to: ${cg.title}`}
                                 >
                                   🎯 {cg.title} +1
@@ -358,7 +358,7 @@ export function MonthCalendar({
                           className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
                             isCompleted
                               ? "bg-forest-700 text-white shadow-xs"
-                              : "bg-gray-100 text-gray-400 hover:bg-forest-100 hover:text-forest-700"
+                              : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-forest-100 dark:hover:bg-forest-900/40 hover:text-forest-700 dark:hover:text-forest-400"
                           }`}
                           title={isCompleted ? "Mark incomplete" : "Mark completed"}
                         >
@@ -376,7 +376,7 @@ export function MonthCalendar({
                           className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
                             isSkipped
                               ? "bg-orange-600 text-white shadow-xs"
-                              : "bg-gray-100 text-gray-400 hover:bg-orange-100 hover:text-orange-600"
+                              : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-orange-100 dark:hover:bg-orange-900/40 hover:text-orange-600 dark:hover:text-orange-400"
                           }`}
                           title={isSkipped ? "Undo skip" : "Skip habit"}
                         >

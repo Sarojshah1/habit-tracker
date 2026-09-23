@@ -122,23 +122,23 @@ export function NoteEditor({
 
   if (!note) {
     return (
-      <div className="h-full flex flex-col items-center justify-center p-8 text-center text-gray-400 bg-white rounded-2xl border border-gray-100">
-        <p className="text-base font-semibold text-gray-700">Select a note from the sidebar</p>
-        <p className="text-xs text-gray-400 mt-1">Or click &quot;New Note&quot; to write down your study plans.</p>
+      <div className="h-full flex flex-col items-center justify-center p-8 text-center text-gray-400 dark:text-gray-500 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800">
+        <p className="text-base font-semibold text-gray-700 dark:text-gray-300">Select a note from the sidebar</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Or click &quot;New Note&quot; to write down your study plans.</p>
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    <div className="h-full flex flex-col bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
       {/* Note Header Toolbar */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-gray-100 bg-gray-50/50">
+      <div className="flex items-center justify-between px-6 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
         <div className="flex items-center gap-1 sm:gap-2">
           {/* Formatting Controls */}
           <button
             type="button"
             onClick={() => insertFormatting("**", "**", "bold text")}
-            className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-200/60 transition-colors"
+            className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/60 dark:hover:bg-gray-700 transition-colors"
             title="Bold"
             aria-label="Bold text"
           >
@@ -147,7 +147,7 @@ export function NoteEditor({
           <button
             type="button"
             onClick={() => insertFormatting("*", "*", "italic text")}
-            className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-200/60 transition-colors"
+            className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/60 dark:hover:bg-gray-700 transition-colors"
             title="Italic"
             aria-label="Italic text"
           >
@@ -156,17 +156,17 @@ export function NoteEditor({
           <button
             type="button"
             onClick={() => insertFormatting("<u>", "</u>", "underlined text")}
-            className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-200/60 transition-colors"
+            className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/60 dark:hover:bg-gray-700 transition-colors"
             title="Underline"
             aria-label="Underline text"
           >
             <Underline className="w-4 h-4" />
           </button>
-          <div className="w-px h-4 bg-gray-200 mx-1" />
+          <div className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-1" />
           <button
             type="button"
             onClick={() => insertFormatting("## ", "", "Heading")}
-            className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-200/60 transition-colors"
+            className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/60 dark:hover:bg-gray-700 transition-colors"
             title="Heading"
             aria-label="Heading"
           >
@@ -175,7 +175,7 @@ export function NoteEditor({
           <button
             type="button"
             onClick={() => insertFormatting("- ", "", "List item")}
-            className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-200/60 transition-colors"
+            className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/60 dark:hover:bg-gray-700 transition-colors"
             title="Bullet List"
             aria-label="Bullet List"
           >
@@ -184,7 +184,7 @@ export function NoteEditor({
           <button
             type="button"
             onClick={() => insertFormatting("- [ ] ", "", "Checklist item")}
-            className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-200/60 transition-colors"
+            className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/60 dark:hover:bg-gray-700 transition-colors"
             title="Checklist"
             aria-label="Checklist item"
           >
@@ -193,7 +193,7 @@ export function NoteEditor({
           <button
             type="button"
             onClick={() => insertFormatting("[", "](https://example.com)", "Link text")}
-            className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-200/60 transition-colors"
+            className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/60 dark:hover:bg-gray-700 transition-colors"
             title="Link"
             aria-label="Insert Link"
           >
@@ -206,17 +206,17 @@ export function NoteEditor({
           {/* Autosave Status Indicator */}
           <div className="flex items-center gap-1.5 text-xs">
             {saveStatus === "saving" && (
-              <span className="flex items-center gap-1 text-amber-600 font-medium animate-pulse">
+              <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium animate-pulse">
                 <Clock className="w-3.5 h-3.5" /> Saving...
               </span>
             )}
             {saveStatus === "saved" && (
-              <span className="flex items-center gap-1 text-forest-700 font-medium">
+              <span className="flex items-center gap-1 text-forest-700 dark:text-forest-400 font-medium">
                 <Check className="w-3.5 h-3.5" /> Saved
               </span>
             )}
             {saveStatus === "error" && (
-              <span className="flex items-center gap-1 text-red-600 font-medium">
+              <span className="flex items-center gap-1 text-red-600 dark:text-red-400 font-medium">
                 <AlertCircle className="w-3.5 h-3.5" /> Error saving
               </span>
             )}
@@ -227,8 +227,8 @@ export function NoteEditor({
             onClick={() => onTogglePin(note._id, note.pinned)}
             className={`p-1.5 rounded-lg transition-colors ${
               note.pinned
-                ? "bg-forest-100 text-forest-800"
-                : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+                ? "bg-forest-100 dark:bg-forest-900/40 text-forest-800 dark:text-forest-300"
+                : "text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
             }`}
             title={note.pinned ? "Unpin note" : "Pin note to top"}
             aria-label={note.pinned ? "Unpin note" : "Pin note"}
@@ -239,7 +239,7 @@ export function NoteEditor({
           <button
             type="button"
             onClick={() => onDeleteNote(note._id)}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+            className="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
             title="Delete note"
             aria-label="Delete note"
           >
@@ -255,7 +255,7 @@ export function NoteEditor({
           value={title}
           onChange={handleTitleChange}
           placeholder="Note Title"
-          className="w-full text-xl font-bold text-gray-900 border-none outline-none focus:ring-0 placeholder:text-gray-300"
+          className="w-full text-xl font-bold text-gray-900 dark:text-gray-100 bg-transparent border-none outline-none focus:ring-0 placeholder:text-gray-300 dark:placeholder:text-gray-600"
         />
       </div>
 
@@ -266,7 +266,7 @@ export function NoteEditor({
           value={content}
           onChange={handleContentChange}
           placeholder="Write your study plans, goals, checklist, or reflections here..."
-          className="w-full h-full min-h-[400px] text-sm text-gray-800 leading-relaxed border-none outline-none resize-none focus:ring-0 placeholder:text-gray-300 font-sans"
+          className="w-full h-full min-h-[400px] text-sm text-gray-800 dark:text-gray-200 bg-transparent leading-relaxed border-none outline-none resize-none focus:ring-0 placeholder:text-gray-300 dark:placeholder:text-gray-600 font-sans"
         />
       </div>
     </div>

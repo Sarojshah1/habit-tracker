@@ -63,23 +63,23 @@ export function GoalCard({
   const isAtRisk = progress.isAtRisk && !isCompleted && !isPaused && !isArchived;
 
   // Status badge styling
-  let badgeColor = "bg-forest-50 text-forest-700 border-forest-100";
+  let badgeColor = "bg-forest-50 dark:bg-forest-950/40 text-forest-700 dark:text-forest-300 border-forest-100 dark:border-forest-900/60";
   let badgeLabel = "Active";
 
   if (isCompleted) {
-    badgeColor = "bg-emerald-100 text-emerald-800 border-emerald-200";
+    badgeColor = "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900/60";
     badgeLabel = "Completed";
   } else if (isPaused) {
-    badgeColor = "bg-amber-100 text-amber-800 border-amber-200";
+    badgeColor = "bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-900/60";
     badgeLabel = "Paused";
   } else if (isArchived) {
-    badgeColor = "bg-gray-100 text-gray-700 border-gray-200";
+    badgeColor = "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700";
     badgeLabel = "Archived";
   } else if (isOverdue) {
-    badgeColor = "bg-red-100 text-red-800 border-red-200";
+    badgeColor = "bg-red-100 dark:bg-red-950/40 text-red-800 dark:text-red-300 border-red-200 dark:border-red-900/60";
     badgeLabel = "Overdue";
   } else if (isAtRisk) {
-    badgeColor = "bg-orange-100 text-orange-800 border-orange-200";
+    badgeColor = "bg-orange-100 dark:bg-orange-950/40 text-orange-800 dark:text-orange-300 border-orange-200 dark:border-orange-900/60";
     badgeLabel = "At Risk";
   }
 
@@ -92,10 +92,10 @@ export function GoalCard({
     <div
       className={`rounded-2xl border transition-all duration-200 p-5 sm:p-6 flex flex-col justify-between relative group ${
         isCompleted
-          ? "bg-gradient-to-br from-white to-emerald-50/30 border-emerald-200 shadow-sm"
+          ? "bg-gradient-to-br from-white dark:from-gray-900 to-emerald-50/30 dark:to-emerald-950/20 border-emerald-200 dark:border-emerald-900/40 shadow-sm"
           : isPaused
-          ? "bg-gray-50/60 border-gray-200 opacity-80"
-          : "bg-white border-gray-100 hover:border-gray-200 shadow-sm hover:shadow-md"
+          ? "bg-gray-50/60 dark:bg-gray-800/40 border-gray-200 dark:border-gray-800 opacity-80"
+          : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 shadow-sm hover:shadow-md"
       }`}
     >
       <div>
@@ -110,7 +110,7 @@ export function GoalCard({
               <div className="flex items-center gap-2 flex-wrap">
                 <Link
                   href={`/goals/${goal._id}`}
-                  className="text-base font-bold text-gray-900 hover:text-forest-700 transition-colors truncate block"
+                  className="text-base font-bold text-gray-900 dark:text-gray-100 hover:text-forest-700 dark:hover:text-forest-400 transition-colors truncate block"
                 >
                   {goal.title}
                 </Link>
@@ -122,7 +122,7 @@ export function GoalCard({
               </div>
 
               {goal.description && (
-                <p className="text-xs text-gray-500 mt-1 line-clamp-2 font-medium">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 font-medium">
                   {goal.description}
                 </p>
               )}
@@ -134,20 +134,20 @@ export function GoalCard({
             <button
               type="button"
               onClick={() => setShowMenu(!showMenu)}
-              className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+              className="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               aria-label="Goal options"
             >
               <MoreVertical className="w-4 h-4" />
             </button>
 
             {showMenu && (
-              <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-elevated border border-gray-100 p-1.5 z-30 animate-in fade-in zoom-in-95 duration-150">
+              <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-gray-800 rounded-xl shadow-elevated border border-gray-100 dark:border-gray-700 p-1.5 z-30 animate-in fade-in zoom-in-95 duration-150">
                 <Link
                   href={`/goals/${goal._id}`}
                   onClick={() => setShowMenu(false)}
-                  className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-forest-50 hover:text-forest-900 rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-forest-50 dark:hover:bg-forest-950/40 hover:text-forest-900 dark:hover:text-forest-300 rounded-lg transition-colors"
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5 text-gray-400" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
                   View Goal
                 </Link>
 
@@ -157,9 +157,9 @@ export function GoalCard({
                     setShowMenu(false);
                     onEdit(goal);
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 rounded-lg transition-colors text-left"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors text-left"
                 >
-                  <Edit className="w-3.5 h-3.5 text-gray-400" />
+                  <Edit className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
                   Edit Goal
                 </button>
 
@@ -169,16 +169,16 @@ export function GoalCard({
                     setShowMenu(false);
                     onPauseToggle(goal);
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 rounded-lg transition-colors text-left"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors text-left"
                 >
                   {isPaused ? (
                     <>
-                      <Play className="w-3.5 h-3.5 text-forest-600" />
+                      <Play className="w-3.5 h-3.5 text-forest-600 dark:text-forest-400" />
                       Resume Goal
                     </>
                   ) : (
                     <>
-                      <Pause className="w-3.5 h-3.5 text-amber-600" />
+                      <Pause className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                       Pause Goal
                     </>
                   )}
@@ -190,13 +190,13 @@ export function GoalCard({
                     setShowMenu(false);
                     onArchiveToggle(goal);
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 rounded-lg transition-colors text-left"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors text-left"
                 >
-                  <Archive className="w-3.5 h-3.5 text-gray-400" />
+                  <Archive className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
                   {isArchived ? "Restore Goal" : "Archive Goal"}
                 </button>
 
-                <div className="border-t border-gray-100 my-1" />
+                <div className="border-t border-gray-100 dark:border-gray-700 my-1" />
 
                 <button
                   type="button"
@@ -204,7 +204,7 @@ export function GoalCard({
                     setShowMenu(false);
                     onDelete(goal);
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors text-left"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   Delete Goal
@@ -217,22 +217,22 @@ export function GoalCard({
         {/* Progress Display */}
         <div className="mt-5 space-y-2">
           <div className="flex items-center justify-between text-xs font-bold">
-            <span className="text-gray-900 flex items-center gap-1.5">
+            <span className="text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
               <span>
                 {progress.currentValue} / {progress.targetValue} {goal.unit}
               </span>
               {goal.trackingMode === "manual" && (
-                <span className="text-[10px] text-gray-400 font-medium">(manual)</span>
+                <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">(manual)</span>
               )}
             </span>
-            <span className={isCompleted ? "text-emerald-700" : "text-forest-800"}>
+            <span className={isCompleted ? "text-emerald-700 dark:text-emerald-400" : "text-forest-800 dark:text-forest-300"}>
               {progress.percentage}%
             </span>
           </div>
 
           {/* Accessible Progress Bar */}
           <div
-            className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden"
+            className="w-full bg-gray-100 dark:bg-gray-800 h-2.5 rounded-full overflow-hidden"
             role="progressbar"
             aria-valuenow={progress.percentage}
             aria-valuemin={0}
@@ -242,12 +242,12 @@ export function GoalCard({
             <div
               className={`h-full rounded-full transition-all duration-500 ${
                 isCompleted
-                  ? "bg-emerald-600"
+                  ? "bg-emerald-600 dark:bg-emerald-500"
                   : isPaused
-                  ? "bg-amber-500"
+                  ? "bg-amber-500 dark:bg-amber-400"
                   : isOverdue
-                  ? "bg-red-500"
-                  : "bg-forest-600"
+                  ? "bg-red-500 dark:bg-red-400"
+                  : "bg-forest-600 dark:bg-forest-500"
               }`}
               style={{ width: `${progress.percentage}%` }}
             />
@@ -256,8 +256,8 @@ export function GoalCard({
 
         {/* Linked Habits Chips */}
         {linkedHabits.length > 0 && (
-          <div className="mt-4 pt-3.5 border-t border-gray-100 flex flex-wrap gap-1.5 items-center">
-            <span className="text-[11px] text-gray-400 font-semibold mr-1">Habits:</span>
+          <div className="mt-4 pt-3.5 border-t border-gray-100 dark:border-gray-800 flex flex-wrap gap-1.5 items-center">
+            <span className="text-[11px] text-gray-400 dark:text-gray-500 font-semibold mr-1">Habits:</span>
             {linkedHabits.map((h: any) => {
               const hName = typeof h === "object" ? h.name : "Habit";
               const hColor = typeof h === "object" ? h.color : "#2D6A4F";
@@ -267,7 +267,7 @@ export function GoalCard({
                 <Link
                   key={hId}
                   href="/habits"
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-gray-50 hover:bg-forest-50 hover:text-forest-900 text-gray-700 border border-gray-200/80 transition-colors"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-gray-50 dark:bg-gray-800 hover:bg-forest-50 dark:hover:bg-forest-950/40 hover:text-forest-900 dark:hover:text-forest-300 text-gray-700 dark:text-gray-300 border border-gray-200/80 dark:border-gray-700 transition-colors"
                 >
                   <span
                     className="w-2 h-2 rounded-full shrink-0"
@@ -282,16 +282,16 @@ export function GoalCard({
       </div>
 
       {/* Footer: Deadline & Quick View Link */}
-      <div className="mt-5 pt-3.5 border-t border-gray-100 flex items-center justify-between text-xs">
+      <div className="mt-5 pt-3.5 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs">
         <div className="flex items-center gap-1.5 font-medium">
-          <Clock className={`w-3.5 h-3.5 ${isOverdue ? "text-red-500" : "text-gray-400"}`} />
+          <Clock className={`w-3.5 h-3.5 ${isOverdue ? "text-red-500 dark:text-red-400" : "text-gray-400 dark:text-gray-500"}`} />
           <span
             className={
               isOverdue
-                ? "text-red-600 font-bold"
+                ? "text-red-600 dark:text-red-400 font-bold"
                 : isCompleted
-                ? "text-emerald-700 font-semibold"
-                : "text-gray-500"
+                ? "text-emerald-700 dark:text-emerald-400 font-semibold"
+                : "text-gray-500 dark:text-gray-400"
             }
           >
             {isCompleted ? "Goal Completed 🎉" : progress.deadlineText}
@@ -300,7 +300,7 @@ export function GoalCard({
 
         <Link
           href={`/goals/${goal._id}`}
-          className="font-bold text-forest-700 hover:text-forest-800 inline-flex items-center gap-1 group"
+          className="font-bold text-forest-700 dark:text-forest-400 hover:text-forest-800 dark:hover:text-forest-300 inline-flex items-center gap-1 group"
         >
           View Goal
           <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />

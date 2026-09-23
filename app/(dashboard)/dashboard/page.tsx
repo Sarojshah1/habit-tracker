@@ -224,7 +224,7 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="h-14 bg-gray-200 rounded-2xl w-1/3 animate-pulse" />
+        <div className="h-14 bg-gray-200 dark:bg-gray-800 rounded-2xl w-1/3 animate-pulse" />
         <LoadingSkeleton type="stats" />
         <LoadingSkeleton count={3} type="row" />
       </div>
@@ -249,13 +249,13 @@ export default function DashboardPage() {
       {/* Dashboard Greeting Header & Planner Triggers */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-gray-100 tracking-tight">
             {greeting}, {studentName}! 👋
           </h1>
-          <p className="text-sm text-gray-500 mt-1 font-medium flex items-center gap-2">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium flex items-center gap-2">
             <span>{data.today.friendlyDate}</span>
             <span>•</span>
-            <span className="text-forest-700 font-semibold">Keep going — consistency builds progress.</span>
+            <span className="text-forest-700 dark:text-forest-400 font-semibold">Keep going — consistency builds progress.</span>
           </p>
         </div>
 
@@ -272,19 +272,19 @@ export default function DashboardPage() {
           <button
             type="button"
             onClick={() => setIsDailyReviewModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-gray-200 hover:border-forest-600 text-gray-700 hover:text-forest-700 text-xs font-bold transition-all shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-forest-600 dark:hover:border-forest-500 text-gray-700 dark:text-gray-200 hover:text-forest-700 dark:hover:text-forest-400 text-xs font-bold transition-all shadow-xs"
           >
-            <Moon className="w-3.5 h-3.5 text-indigo-600" />
+            <Moon className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
             {data.todayReview ? "Review Completed" : "Daily Review"}
           </button>
 
           {/* Motivational Quote pill */}
           {data.today?.quote && (
-            <div className="hidden lg:block bg-white rounded-2xl border border-gray-100/90 px-4 py-2 shadow-xs max-w-xs">
-              <p className="text-[11px] text-gray-700 italic font-medium line-clamp-1">
+            <div className="hidden lg:block bg-white dark:bg-gray-900 rounded-2xl border border-gray-100/90 dark:border-gray-800 px-4 py-2 shadow-xs max-w-xs">
+              <p className="text-[11px] text-gray-700 dark:text-gray-300 italic font-medium line-clamp-1">
                 &ldquo;{data.today.quote.text}&rdquo;
               </p>
-              <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider text-right">
+              <p className="text-[9px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider text-right">
                 — {data.today.quote.author}
               </p>
             </div>
@@ -299,7 +299,7 @@ export default function DashboardPage() {
           value={data.stats.habitsCompleted.label}
           subtitle="Scheduled for today"
           icon={CheckCircle2}
-          colorClass="text-forest-700 bg-forest-50"
+          colorClass="text-forest-700 dark:text-forest-300 bg-forest-50 dark:bg-forest-950/40"
           badgeText="Today"
         />
 
@@ -308,7 +308,7 @@ export default function DashboardPage() {
           value={data.stats.currentStreak.label}
           subtitle={`Best: ${data.stats.currentStreak.longest} days`}
           icon={Flame}
-          colorClass="text-orange-600 bg-orange-50"
+          colorClass="text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40"
           badgeText="Active 🔥"
         />
 
@@ -317,7 +317,7 @@ export default function DashboardPage() {
           value={data.stats.weeklyCompletion.label}
           subtitle="Past 7 days performance"
           icon={BarChart3}
-          colorClass="text-emerald-600 bg-emerald-50"
+          colorClass="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40"
         />
 
         <StatCard
@@ -325,24 +325,24 @@ export default function DashboardPage() {
           value={data.stats.goalsInProgress.label}
           subtitle="Active milestones"
           icon={Target}
-          colorClass="text-blue-600 bg-blue-50"
+          colorClass="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40"
         />
       </div>
 
       {/* Today's Priorities & Deep Work Focus Banner */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Top 3 Priorities (7 cols) */}
-        <div className="lg:col-span-7 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm flex flex-col justify-between">
+        <div className="lg:col-span-7 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-4">
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800 mb-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-base font-bold text-gray-900 tracking-tight">Today&apos;s Priorities</h2>
-                  <span className="text-[10px] font-bold text-forest-700 bg-forest-50 px-2 py-0.5 rounded-full">
+                  <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 tracking-tight">Today&apos;s Priorities</h2>
+                  <span className="text-[10px] font-bold text-forest-700 dark:text-forest-300 bg-forest-50 dark:bg-forest-950/40 px-2 py-0.5 rounded-full">
                     Focus Targets
                   </span>
                 </div>
-                <p className="text-xs text-gray-400 font-medium mt-0.5">
+                <p className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">
                   Complete your essential student milestones for today.
                 </p>
               </div>
@@ -351,14 +351,14 @@ export default function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => setIsCreateTaskModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-forest-50 hover:bg-forest-100 text-forest-800 text-xs font-bold transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-forest-50 dark:bg-forest-950/40 hover:bg-forest-100 dark:hover:bg-forest-900/60 text-forest-800 dark:text-forest-300 text-xs font-bold transition-colors"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   Add Task
                 </button>
                 <Link
                   href="/tasks"
-                  className="text-xs font-bold text-forest-700 hover:text-forest-800 hover:underline"
+                  className="text-xs font-bold text-forest-700 dark:text-forest-400 hover:text-forest-800 dark:hover:text-forest-300 hover:underline"
                 >
                   View All
                 </Link>
@@ -366,9 +366,9 @@ export default function DashboardPage() {
             </div>
 
             {(!data.todayPriorities || data.todayPriorities.length === 0) ? (
-              <div className="py-8 text-center text-xs text-gray-400">
-                <CheckSquare className="w-8 h-8 text-forest-200 mx-auto mb-2" />
-                <p className="font-semibold text-gray-700">No priority tasks selected</p>
+              <div className="py-8 text-center text-xs text-gray-400 dark:text-gray-500">
+                <CheckSquare className="w-8 h-8 text-forest-200 dark:text-forest-800 mx-auto mb-2" />
+                <p className="font-semibold text-gray-700 dark:text-gray-300">No priority tasks selected</p>
                 <p className="text-[11px] mt-0.5 mb-3">Set your top 3 daily priorities in morning planning.</p>
                 <button
                   type="button"
@@ -387,8 +387,8 @@ export default function DashboardPage() {
                       key={task._id}
                       className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
                         isCompleted
-                          ? "bg-forest-50/40 border-forest-100"
-                          : "bg-white border-gray-100 hover:border-gray-200"
+                          ? "bg-forest-50/40 dark:bg-forest-950/20 border-forest-100 dark:border-forest-900/40"
+                          : "bg-white dark:bg-gray-800/60 border-gray-100 dark:border-gray-700/60 hover:border-gray-200 dark:hover:border-gray-600"
                       }`}
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -398,17 +398,17 @@ export default function DashboardPage() {
                           className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all shrink-0 ${
                             isCompleted
                               ? "bg-forest-700 text-white shadow-xs"
-                              : "border-2 border-gray-300 hover:border-forest-600 bg-white"
+                              : "border-2 border-gray-300 dark:border-gray-600 hover:border-forest-600 bg-white dark:bg-gray-800"
                           }`}
                         >
                           {isCompleted && <Check className="w-3.5 h-3.5" strokeWidth={3} />}
                         </button>
                         <div className="min-w-0 flex-1">
-                          <p className={`text-xs font-bold truncate ${isCompleted ? "line-through text-gray-400 font-medium" : "text-gray-900"}`}>
+                          <p className={`text-xs font-bold truncate ${isCompleted ? "line-through text-gray-400 dark:text-gray-500 font-medium" : "text-gray-900 dark:text-gray-100"}`}>
                             {task.title}
                           </p>
-                          <div className="flex items-center gap-2 mt-0.5 text-[11px] text-gray-400">
-                            <span className="capitalize text-forest-700 font-semibold">{task.priority} Priority</span>
+                          <div className="flex items-center gap-2 mt-0.5 text-[11px] text-gray-400 dark:text-gray-500">
+                            <span className="capitalize text-forest-700 dark:text-forest-400 font-semibold">{task.priority} Priority</span>
                             {task.estimatedMinutes && (
                               <>
                                 <span>•</span>
@@ -438,32 +438,32 @@ export default function DashboardPage() {
         </div>
 
         {/* Daily Focus & Productivity Target (5 cols) */}
-        <div className="lg:col-span-5 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm flex flex-col justify-between">
+        <div className="lg:col-span-5 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-3">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800 mb-3">
               <div>
-                <h3 className="text-base font-bold text-gray-900 tracking-tight">Focus &amp; Productivity</h3>
-                <p className="text-xs text-gray-400 font-medium">Daily study target &amp; score</p>
+                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 tracking-tight">Focus &amp; Productivity</h3>
+                <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">Daily study target &amp; score</p>
               </div>
-              <span className="text-xs font-black text-forest-800 bg-forest-50 px-3 py-1 rounded-xl">
+              <span className="text-xs font-black text-forest-800 dark:text-forest-300 bg-forest-50 dark:bg-forest-950/40 px-3 py-1 rounded-xl">
                 Score: {data.productivityScore?.overallScore ?? 0}%
               </span>
             </div>
 
             <div className="space-y-4 pt-1">
               <div>
-                <div className="flex items-center justify-between text-xs font-bold text-gray-700 mb-1.5">
+                <div className="flex items-center justify-between text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
                   <span className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-forest-700" />
+                    <Clock className="w-3.5 h-3.5 text-forest-700 dark:text-forest-400" />
                     Deep Work Completed
                   </span>
-                  <span className="text-forest-700">
+                  <span className="text-forest-700 dark:text-forest-400">
                     {data.focusStatus?.completedMinutes ?? 0} / {data.focusStatus?.targetMinutes ?? 120} min
                   </span>
                 </div>
-                <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                <div className="w-full bg-gray-100 dark:bg-gray-800 h-2.5 rounded-full overflow-hidden">
                   <div
-                    className="bg-forest-700 h-full rounded-full transition-all duration-500"
+                    className="bg-forest-700 dark:bg-forest-500 h-full rounded-full transition-all duration-500"
                     style={{
                       width: `${Math.min(
                         100,
@@ -480,22 +480,22 @@ export default function DashboardPage() {
 
               {/* Today's Schedule Snapshot */}
               <div>
-                <div className="flex items-center justify-between text-xs font-bold text-gray-700 mb-2">
+                <div className="flex items-center justify-between text-xs font-bold text-gray-700 dark:text-gray-300 mb-2">
                   <span>Today&apos;s Schedule</span>
-                  <Link href="/calendar" className="text-[11px] text-forest-700 hover:underline">
+                  <Link href="/calendar" className="text-[11px] text-forest-700 dark:text-forest-400 hover:underline">
                     Full Calendar
                   </Link>
                 </div>
                 {(!data.todaySchedule || data.todaySchedule.length === 0) ? (
-                  <p className="text-[11px] text-gray-400 py-2">No time blocks scheduled for today.</p>
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500 py-2">No time blocks scheduled for today.</p>
                 ) : (
                   <div className="space-y-2">
                     {data.todaySchedule.slice(0, 2).map((b: any) => {
                       const startTime = new Date(b.start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
                       return (
-                        <div key={b._id} className="p-2 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between text-xs">
-                          <span className="font-semibold text-gray-800 truncate">{b.title}</span>
-                          <span className="text-[11px] text-gray-400 shrink-0 font-medium">{startTime}</span>
+                        <div key={b._id} className="p-2 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60 flex items-center justify-between text-xs">
+                          <span className="font-semibold text-gray-800 dark:text-gray-200 truncate">{b.title}</span>
+                          <span className="text-[11px] text-gray-400 dark:text-gray-500 shrink-0 font-medium">{startTime}</span>
                         </div>
                       );
                     })}
@@ -505,7 +505,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="pt-4 mt-4 border-t border-gray-100 flex items-center justify-between">
+          <div className="pt-4 mt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
             <Link
               href="/focus"
               className="w-full py-2.5 rounded-xl bg-forest-700 hover:bg-forest-800 text-white text-xs font-bold text-center transition-colors shadow-xs"
@@ -519,12 +519,12 @@ export default function DashboardPage() {
       {/* Main Grid: Today's Habits (7 cols) & Weekly Progress / Mini Calendar (5 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Today's Habits Card (7 cols) */}
-        <div className="lg:col-span-7 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm flex flex-col justify-between">
+        <div className="lg:col-span-7 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-4">
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800 mb-4">
               <div>
-                <h2 className="text-lg font-bold text-gray-900 tracking-tight">Today&apos;s Habits</h2>
-                <p className="text-xs text-gray-400 font-medium mt-0.5">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 tracking-tight">Today&apos;s Habits</h2>
+                <p className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">
                   Check off items as you complete them to build your streak.
                 </p>
               </div>
@@ -564,10 +564,10 @@ export default function DashboardPage() {
                       key={habit._id}
                       className={`group p-3.5 rounded-2xl border transition-all duration-150 flex items-center justify-between gap-3.5 ${
                         isCompleted
-                          ? "bg-forest-50/40 border-forest-100"
+                          ? "bg-forest-50/40 dark:bg-forest-950/20 border-forest-100 dark:border-forest-900/40"
                           : isSkipped
-                          ? "bg-orange-50/30 border-orange-100 opacity-60"
-                          : "bg-white border-gray-100 hover:border-gray-200 hover:shadow-xs"
+                          ? "bg-orange-50/30 dark:bg-orange-950/20 border-orange-100 dark:border-orange-900/40 opacity-60"
+                          : "bg-white dark:bg-gray-800/60 border-gray-100 dark:border-gray-700/60 hover:border-gray-200 dark:hover:border-gray-600 hover:shadow-xs"
                       }`}
                     >
                       {/* Left: Checkbox + Icon + Info */}
@@ -579,7 +579,7 @@ export default function DashboardPage() {
                           className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-150 shrink-0 ${
                             isCompleted
                               ? "bg-forest-700 text-white shadow-xs"
-                              : "border-2 border-gray-300 hover:border-forest-600 bg-white"
+                              : "border-2 border-gray-300 dark:border-gray-600 hover:border-forest-600 bg-white dark:bg-gray-800"
                           }`}
                           aria-label={`Mark ${habit.name} ${isCompleted ? "incomplete" : "complete"}`}
                         >
@@ -594,12 +594,12 @@ export default function DashboardPage() {
                           <div className="min-w-0">
                             <p
                               className={`text-sm font-bold truncate transition-colors ${
-                                isCompleted ? "line-through text-gray-400 font-medium" : "text-gray-900"
+                                isCompleted ? "line-through text-gray-400 dark:text-gray-500 font-medium" : "text-gray-900 dark:text-gray-100"
                               }`}
                             >
                               {habit.name}
                             </p>
-                            <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-400 font-medium">
+                            <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-400 dark:text-gray-500 font-medium">
                               <span className="flex items-center gap-1">
                                 <Clock className="w-3 h-3" />
                                 {habit.schedule?.time || "Anytime"}
@@ -617,7 +617,7 @@ export default function DashboardPage() {
                           <button
                             type="button"
                             onClick={() => handleSkipHabit(habit._id)}
-                            className="px-2.5 py-1 text-[11px] font-semibold text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                            className="px-2.5 py-1 text-[11px] font-semibold text-gray-400 dark:text-gray-500 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 rounded-lg transition-colors"
                             title="Skip this habit for today"
                           >
                             Skip
@@ -626,7 +626,7 @@ export default function DashboardPage() {
                         <button
                           type="button"
                           onClick={() => setSelectedHabitDetail(habit)}
-                          className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                          className="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                           aria-label="Habit details"
                         >
                           <MoreVertical className="w-4 h-4" />
@@ -640,15 +640,15 @@ export default function DashboardPage() {
           </div>
 
           {/* Quick Action Footer */}
-          <div className="pt-4 mt-6 border-t border-gray-100 flex items-center justify-between text-xs">
+          <div className="pt-4 mt-6 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs">
             <Link
               href="/habits"
-              className="font-bold text-forest-700 hover:text-forest-800 inline-flex items-center gap-1 group"
+              className="font-bold text-forest-700 dark:text-forest-400 hover:text-forest-800 dark:hover:text-forest-300 inline-flex items-center gap-1 group"
             >
               View All Habits
               <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
             </Link>
-            <span className="text-gray-400 font-medium">
+            <span className="text-gray-400 dark:text-gray-500 font-medium">
               {data.stats.habitsCompleted.completed} of {data.stats.habitsCompleted.total} completed today
             </span>
           </div>
@@ -657,13 +657,13 @@ export default function DashboardPage() {
         {/* Weekly Progress & Mini Calendar (5 cols) */}
         <div className="lg:col-span-5 space-y-6">
           {/* Weekly Progress Bar Chart */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-100">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm">
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-100 dark:border-gray-800">
               <div>
-                <h3 className="text-base font-bold text-gray-900 tracking-tight">Weekly Progress</h3>
-                <p className="text-xs text-gray-400 font-medium">Daily completion percentage</p>
+                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 tracking-tight">Weekly Progress</h3>
+                <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">Daily completion percentage</p>
               </div>
-              <span className="text-xs font-bold text-forest-700 bg-forest-50 px-2.5 py-1 rounded-full">
+              <span className="text-xs font-bold text-forest-700 dark:text-forest-300 bg-forest-50 dark:bg-forest-950/40 px-2.5 py-1 rounded-full">
                 {data.stats.weeklyCompletion.label} Avg
               </span>
             </div>
@@ -691,7 +691,7 @@ export default function DashboardPage() {
                       if (active && payload && payload.length) {
                         const pt = payload[0].payload;
                         return (
-                          <div className="bg-gray-900 text-white p-2.5 rounded-xl text-xs shadow-lg space-y-1">
+                          <div className="bg-gray-900 dark:bg-gray-800 text-white p-2.5 rounded-xl text-xs shadow-lg space-y-1 border border-gray-800 dark:border-gray-700">
                             <p className="font-bold">{pt.date}</p>
                             <p className="text-forest-300">Completion: {pt.completionPercentage}%</p>
                             <p className="text-gray-300">
@@ -707,7 +707,7 @@ export default function DashboardPage() {
                     {data.weeklyProgress.map((entry: any, index: number) => (
                       <Cell
                         key={`cell-${index}`}
-                        fill={entry.isToday ? "#1B4332" : entry.completionPercentage > 0 ? "#52B788" : "#E2E8F0"}
+                        fill={entry.isToday ? "#10b981" : entry.completionPercentage > 0 ? "#34d399" : "#334155"}
                       />
                     ))}
                   </Bar>
@@ -717,15 +717,15 @@ export default function DashboardPage() {
           </div>
 
           {/* Mini Monthly Calendar Preview */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-            <div className="flex items-center justify-between pb-3 mb-4 border-b border-gray-100">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm">
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-gray-100 dark:border-gray-800">
               <div>
-                <h3 className="text-base font-bold text-gray-900 tracking-tight">Month Overview</h3>
-                <p className="text-xs text-gray-400 font-medium">Monthly consistency grid</p>
+                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 tracking-tight">Month Overview</h3>
+                <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">Monthly consistency grid</p>
               </div>
               <Link
                 href="/calendar"
-                className="text-xs font-bold text-forest-700 hover:text-forest-800 inline-flex items-center gap-1 group"
+                className="text-xs font-bold text-forest-700 dark:text-forest-400 hover:text-forest-800 dark:hover:text-forest-300 inline-flex items-center gap-1 group"
               >
                 Full Calendar
                 <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
@@ -734,22 +734,22 @@ export default function DashboardPage() {
 
             <div className="grid grid-cols-7 gap-1.5 text-center">
               {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
-                <span key={i} className="text-[10px] font-bold text-gray-400">
+                <span key={i} className="text-[10px] font-bold text-gray-400 dark:text-gray-500">
                   {d}
                 </span>
               ))}
 
               {data.monthCalendar.days.map((day: any) => {
-                let dotColor = "bg-gray-100 text-gray-500";
-                if (day.status === "completed") dotColor = "bg-forest-600 text-white font-bold";
+                let dotColor = "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400";
+                if (day.status === "completed") dotColor = "bg-forest-600 dark:bg-forest-500 text-white font-bold";
                 else if (day.status === "partial") dotColor = "bg-orange-500 text-white font-bold";
-                else if (day.status === "missed") dotColor = "bg-red-200 text-red-800";
+                else if (day.status === "missed") dotColor = "bg-red-200 dark:bg-red-950/60 text-red-800 dark:text-red-300";
 
                 return (
                   <div
                     key={day.date}
                     className={`h-7 rounded-lg flex items-center justify-center text-[10px] transition-all ${dotColor} ${
-                      day.isToday ? "ring-2 ring-forest-700 font-black" : ""
+                      day.isToday ? "ring-2 ring-forest-700 dark:ring-forest-400 font-black" : ""
                     }`}
                     title={`${day.date}: ${day.status}`}
                   >
@@ -765,12 +765,12 @@ export default function DashboardPage() {
       {/* Secondary Row: Active Goals & Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Active Goals (7 cols) */}
-        <div className="lg:col-span-7 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm flex flex-col justify-between">
+        <div className="lg:col-span-7 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-4 gap-2 flex-wrap">
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800 mb-4 gap-2 flex-wrap">
               <div>
-                <h3 className="text-base font-bold text-gray-900 tracking-tight">Active Goals</h3>
-                <p className="text-xs text-gray-400 font-medium">Your ongoing milestones and targets</p>
+                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 tracking-tight">Active Goals</h3>
+                <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">Your ongoing milestones and targets</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -781,19 +781,19 @@ export default function DashboardPage() {
                   <Plus className="w-3.5 h-3.5" />
                   Add Goal
                 </button>
-                <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full">
+                <span className="text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 px-2.5 py-1 rounded-full">
                   {data.goals.length} active
                 </span>
               </div>
             </div>
 
             {data.goals.length === 0 ? (
-              <div className="p-8 text-center text-xs text-gray-400 font-medium space-y-3">
+              <div className="p-8 text-center text-xs text-gray-400 dark:text-gray-500 font-medium space-y-3">
                 <p>No active goals yet. Create targets like reading 5 books or a 30-day study streak!</p>
                 <button
                   type="button"
                   onClick={() => setIsCreateGoalModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-forest-600 text-forest-700 hover:bg-forest-50 text-xs font-bold transition-all"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-forest-600 text-forest-700 dark:text-forest-400 hover:bg-forest-50 dark:hover:bg-forest-950/40 text-xs font-bold transition-all"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   Create Your First Goal
@@ -812,39 +812,39 @@ export default function DashboardPage() {
                     <Link
                       key={goal._id}
                       href={`/goals/${goal._id}`}
-                      className="block p-4 rounded-2xl bg-gray-50/70 hover:bg-gray-50 border border-gray-100 transition-all hover:shadow-xs group"
+                      className="block p-4 rounded-2xl bg-gray-50/70 dark:bg-gray-800/50 hover:bg-gray-100/70 dark:hover:bg-gray-800 border border-gray-100 dark:border-gray-800 transition-all hover:shadow-xs group"
                     >
                       <div className="flex items-center justify-between mb-1.5 gap-2">
                         <div className="flex items-center gap-2 min-w-0">
                           <HabitIcon name={goal.icon || "target"} color={goal.color || "#1B4332"} size="sm" />
-                          <p className="text-sm font-bold text-gray-900 group-hover:text-forest-700 transition-colors truncate">
+                          <p className="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-forest-700 dark:group-hover:text-forest-400 transition-colors truncate">
                             {goal.title}
                           </p>
                         </div>
-                        <span className="text-xs font-extrabold text-forest-700 shrink-0">
+                        <span className="text-xs font-extrabold text-forest-700 dark:text-forest-400 shrink-0">
                           {goal.currentValue} / {goal.targetValue} {goal.unit}
                         </span>
                       </div>
 
                       {goal.description && (
-                        <p className="text-xs text-gray-500 mb-2.5 font-medium line-clamp-1">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-2.5 font-medium line-clamp-1">
                           {goal.description}
                         </p>
                       )}
 
-                      <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden mb-2">
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full overflow-hidden mb-2">
                         <div
-                          className="bg-forest-600 h-full rounded-full transition-all duration-500"
+                          className="bg-forest-600 dark:bg-forest-500 h-full rounded-full transition-all duration-500"
                           style={{ width: `${pct}%` }}
                         />
                       </div>
 
-                      <div className="flex items-center justify-between text-[11px] text-gray-400 font-medium">
+                      <div className="flex items-center justify-between text-[11px] text-gray-400 dark:text-gray-500 font-medium">
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
                           {deadlineText}
                         </span>
-                        <span className="font-bold text-gray-600">{pct}%</span>
+                        <span className="font-bold text-gray-600 dark:text-gray-300">{pct}%</span>
                       </div>
                     </Link>
                   );
@@ -853,33 +853,33 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="pt-4 mt-6 border-t border-gray-100 flex items-center justify-between text-xs">
+          <div className="pt-4 mt-6 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs">
             <Link
               href="/goals"
-              className="font-bold text-forest-700 hover:text-forest-800 inline-flex items-center gap-1 group"
+              className="font-bold text-forest-700 dark:text-forest-400 hover:text-forest-800 dark:hover:text-forest-300 inline-flex items-center gap-1 group"
             >
               View All Goals
               <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
             </Link>
-            <span className="text-gray-400 font-medium">
+            <span className="text-gray-400 dark:text-gray-500 font-medium">
               {data.goals.length} tracked milestone{data.goals.length === 1 ? "" : "s"}
             </span>
           </div>
         </div>
 
         {/* Recent Activity Feed (5 cols) */}
-        <div className="lg:col-span-5 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-          <div className="pb-4 border-b border-gray-100 mb-4">
-            <h3 className="text-base font-bold text-gray-900 tracking-tight">Recent Activity</h3>
-            <p className="text-xs text-gray-400 font-medium">Your latest productivity logs</p>
+        <div className="lg:col-span-5 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm">
+          <div className="pb-4 border-b border-gray-100 dark:border-gray-800 mb-4">
+            <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 tracking-tight">Recent Activity</h3>
+            <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">Your latest productivity logs</p>
           </div>
 
           {data.recentActivity.length === 0 ? (
-            <div className="p-8 text-center text-xs text-gray-400 font-medium">
+            <div className="p-8 text-center text-xs text-gray-400 dark:text-gray-500 font-medium">
               No recent actions recorded yet.
             </div>
           ) : (
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-gray-50 dark:divide-gray-800">
               {data.recentActivity.map((act: any) => {
                 const timeAgo = new Date(act.createdAt).toLocaleTimeString([], {
                   hour: "2-digit",
@@ -889,17 +889,17 @@ export default function DashboardPage() {
                 return (
                   <div key={act._id} className="py-2.5 flex items-start justify-between gap-3 text-xs">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-2 h-2 rounded-full bg-forest-600 shrink-0" />
+                      <div className="w-2 h-2 rounded-full bg-forest-600 dark:bg-forest-500 shrink-0" />
                       <div>
-                        <span className="font-semibold text-gray-800 capitalize">
+                        <span className="font-semibold text-gray-800 dark:text-gray-200 capitalize">
                           {act.type.replace(/_/g, " ")}:
                         </span>{" "}
-                        <span className="text-gray-600">
+                        <span className="text-gray-600 dark:text-gray-400">
                           {act.metadata?.habitName || act.metadata?.goalTitle || act.metadata?.title || act.metadata?.message || "Action"}
                         </span>
                       </div>
                     </div>
-                    <span className="text-[11px] text-gray-400 shrink-0 font-medium">{timeAgo}</span>
+                    <span className="text-[11px] text-gray-400 dark:text-gray-500 shrink-0 font-medium">{timeAgo}</span>
                   </div>
                 );
               })}

@@ -26,6 +26,7 @@ import {
 import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useTheme } from "@/lib/context/ThemeContext";
 
 const PRESET_AVATARS = [
   "🎓", "📚", "🚀", "⚡", "🎯", "🌿", "🧠", "💻", "🎨", "🔬", "🏆", "⭐", "☕", "🦉", "💡", "🔥"
@@ -55,6 +56,7 @@ const COMMON_TIMEZONES = [
 
 export default function SettingsPage() {
   const router = useRouter();
+  const { setTheme: setContextTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<
     "profile" | "notifications" | "appearance" | "habits" | "productivity" | "security" | "privacy"
   >("profile");
@@ -187,6 +189,7 @@ export default function SettingsPage() {
 
   const handleAppearanceChange = (newTheme: "light" | "dark" | "system") => {
     setAppearance(newTheme);
+    setContextTheme(newTheme);
     applyThemeToDOM(newTheme);
   };
 
@@ -376,21 +379,21 @@ export default function SettingsPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Settings</h1>
-        <p className="text-sm text-gray-500 mt-1 font-medium">
+        <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Settings</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">
           Customize your student profile, alerts, study preferences, and privacy controls.
         </p>
       </div>
 
       {saveSuccess && (
-        <div className="p-4 bg-forest-50 border border-forest-200 rounded-2xl text-xs font-bold text-forest-800 flex items-center gap-2 animate-in fade-in duration-200">
-          <Check className="w-4 h-4 text-forest-700" />
+        <div className="p-4 bg-forest-50 dark:bg-forest-900/30 border border-forest-200 dark:border-forest-800 rounded-2xl text-xs font-bold text-forest-800 dark:text-forest-300 flex items-center gap-2 animate-in fade-in duration-200">
+          <Check className="w-4 h-4 text-forest-700 dark:text-forest-400" />
           Settings successfully saved and synchronized!
         </div>
       )}
 
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-2xl text-xs font-bold text-red-700">
+        <div className="p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-2xl text-xs font-bold text-red-700 dark:text-red-400">
           {error}
         </div>
       )}
@@ -405,7 +408,7 @@ export default function SettingsPage() {
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all text-left ${
               activeTab === "profile"
                 ? "bg-forest-700 text-white shadow-xs"
-                : "text-gray-600 hover:bg-white hover:text-gray-900"
+                : "text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100"
             }`}
           >
             <User className="w-4 h-4" />
@@ -418,7 +421,7 @@ export default function SettingsPage() {
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all text-left ${
               activeTab === "notifications"
                 ? "bg-forest-700 text-white shadow-xs"
-                : "text-gray-600 hover:bg-white hover:text-gray-900"
+                : "text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100"
             }`}
           >
             <Bell className="w-4 h-4" />
@@ -431,7 +434,7 @@ export default function SettingsPage() {
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all text-left ${
               activeTab === "appearance"
                 ? "bg-forest-700 text-white shadow-xs"
-                : "text-gray-600 hover:bg-white hover:text-gray-900"
+                : "text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100"
             }`}
           >
             <Sun className="w-4 h-4" />
@@ -444,7 +447,7 @@ export default function SettingsPage() {
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all text-left ${
               activeTab === "habits"
                 ? "bg-forest-700 text-white shadow-xs"
-                : "text-gray-600 hover:bg-white hover:text-gray-900"
+                : "text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100"
             }`}
           >
             <Sliders className="w-4 h-4" />
@@ -457,7 +460,7 @@ export default function SettingsPage() {
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all text-left ${
               activeTab === "productivity"
                 ? "bg-forest-700 text-white shadow-xs"
-                : "text-gray-600 hover:bg-white hover:text-gray-900"
+                : "text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100"
             }`}
           >
             <Zap className="w-4 h-4" />
@@ -470,7 +473,7 @@ export default function SettingsPage() {
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all text-left ${
               activeTab === "security"
                 ? "bg-forest-700 text-white shadow-xs"
-                : "text-gray-600 hover:bg-white hover:text-gray-900"
+                : "text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100"
             }`}
           >
             <KeyRound className="w-4 h-4" />
@@ -483,7 +486,7 @@ export default function SettingsPage() {
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all text-left ${
               activeTab === "privacy"
                 ? "bg-forest-700 text-white shadow-xs"
-                : "text-gray-600 hover:bg-white hover:text-gray-900"
+                : "text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100"
             }`}
           >
             <ShieldAlert className="w-4 h-4" />
@@ -492,20 +495,20 @@ export default function SettingsPage() {
         </div>
 
         {/* Tab Content Panels (9 cols) */}
-        <div className="lg:col-span-9 bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm">
+        <div className="lg:col-span-9 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 p-6 sm:p-8 shadow-sm">
           {/* PROFILE TAB */}
           {activeTab === "profile" && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-base font-bold text-gray-900">Student Profile</h3>
-                <p className="text-xs text-gray-400 font-medium mt-0.5">
+                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Student Profile</h3>
+                <p className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">
                   Update your display name, personalized avatar, timezone, and language.
                 </p>
               </div>
 
               {/* Avatar Selector */}
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">
                   Choose Your Student Avatar
                 </label>
                 <div className="flex flex-wrap items-center gap-2 pt-1">
@@ -516,8 +519,8 @@ export default function SettingsPage() {
                       onClick={() => setAvatar(emoji)}
                       className={`w-11 h-11 text-xl rounded-2xl flex items-center justify-center transition-all ${
                         avatar === emoji
-                          ? "bg-forest-100 border-2 border-forest-600 shadow-xs scale-105"
-                          : "bg-gray-50 hover:bg-gray-100 border border-gray-200"
+                          ? "bg-forest-100 dark:bg-forest-900/50 border-2 border-forest-600 shadow-xs scale-105"
+                          : "bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
                       }`}
                     >
                       {emoji}
@@ -527,7 +530,7 @@ export default function SettingsPage() {
                     <button
                       type="button"
                       onClick={() => setAvatar("")}
-                      className="px-3 py-2 text-xs font-semibold text-gray-400 hover:text-gray-700 rounded-xl hover:bg-gray-100 transition-colors"
+                      className="px-3 py-2 text-xs font-semibold text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                     >
                       Use Initials
                     </button>
@@ -537,20 +540,20 @@ export default function SettingsPage() {
 
               <div className="space-y-4 pt-2">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
                     Full Name
                   </label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full max-w-md px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:border-forest-600 outline-none"
+                    className="w-full max-w-md px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 outline-none"
                     placeholder="e.g. Alex Morgan"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
                     Email Address
                   </label>
                   <div className="flex items-center gap-2 max-w-md">
@@ -558,20 +561,20 @@ export default function SettingsPage() {
                       type="email"
                       value={email}
                       disabled
-                      className="flex-1 px-3.5 py-2.5 bg-gray-100 border border-gray-200 rounded-xl text-sm text-gray-500 cursor-not-allowed outline-none"
+                      className="flex-1 px-3.5 py-2.5 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-500 dark:text-gray-400 cursor-not-allowed outline-none"
                     />
                     <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[11px] font-bold rounded-lg shrink-0">
                       Verified
                     </span>
                   </div>
-                  <p className="text-[11px] text-gray-400 mt-1">
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
                     Email cannot be changed directly to prevent unauthorized access.
                   </p>
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between max-w-md mb-1.5">
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Timezone
                     </label>
                     <button
@@ -586,7 +589,7 @@ export default function SettingsPage() {
                   <select
                     value={timezone}
                     onChange={(e) => setTimezone(e.target.value)}
-                    className="w-full max-w-md px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:border-forest-600 outline-none"
+                    className="w-full max-w-md px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 outline-none"
                   >
                     {!COMMON_TIMEZONES.includes(timezone) && (
                       <option value={timezone}>{timezone} (Custom)</option>
@@ -597,19 +600,19 @@ export default function SettingsPage() {
                       </option>
                     ))}
                   </select>
-                  <p className="text-[11px] text-gray-400 mt-1">
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
                     Controls midnight habit resets, streak boundaries, and day schedule views.
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
                     Language
                   </label>
                   <select
                     value={language}
                     onChange={(e) => setLanguage(e.target.value)}
-                    className="w-full max-w-md px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:border-forest-600 outline-none"
+                    className="w-full max-w-md px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 outline-none"
                   >
                     <option value="en">English (US)</option>
                     <option value="es">Español</option>
@@ -625,31 +628,31 @@ export default function SettingsPage() {
           {activeTab === "notifications" && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-base font-bold text-gray-900">Notifications &amp; Alerts</h3>
-                <p className="text-xs text-gray-400 font-medium mt-0.5">
+                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Notifications &amp; Alerts</h3>
+                <p className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">
                   Configure real-time push and in-app alerts so you never break a study routine.
                 </p>
               </div>
 
               {/* Native Browser Notification Banner */}
-              <div className="p-5 rounded-2xl bg-forest-50/60 border border-forest-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="p-5 rounded-2xl bg-forest-50/60 dark:bg-forest-900/20 border border-forest-100 dark:border-forest-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <Smartphone className="w-4 h-4 text-forest-700" />
-                    <h4 className="text-sm font-bold text-forest-900">Browser Desktop Notifications</h4>
+                    <Smartphone className="w-4 h-4 text-forest-700 dark:text-forest-400" />
+                    <h4 className="text-sm font-bold text-forest-900 dark:text-forest-200">Browser Desktop Notifications</h4>
                     <span
                       className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
                         browserNotifPermission === "granted"
-                          ? "bg-emerald-100 text-emerald-800"
+                          ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300"
                           : browserNotifPermission === "denied"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-amber-100 text-amber-800"
+                          ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300"
+                          : "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300"
                       }`}
                     >
                       {browserNotifPermission}
                     </span>
                   </div>
-                  <p className="text-xs text-forest-700 mt-1">
+                  <p className="text-xs text-forest-700 dark:text-forest-400 mt-1">
                     Receive background alerts when Pomodoro timers finish or when tasks are due.
                   </p>
                 </div>
@@ -668,7 +671,7 @@ export default function SettingsPage() {
                       type="button"
                       onClick={handleSendTestNotification}
                       disabled={testNotifSent}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-forest-300 hover:bg-forest-100 text-forest-800 text-xs font-bold transition-colors shrink-0 shadow-xs"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-gray-800 border border-forest-300 dark:border-forest-700 hover:bg-forest-100 dark:hover:bg-forest-900/40 text-forest-800 dark:text-forest-300 text-xs font-bold transition-colors shrink-0 shadow-xs"
                     >
                       <Send className="w-3.5 h-3.5" />
                       {testNotifSent ? "Sent!" : "Send Test Alert"}
@@ -678,11 +681,11 @@ export default function SettingsPage() {
               </div>
 
               {/* In-app Notification Toggles */}
-              <div className="space-y-4 pt-2 divide-y divide-gray-100">
+              <div className="space-y-4 pt-2 divide-y divide-gray-100 dark:divide-gray-800">
                 <div className="flex items-center justify-between py-2">
                   <div>
-                    <p className="text-sm font-bold text-gray-900">Habit Reminders</p>
-                    <p className="text-xs text-gray-500">Scheduled reminders for pending daily habits.</p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Habit Reminders</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Scheduled reminders for pending daily habits.</p>
                   </div>
                   <input
                     type="checkbox"
@@ -696,8 +699,8 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between pt-4">
                   <div>
-                    <p className="text-sm font-bold text-gray-900">Task Due Alerts</p>
-                    <p className="text-xs text-gray-500">Nudges when priority study tasks are scheduled for today.</p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Task Due Alerts</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Nudges when priority study tasks are scheduled for today.</p>
                   </div>
                   <input
                     type="checkbox"
@@ -711,8 +714,8 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between pt-4">
                   <div>
-                    <p className="text-sm font-bold text-gray-900">Streak Milestones</p>
-                    <p className="text-xs text-gray-500">Celebrations when hitting 3, 7, 14, 21, and 30-day streaks.</p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Streak Milestones</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Celebrations when hitting 3, 7, 14, 21, and 30-day streaks.</p>
                   </div>
                   <input
                     type="checkbox"
@@ -726,8 +729,8 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between pt-4">
                   <div>
-                    <p className="text-sm font-bold text-gray-900">Focus Session Completion</p>
-                    <p className="text-xs text-gray-500">Audio and notification alerts when Pomodoro focus rounds end.</p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Focus Session Completion</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Audio and notification alerts when Pomodoro focus rounds end.</p>
                   </div>
                   <input
                     type="checkbox"
@@ -741,8 +744,8 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between pt-4">
                   <div>
-                    <p className="text-sm font-bold text-gray-900">Goal Milestone Alerts</p>
-                    <p className="text-xs text-gray-500">Notifications when you reach goal targets and milestones.</p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Goal Milestone Alerts</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Notifications when you reach goal targets and milestones.</p>
                   </div>
                   <input
                     type="checkbox"
@@ -756,8 +759,8 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between pt-4">
                   <div>
-                    <p className="text-sm font-bold text-gray-900">Daily Review Evening Nudge</p>
-                    <p className="text-xs text-gray-500">Gentle evening prompt (after 6 PM) to reflect on your daily wins.</p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Daily Review Evening Nudge</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Gentle evening prompt (after 6 PM) to reflect on your daily wins.</p>
                   </div>
                   <input
                     type="checkbox"
@@ -771,8 +774,8 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between pt-4">
                   <div>
-                    <p className="text-sm font-bold text-gray-900">Weekly Planning &amp; Review</p>
-                    <p className="text-xs text-gray-500">End-of-week summary and Sunday/Monday planning reminders.</p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Weekly Planning &amp; Review</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">End-of-week summary and Sunday/Monday planning reminders.</p>
                   </div>
                   <input
                     type="checkbox"
@@ -791,8 +794,8 @@ export default function SettingsPage() {
           {activeTab === "appearance" && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-base font-bold text-gray-900">Appearance &amp; Theme</h3>
-                <p className="text-xs text-gray-400 font-medium mt-0.5">
+                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Appearance &amp; Theme</h3>
+                <p className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">
                   Select your interface theme. Updates are applied instantly and persisted to your account.
                 </p>
               </div>
@@ -803,15 +806,15 @@ export default function SettingsPage() {
                   onClick={() => handleAppearanceChange("light")}
                   className={`p-4 rounded-2xl border-2 text-left transition-all ${
                     appearance === "light"
-                      ? "border-forest-700 bg-forest-50/40 shadow-xs ring-2 ring-forest-700/20"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "border-forest-700 bg-forest-50/40 dark:bg-forest-900/20 shadow-xs ring-2 ring-forest-700/20"
+                      : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                   }`}
                 >
-                  <div className="w-8 h-8 rounded-xl bg-forest-100 text-forest-800 flex items-center justify-center mb-3">
+                  <div className="w-8 h-8 rounded-xl bg-forest-100 dark:bg-forest-900/50 text-forest-800 dark:text-forest-300 flex items-center justify-center mb-3">
                     <Sun className="w-4 h-4" />
                   </div>
-                  <p className="text-xs font-bold text-gray-900">Light Forest (Default)</p>
-                  <p className="text-[11px] text-gray-400 mt-0.5">Clean, bright, calm study interface.</p>
+                  <p className="text-xs font-bold text-gray-900 dark:text-gray-100">Light Forest (Default)</p>
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">Clean, bright, calm study interface.</p>
                 </button>
 
                 <button
@@ -819,15 +822,15 @@ export default function SettingsPage() {
                   onClick={() => handleAppearanceChange("dark")}
                   className={`p-4 rounded-2xl border-2 text-left transition-all ${
                     appearance === "dark"
-                      ? "border-forest-700 bg-forest-50/40 shadow-xs ring-2 ring-forest-700/20"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "border-forest-700 bg-forest-50/40 dark:bg-forest-900/20 shadow-xs ring-2 ring-forest-700/20"
+                      : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                   }`}
                 >
                   <div className="w-8 h-8 rounded-xl bg-gray-900 text-gray-100 flex items-center justify-center mb-3">
                     <Clock className="w-4 h-4" />
                   </div>
-                  <p className="text-xs font-bold text-gray-900">Dark Accent</p>
-                  <p className="text-[11px] text-gray-400 mt-0.5">High-contrast night study mode.</p>
+                  <p className="text-xs font-bold text-gray-900 dark:text-gray-100">Dark Accent</p>
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">High-contrast night study mode.</p>
                 </button>
 
                 <button
@@ -835,15 +838,15 @@ export default function SettingsPage() {
                   onClick={() => handleAppearanceChange("system")}
                   className={`p-4 rounded-2xl border-2 text-left transition-all ${
                     appearance === "system"
-                      ? "border-forest-700 bg-forest-50/40 shadow-xs ring-2 ring-forest-700/20"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "border-forest-700 bg-forest-50/40 dark:bg-forest-900/20 shadow-xs ring-2 ring-forest-700/20"
+                      : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                   }`}
                 >
-                  <div className="w-8 h-8 rounded-xl bg-gray-100 text-gray-600 flex items-center justify-center mb-3">
+                  <div className="w-8 h-8 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center mb-3">
                     <Globe className="w-4 h-4" />
                   </div>
-                  <p className="text-xs font-bold text-gray-900">System Sync</p>
-                  <p className="text-[11px] text-gray-400 mt-0.5">Automatically mirrors your OS theme.</p>
+                  <p className="text-xs font-bold text-gray-900 dark:text-gray-100">System Sync</p>
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">Automatically mirrors your OS theme.</p>
                 </button>
               </div>
             </div>
@@ -853,15 +856,15 @@ export default function SettingsPage() {
           {activeTab === "habits" && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-base font-bold text-gray-900">Habit &amp; Task Preferences</h3>
-                <p className="text-xs text-gray-400 font-medium mt-0.5">
+                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Habit &amp; Task Preferences</h3>
+                <p className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">
                   Configure default study schedules, calendar week starts, and focus duration.
                 </p>
               </div>
 
               <div className="space-y-4 pt-2">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
                     Default Habit Reminder Time
                   </label>
                   <input
@@ -873,15 +876,15 @@ export default function SettingsPage() {
                         defaultReminderTime: e.target.value,
                       })
                     }
-                    className="w-full max-w-xs px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-forest-600"
+                    className="w-full max-w-xs px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm outline-none focus:border-forest-600 text-gray-900 dark:text-gray-100"
                   />
-                  <p className="text-[11px] text-gray-400 mt-1">
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
                     Pre-filled time when scheduling new daily habits.
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
                     Week Starts On
                   </label>
                   <select
@@ -892,7 +895,7 @@ export default function SettingsPage() {
                         weekStartsOn: e.target.value as "monday" | "sunday",
                       })
                     }
-                    className="w-full max-w-xs px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-forest-600"
+                    className="w-full max-w-xs px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm outline-none focus:border-forest-600 text-gray-900 dark:text-gray-100"
                   >
                     <option value="monday">Monday (Academic standard)</option>
                     <option value="sunday">Sunday</option>
@@ -900,7 +903,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
                     Default Habit View
                   </label>
                   <select
@@ -911,7 +914,7 @@ export default function SettingsPage() {
                         defaultHabitView: e.target.value as "grid" | "list",
                       })
                     }
-                    className="w-full max-w-xs px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-forest-600"
+                    className="w-full max-w-xs px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm outline-none focus:border-forest-600 text-gray-900 dark:text-gray-100"
                   >
                     <option value="list">List View (Compact checklist)</option>
                     <option value="grid">Grid Cards</option>
@@ -919,13 +922,13 @@ export default function SettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
                     Default Focus Block Duration (Minutes)
                   </label>
                   <select
                     value={defaultDurationMinutes}
                     onChange={(e) => setDefaultDurationMinutes(Number(e.target.value))}
-                    className="w-full max-w-xs px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-forest-600"
+                    className="w-full max-w-xs px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm outline-none focus:border-forest-600 text-gray-900 dark:text-gray-100"
                   >
                     <option value={15}>15 minutes (Quick sprint)</option>
                     <option value={25}>25 minutes (Classic Pomodoro)</option>
@@ -943,22 +946,22 @@ export default function SettingsPage() {
           {activeTab === "productivity" && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-base font-bold text-gray-900">Productivity Score Customization</h3>
-                <p className="text-xs text-gray-400 font-medium mt-0.5">
+                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Productivity Score Customization</h3>
+                <p className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">
                   HabitTrack computes your daily productivity score transparently using a weighted formula. Adjust the percentages to fit your personal workflow.
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold text-gray-700">Formula Weights Total</p>
-                  <p className="text-[11px] text-gray-400">Sum must equal 100%</p>
+                  <p className="text-xs font-bold text-gray-700 dark:text-gray-300">Formula Weights Total</p>
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500">Sum must equal 100%</p>
                 </div>
                 <span
                   className={`text-sm font-black px-3 py-1 rounded-xl ${
                     totalWeights === 100
-                      ? "bg-forest-100 text-forest-800"
-                      : "bg-red-100 text-red-800"
+                      ? "bg-forest-100 dark:bg-forest-900/40 text-forest-800 dark:text-forest-300"
+                      : "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300"
                   }`}
                 >
                   {totalWeights}%
@@ -967,7 +970,7 @@ export default function SettingsPage() {
 
               <div className="space-y-4 pt-2">
                 <div>
-                  <div className="flex items-center justify-between text-xs font-bold text-gray-700 mb-1">
+                  <div className="flex items-center justify-between text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
                     <span>Daily Habits Weight</span>
                     <span className="text-forest-700">{scoreWeights.habits}%</span>
                   </div>
@@ -985,7 +988,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div>
-                  <div className="flex items-center justify-between text-xs font-bold text-gray-700 mb-1">
+                  <div className="flex items-center justify-between text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
                     <span>Task Completion Weight</span>
                     <span className="text-forest-700">{scoreWeights.tasks}%</span>
                   </div>
@@ -1003,7 +1006,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div>
-                  <div className="flex items-center justify-between text-xs font-bold text-gray-700 mb-1">
+                  <div className="flex items-center justify-between text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
                     <span>Focus Time Target Weight</span>
                     <span className="text-forest-700">{scoreWeights.focus}%</span>
                   </div>
@@ -1024,7 +1027,7 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={() => setScoreWeights({ habits: 40, tasks: 40, focus: 20 })}
-                    className="px-3 py-1.5 rounded-xl border border-gray-200 hover:bg-gray-50 text-xs font-semibold text-gray-600 transition-colors"
+                    className="px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-xs font-semibold text-gray-600 dark:text-gray-300 transition-colors"
                   >
                     Reset to Recommended (40% / 40% / 20%)
                   </button>
@@ -1037,8 +1040,8 @@ export default function SettingsPage() {
           {activeTab === "security" && (
             <form onSubmit={handleChangePassword} className="space-y-6">
               <div>
-                <h3 className="text-base font-bold text-gray-900">Account Security</h3>
-                <p className="text-xs text-gray-400 font-medium mt-0.5">
+                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Account Security</h3>
+                <p className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">
                   Update your password to keep your account and study logs secure.
                 </p>
               </div>
@@ -1047,14 +1050,14 @@ export default function SettingsPage() {
                 <div
                   className={`p-4 rounded-2xl text-xs font-bold flex items-center gap-2 ${
                     passwordMessage.type === "success"
-                      ? "bg-forest-50 border border-forest-200 text-forest-800"
-                      : "bg-red-50 border border-red-200 text-red-700"
+                      ? "bg-forest-50 dark:bg-forest-900/30 border border-forest-200 dark:border-forest-800 text-forest-800 dark:text-forest-300"
+                      : "bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400"
                   }`}
                 >
                   {passwordMessage.type === "success" ? (
-                    <Check className="w-4 h-4 text-forest-700" />
+                    <Check className="w-4 h-4 text-forest-700 dark:text-forest-400" />
                   ) : (
-                    <Lock className="w-4 h-4 text-red-600" />
+                    <Lock className="w-4 h-4 text-red-600 dark:text-red-400" />
                   )}
                   {passwordMessage.text}
                 </div>
@@ -1062,7 +1065,7 @@ export default function SettingsPage() {
 
               <div className="space-y-4 pt-2">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
                     Current Password
                   </label>
                   <div className="relative max-w-md">
@@ -1071,12 +1074,12 @@ export default function SettingsPage() {
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       required
-                      className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:border-forest-600 pr-10"
+                      className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm outline-none focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 pr-10 text-gray-900 dark:text-gray-100"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -1084,7 +1087,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
                     New Password
                   </label>
                   <input
@@ -1093,13 +1096,13 @@ export default function SettingsPage() {
                     onChange={(e) => setNewPassword(e.target.value)}
                     required
                     minLength={8}
-                    className="w-full max-w-md px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:border-forest-600"
+                    className="w-full max-w-md px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm outline-none focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 text-gray-900 dark:text-gray-100"
                   />
-                  <p className="text-[11px] text-gray-400 mt-1">Minimum 8 characters required.</p>
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">Minimum 8 characters required.</p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
                     Confirm New Password
                   </label>
                   <input
@@ -1107,7 +1110,7 @@ export default function SettingsPage() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
-                    className="w-full max-w-md px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:border-forest-600"
+                    className="w-full max-w-md px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm outline-none focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 text-gray-900 dark:text-gray-100"
                   />
                 </div>
 
@@ -1128,25 +1131,25 @@ export default function SettingsPage() {
           {activeTab === "privacy" && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-base font-bold text-gray-900">Data &amp; Privacy</h3>
-                <p className="text-xs text-gray-400 font-medium mt-0.5">
+                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Data &amp; Privacy</h3>
+                <p className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">
                   Export all your historical data or permanently remove your account.
                 </p>
               </div>
 
               <div className="space-y-6 pt-2">
                 {/* Export Data */}
-                <div className="p-5 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="p-5 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <h4 className="text-sm font-bold text-gray-900">Export Personal Data</h4>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">Export Personal Data</h4>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                       Download a complete JSON export of all your habits, completions, tasks, goals, focus sessions, time blocks, and notes.
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={handleExportData}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-xs font-bold text-gray-700 shadow-xs transition-colors shrink-0"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300 shadow-xs transition-colors shrink-0"
                   >
                     <Download className="w-4 h-4" />
                     Export Data (JSON)
@@ -1154,10 +1157,10 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Delete Account */}
-                <div className="p-5 rounded-2xl bg-red-50/50 border border-red-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="p-5 rounded-2xl bg-red-50/50 dark:bg-red-950/30 border border-red-100 dark:border-red-900 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <h4 className="text-sm font-bold text-red-900">Delete Account</h4>
-                    <p className="text-xs text-red-700/80 mt-0.5">
+                    <h4 className="text-sm font-bold text-red-900 dark:text-red-300">Delete Account</h4>
+                    <p className="text-xs text-red-700/80 dark:text-red-400/80 mt-0.5">
                       Permanently delete your profile, all habits, streaks, tasks, schedule blocks, focus history, and notes. This cannot be undone.
                     </p>
                   </div>
@@ -1176,7 +1179,7 @@ export default function SettingsPage() {
 
           {/* Global Save Button Bar (Hidden on Security & Privacy tabs) */}
           {activeTab !== "privacy" && activeTab !== "security" && (
-            <div className="pt-6 mt-8 border-t border-gray-100 flex items-center justify-end">
+            <div className="pt-6 mt-8 border-t border-gray-100 dark:border-gray-800 flex items-center justify-end">
               <button
                 type="button"
                 onClick={handleSave}

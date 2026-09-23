@@ -77,11 +77,11 @@ export function HabitDetailModal({
     >
       <div className="space-y-6">
         {/* Habit Header & Badge */}
-        <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50/80 border border-gray-100">
+        <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50/80 dark:bg-gray-800/80 border border-gray-100 dark:border-gray-700">
           <HabitIcon name={habit.icon} color={habit.color} size="lg" />
           <div className="flex-1 min-w-0">
-            <h4 className="text-base font-bold text-gray-900 truncate">{habit.name}</h4>
-            <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+            <h4 className="text-base font-bold text-gray-900 dark:text-gray-100 truncate">{habit.name}</h4>
+            <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
               <span className="capitalize font-medium">{habit.frequency?.replace("_", " ")}</span>
               <span>•</span>
               <span className="flex items-center gap-1">
@@ -93,7 +93,7 @@ export function HabitDetailModal({
             </div>
           </div>
           {habit.archived && (
-            <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-gray-200 text-gray-700">
+            <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
               Archived
             </span>
           )}
@@ -101,48 +101,48 @@ export function HabitDetailModal({
 
         {/* 4 Performance Metrics */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="bg-orange-50/60 border border-orange-100 rounded-2xl p-3.5 text-center">
-            <div className="w-8 h-8 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center mx-auto mb-2">
+          <div className="bg-orange-50/60 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/40 rounded-2xl p-3.5 text-center">
+            <div className="w-8 h-8 rounded-xl bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400 flex items-center justify-center mx-auto mb-2">
               <Flame className="w-4 h-4" />
             </div>
-            <p className="text-xs text-gray-500 font-medium">Current Streak</p>
-            <p className="text-xl font-black text-gray-900 mt-0.5">{stats.currentStreak} d</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Current Streak</p>
+            <p className="text-xl font-black text-gray-900 dark:text-gray-100 mt-0.5">{stats.currentStreak} d</p>
           </div>
 
-          <div className="bg-emerald-50/60 border border-emerald-100 rounded-2xl p-3.5 text-center">
-            <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-2">
+          <div className="bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/40 rounded-2xl p-3.5 text-center">
+            <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-2">
               <Trophy className="w-4 h-4" />
             </div>
-            <p className="text-xs text-gray-500 font-medium">Best Streak</p>
-            <p className="text-xl font-black text-gray-900 mt-0.5">{stats.bestStreak} d</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Best Streak</p>
+            <p className="text-xl font-black text-gray-900 dark:text-gray-100 mt-0.5">{stats.bestStreak} d</p>
           </div>
 
-          <div className="bg-forest-50/60 border border-forest-100 rounded-2xl p-3.5 text-center">
-            <div className="w-8 h-8 rounded-xl bg-forest-100 text-forest-700 flex items-center justify-center mx-auto mb-2">
+          <div className="bg-forest-50/60 dark:bg-forest-950/20 border border-forest-100 dark:border-forest-900/40 rounded-2xl p-3.5 text-center">
+            <div className="w-8 h-8 rounded-xl bg-forest-100 dark:bg-forest-900/40 text-forest-700 dark:text-forest-300 flex items-center justify-center mx-auto mb-2">
               <CheckCircle2 className="w-4 h-4" />
             </div>
-            <p className="text-xs text-gray-500 font-medium">Completion Rate</p>
-            <p className="text-xl font-black text-gray-900 mt-0.5">{stats.completionRate}%</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Completion Rate</p>
+            <p className="text-xl font-black text-gray-900 dark:text-gray-100 mt-0.5">{stats.completionRate}%</p>
           </div>
 
-          <div className="bg-blue-50/60 border border-blue-100 rounded-2xl p-3.5 text-center">
-            <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto mb-2">
+          <div className="bg-blue-50/60 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40 rounded-2xl p-3.5 text-center">
+            <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto mb-2">
               <CalendarIcon className="w-4 h-4" />
             </div>
-            <p className="text-xs text-gray-500 font-medium">Total Done</p>
-            <p className="text-xl font-black text-gray-900 mt-0.5">{stats.totalCompletions}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Total Done</p>
+            <p className="text-xl font-black text-gray-900 dark:text-gray-100 mt-0.5">{stats.totalCompletions}</p>
           </div>
         </div>
 
         {/* Progress Bar */}
         <div className="space-y-2">
-          <div className="flex justify-between text-xs font-semibold text-gray-600">
+          <div className="flex justify-between text-xs font-semibold text-gray-600 dark:text-gray-400">
             <span>Overall Consistency</span>
             <span>{stats.completionRate}%</span>
           </div>
-          <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
+          <div className="w-full h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
             <div
-              className="h-full rounded-full transition-all duration-500 bg-forest-600"
+              className="h-full rounded-full transition-all duration-500 bg-forest-600 dark:bg-forest-500"
               style={{ width: `${stats.completionRate}%` }}
             />
           </div>
@@ -150,17 +150,17 @@ export function HabitDetailModal({
 
         {/* Reminder note if present */}
         {habit.reminder && (
-          <div className="p-3 bg-gray-50 rounded-xl text-xs text-gray-600 border border-gray-200">
-            <span className="font-bold text-gray-800">Reminder Note: </span>
+          <div className="p-3 bg-gray-50 dark:bg-gray-800/80 rounded-xl text-xs text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+            <span className="font-bold text-gray-800 dark:text-gray-200">Reminder Note: </span>
             {habit.reminder}
           </div>
         )}
 
         {/* Linked Goals Section */}
-        <div className="space-y-3 pt-2 border-t border-gray-100">
+        <div className="space-y-3 pt-2 border-t border-gray-100 dark:border-gray-800">
           <div className="flex items-center justify-between">
-            <h5 className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
-              <Target className="w-3.5 h-3.5 text-forest-700" />
+            <h5 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
+              <Target className="w-3.5 h-3.5 text-forest-700 dark:text-forest-400" />
               Linked Goals
             </h5>
             <button
@@ -169,7 +169,7 @@ export function HabitDetailModal({
                 onClose();
                 if (onCreateGoal) onCreateGoal(habit);
               }}
-              className="inline-flex items-center gap-1 text-xs font-bold text-forest-700 hover:text-forest-800 transition-colors"
+              className="inline-flex items-center gap-1 text-xs font-bold text-forest-700 dark:text-forest-400 hover:text-forest-800 dark:hover:text-forest-300 transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
               Create Goal with this Habit
@@ -177,7 +177,7 @@ export function HabitDetailModal({
           </div>
 
           {linkedGoals.length === 0 ? (
-            <div className="p-3 bg-gray-50/70 rounded-xl border border-gray-100 text-xs text-gray-500 flex items-center justify-between">
+            <div className="p-3 bg-gray-50/70 dark:bg-gray-800/60 rounded-xl border border-gray-100 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400 flex items-center justify-between">
               <span>This habit does not contribute to any goals yet.</span>
               <button
                 type="button"
@@ -185,34 +185,34 @@ export function HabitDetailModal({
                   onClose();
                   if (onCreateGoal) onCreateGoal(habit);
                 }}
-                className="font-bold text-forest-700 hover:underline ml-2 shrink-0"
+                className="font-bold text-forest-700 dark:text-forest-400 hover:underline ml-2 shrink-0"
               >
                 + Connect to Goal
               </button>
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-xs text-gray-500 font-medium">This habit contributes to:</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">This habit contributes to:</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {linkedGoals.map((g) => (
                   <Link
                     key={g._id}
                     href={`/goals/${g._id}`}
                     onClick={onClose}
-                    className="p-2.5 rounded-xl bg-gray-50 hover:bg-forest-50/60 border border-gray-100 transition-colors flex items-center justify-between gap-2 group"
+                    className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 hover:bg-forest-50/60 dark:hover:bg-forest-950/30 border border-gray-100 dark:border-gray-700 transition-colors flex items-center justify-between gap-2 group"
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <HabitIcon name={g.icon || "target"} color={g.color || "#1B4332"} size="sm" />
                       <div className="min-w-0">
-                        <p className="text-xs font-bold text-gray-900 group-hover:text-forest-700 truncate">
+                        <p className="text-xs font-bold text-gray-900 dark:text-gray-100 group-hover:text-forest-700 dark:group-hover:text-forest-400 truncate">
                           {g.title}
                         </p>
-                        <p className="text-[10px] text-gray-400">
+                        <p className="text-[10px] text-gray-400 dark:text-gray-500">
                           {g.progress?.currentValue || g.currentValue} / {g.targetValue} {g.unit} ({g.progress?.percentage || 0}%)
                         </p>
                       </div>
                     </div>
-                    <ArrowRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-forest-700 shrink-0" />
+                    <ArrowRight className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 group-hover:text-forest-700 dark:group-hover:text-forest-400 shrink-0" />
                   </Link>
                 ))}
               </div>
@@ -221,14 +221,14 @@ export function HabitDetailModal({
         </div>
 
         {/* Actions Bar */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+        <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800">
           <button
             type="button"
             onClick={() => {
               onClose();
               onDelete(habit);
             }}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
           >
             <Trash2 className="w-4 h-4" />
             Delete Habit
@@ -241,7 +241,7 @@ export function HabitDetailModal({
                 onClose();
                 onArchive(habit);
               }}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-gray-200 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               <Archive className="w-4 h-4" />
               {habit.archived ? "Restore" : "Archive"}

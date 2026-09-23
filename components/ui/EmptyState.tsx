@@ -17,12 +17,12 @@ export function EmptyState({
   onAction,
 }: EmptyStateProps) {
   return (
-    <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-10 text-center flex flex-col items-center justify-center my-4">
-      <div className="w-14 h-14 rounded-2xl bg-forest-50 text-forest-700 flex items-center justify-center mb-4">
+    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800 p-10 text-center flex flex-col items-center justify-center my-4">
+      <div className="w-14 h-14 rounded-2xl bg-forest-50 dark:bg-forest-950/60 text-forest-700 dark:text-forest-400 flex items-center justify-center mb-4">
         <Icon className="w-7 h-7" strokeWidth={1.8} />
       </div>
-      <h3 className="text-base font-bold text-gray-900">{title}</h3>
-      <p className="text-sm text-gray-500 max-w-sm mt-1 mb-6 leading-relaxed">
+      <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">{title}</h3>
+      <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm mt-1 mb-6 leading-relaxed">
         {description}
       </p>
       {actionText && onAction && (

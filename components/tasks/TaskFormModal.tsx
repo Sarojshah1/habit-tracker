@@ -170,7 +170,7 @@ export function TaskFormModal({
 
         {/* Task Title */}
         <div>
-          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
             Task Title *
           </label>
           <input
@@ -178,14 +178,14 @@ export function TaskFormModal({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g., Complete Chapter 5 practice questions..."
-            className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none"
+            className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none"
             required
           />
         </div>
 
         {/* Description */}
         <div>
-          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
             Description / Notes (Optional)
           </label>
           <textarea
@@ -193,14 +193,14 @@ export function TaskFormModal({
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
             placeholder="What needs to be accomplished? Key requirements..."
-            className="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none resize-none"
+            className="w-full px-3.5 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none resize-none"
           />
         </div>
 
         {/* Priority & Due Date */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
               Priority
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -212,11 +212,11 @@ export function TaskFormModal({
                   className={`py-2 rounded-xl text-xs font-bold capitalize transition-all border ${
                     priority === p
                       ? p === "high"
-                        ? "bg-red-50 border-red-500 text-red-800 shadow-xs"
+                        ? "bg-red-50 dark:bg-red-950/40 border-red-500 text-red-800 dark:text-red-300 shadow-xs"
                         : p === "medium"
-                        ? "bg-amber-50 border-amber-500 text-amber-800 shadow-xs"
-                        : "bg-blue-50 border-blue-500 text-blue-800 shadow-xs"
-                      : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50"
+                        ? "bg-amber-50 dark:bg-amber-950/40 border-amber-500 text-amber-800 dark:text-amber-300 shadow-xs"
+                        : "bg-blue-50 dark:bg-blue-950/40 border-blue-500 text-blue-800 dark:text-blue-300 shadow-xs"
+                      : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
                   }`}
                 >
                   {p}
@@ -226,14 +226,14 @@ export function TaskFormModal({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
               Due Date *
             </label>
             <input
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:border-forest-600 outline-none"
+              className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 outline-none"
               required
             />
           </div>
@@ -241,7 +241,7 @@ export function TaskFormModal({
 
         {/* Duration */}
         <div>
-          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
             Estimated Duration (Minutes)
           </label>
           <div className="flex items-center gap-3">
@@ -252,9 +252,9 @@ export function TaskFormModal({
               step={5}
               value={estimatedMinutes}
               onChange={(e) => setEstimatedMinutes(Number(e.target.value))}
-              className="w-28 px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:border-forest-600 outline-none font-bold text-center"
+              className="w-28 px-3.5 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 outline-none font-bold text-center"
             />
-            <span className="text-xs text-gray-500 font-medium">
+            <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
               ({Math.floor(estimatedMinutes / 60) > 0 ? `${Math.floor(estimatedMinutes / 60)}h ` : ""}
               {estimatedMinutes % 60}m)
             </span>
@@ -262,16 +262,16 @@ export function TaskFormModal({
         </div>
 
         {/* Linked Goal & Linked Habit */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-gray-100">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-gray-100 dark:border-gray-800">
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-              <Target className="w-3.5 h-3.5 text-forest-700" />
+            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+              <Target className="w-3.5 h-3.5 text-forest-700 dark:text-forest-400" />
               Link to Goal (Optional)
             </label>
             <select
               value={goalId}
               onChange={(e) => setGoalId(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:border-forest-600 outline-none"
+              className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 outline-none"
             >
               <option value="">No linked goal</option>
               {availableGoals.map((g) => (
@@ -283,14 +283,14 @@ export function TaskFormModal({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5 text-forest-700" />
+            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-forest-700 dark:text-forest-400" />
               Link to Habit (Optional)
             </label>
             <select
               value={habitId}
               onChange={(e) => setHabitId(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:border-forest-600 outline-none"
+              className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 outline-none"
             >
               <option value="">No linked habit</option>
               {availableHabits.map((h) => (
@@ -303,13 +303,13 @@ export function TaskFormModal({
         </div>
 
         {/* Schedule Time Blocking Toggle */}
-        <div className="pt-3 border-t border-gray-100 space-y-3">
+        <div className="pt-3 border-t border-gray-100 dark:border-gray-800 space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-gray-800 uppercase tracking-wider">
+              <p className="text-xs font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">
                 Schedule in Calendar Timeline
               </p>
-              <p className="text-[11px] text-gray-400">
+              <p className="text-[11px] text-gray-400 dark:text-gray-500">
                 Block dedicated time on your daily schedule
               </p>
             </div>
@@ -322,23 +322,23 @@ export function TaskFormModal({
           </div>
 
           {isScheduled && (
-            <div className="grid grid-cols-2 gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200/80 animate-in fade-in duration-150">
+            <div className="grid grid-cols-2 gap-3 p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl border border-gray-200/80 dark:border-gray-700 animate-in fade-in duration-150">
               <div>
-                <label className="block text-[11px] font-bold text-gray-600 mb-1">Start Time</label>
+                <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 mb-1">Start Time</label>
                 <input
                   type="time"
                   value={scheduledStartTime}
                   onChange={(e) => setScheduledStartTime(e.target.value)}
-                  className="w-full px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-xs outline-none focus:border-forest-600"
+                  className="w-full px-2.5 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs text-gray-900 dark:text-gray-100 outline-none focus:border-forest-600"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-gray-600 mb-1">End Time</label>
+                <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 mb-1">End Time</label>
                 <input
                   type="time"
                   value={scheduledEndTime}
                   onChange={(e) => setScheduledEndTime(e.target.value)}
-                  className="w-full px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-xs outline-none focus:border-forest-600"
+                  className="w-full px-2.5 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs text-gray-900 dark:text-gray-100 outline-none focus:border-forest-600"
                 />
               </div>
             </div>
@@ -346,12 +346,12 @@ export function TaskFormModal({
         </div>
 
         {/* Submit Actions */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
           <button
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+            className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
             Cancel
           </button>

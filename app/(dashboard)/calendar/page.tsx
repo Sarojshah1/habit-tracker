@@ -89,10 +89,10 @@ export default function CalendarPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-gray-100 tracking-tight">
           Calendar
         </h1>
-        <p className="text-sm text-gray-500 mt-1 font-medium">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">
           View, organize, and manage your daily habit completion history by date.
         </p>
       </div>
