@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
-export type CompletionStatus = "completed" | "skipped" | "missed";
+export type CompletionStatus = "completed" | "skipped" | "missed" | "frozen";
 
 export interface IHabitCompletion extends Document {
   _id: mongoose.Types.ObjectId;
@@ -39,7 +39,7 @@ const HabitCompletionSchema = new Schema<IHabitCompletion>(
     },
     status: {
       type: String,
-      enum: ["completed", "skipped", "missed"],
+      enum: ["completed", "skipped", "missed", "frozen"],
       default: "completed",
     },
     notes: {

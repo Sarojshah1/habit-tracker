@@ -3,6 +3,8 @@ import { getAuthenticatedUser, unauthorizedResponse } from "@/lib/auth/middlewar
 import { Habit } from "@/lib/models/Habit";
 import { HabitCompletion } from "@/lib/models/HabitCompletion";
 import { Goal } from "@/lib/models/Goal";
+import { ExamTarget } from "@/lib/models/ExamTarget";
+import { MockExam } from "@/lib/models/MockExam";
 import { getUserTodayDateString, getUserDayOfWeek } from "@/lib/utils/date";
 import { isHabitScheduledForDate } from "@/lib/services/streak";
 
@@ -36,6 +38,17 @@ export async function GET(req: NextRequest) {
     });
 
     const completions = await HabitCompletion.find({
+      userId: user._id,
+      date: { $gte: startDate, $lte: endDate },
+    });
+
+    // Target exams and mock exams for this month
+    const examTargets = await ExamTarget.find({
+      userId: user._id,
+      examDate: { $gte: startDate, $lte: endDate },
+    });
+
+    const mockExams = await MockExam.find({
       userId: user._id,
       date: { $gte: startDate, $lte: endDate },
     });
@@ -119,6 +132,8 @@ export async function GET(req: NextRequest) {
       }
 
       const completionPercentage = totalScheduled > 0 ? Math.round((completedCount / totalScheduled) * 100) : 0;
+      const dayExams = examTargets.filter((t) => t.examDate === dateStr);
+      const dayMockExams = mockExams.filter((m) => m.date === dateStr);
 
       days.push({
         date: dateStr,
@@ -135,6 +150,8 @@ export async function GET(req: NextRequest) {
         missedCount,
         pendingCount,
         habits: scheduledHabits,
+        exams: dayExams,
+        mockExams: dayMockExams,
       });
     }
 

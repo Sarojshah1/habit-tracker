@@ -29,6 +29,8 @@ interface CalendarDayData {
   missedCount: number;
   pendingCount: number;
   habits: any[];
+  exams?: any[];
+  mockExams?: any[];
 }
 
 interface MonthCalendarProps {
@@ -212,11 +214,23 @@ export function MonthCalendar({
                   >
                     {day.dayNumber}
                   </span>
-                  {day.totalScheduled > 0 && (
-                    <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500">
-                      {day.completedCount}/{day.totalScheduled}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-1">
+                    {day.exams && day.exams.length > 0 && (
+                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-rose-500 text-white shadow-xs" title="Target Exam Day">
+                        EXAM
+                      </span>
+                    )}
+                    {day.mockExams && day.mockExams.length > 0 && (
+                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-amber-500 text-white shadow-xs" title="Mock Exam Taken">
+                        TEST
+                      </span>
+                    )}
+                    {day.totalScheduled > 0 && (
+                      <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500">
+                        {day.completedCount}/{day.totalScheduled}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Status Indicator Bar / Pill */}
@@ -281,6 +295,36 @@ export function MonthCalendar({
                   </p>
                 </div>
               </div>
+
+              {/* Target Exams on this Day */}
+              {selectedDayData.exams && selectedDayData.exams.length > 0 && (
+                <div className="mt-3 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 space-y-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-400">
+                    🎯 Target Exam Scheduled:
+                  </span>
+                  {selectedDayData.exams.map((ex: any) => (
+                    <div key={ex._id} className="text-xs font-bold text-rose-900 dark:text-rose-200 flex justify-between">
+                      <span>{ex.title} ({ex.subject})</span>
+                      <span>Target: {ex.targetScore}%</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Mock Exams Logged on this Day */}
+              {selectedDayData.mockExams && selectedDayData.mockExams.length > 0 && (
+                <div className="mt-3 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 space-y-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                    📝 Mock Exam Completed:
+                  </span>
+                  {selectedDayData.mockExams.map((mx: any) => (
+                    <div key={mx._id} className="text-xs font-bold text-amber-900 dark:text-amber-200 flex justify-between">
+                      <span>{mx.title}</span>
+                      <span>Score: {mx.percentage}%</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Scheduled Habits List */}

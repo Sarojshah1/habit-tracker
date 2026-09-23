@@ -15,6 +15,8 @@ import {
   Sparkles,
   Target,
   X,
+  GraduationCap,
+  Brain,
 } from "lucide-react";
 import { Logo } from "../ui/Logo";
 
@@ -29,8 +31,10 @@ const NAV_ITEMS = [
   { name: "Tasks", href: "/tasks", icon: ListTodo },
   { name: "Calendar", href: "/calendar", icon: Calendar },
   { name: "Goals", href: "/goals", icon: Target },
+  { name: "Mock Exams", href: "/exams", icon: GraduationCap },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
   { name: "Focus Mode", href: "/focus", icon: Timer },
+  { name: "Flashcards", href: "/flashcards", icon: Brain },
   { name: "Notes", href: "/notes", icon: FileText },
   { name: "Settings", href: "/settings", icon: Settings },
 ];

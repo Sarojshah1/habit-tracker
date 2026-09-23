@@ -133,7 +133,9 @@ export function calculateHabitStats(
   timezone: string = "UTC"
 ) {
   const completedRecords = completions.filter(
-    (c) => c.habitId.toString() === habit._id.toString() && c.status === "completed"
+    (c) =>
+      c.habitId.toString() === habit._id.toString() &&
+      (c.status === "completed" || c.status === "frozen")
   );
   const completedDateStrings = completedRecords.map((c) => c.date);
   const completedDateSet = new Set(completedDateStrings);

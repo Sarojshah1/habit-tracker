@@ -19,6 +19,7 @@ import {
   Wind,
   CloudRain,
   Sliders,
+  Award,
 } from "lucide-react";
 import { formatTime } from "@/lib/utils";
 import { PipTimerManager } from "@/lib/focus/pipTimer";
@@ -27,6 +28,7 @@ import {
   AmbientSoundType,
   AMBIENT_SOUND_OPTIONS,
 } from "@/lib/focus/ambientSound";
+import { MockExamModal } from "@/components/exams/MockExamModal";
 
 interface HabitOption {
   _id: string;
@@ -96,8 +98,10 @@ export function FocusTimer({
 
   // Post session states
   const [sessionSaved, setSessionSaved] = useState(false);
-  const [, setLastCompletedSession] = useState<any>(null);
+  const [lastCompletedSession, setLastCompletedSession] = useState<any>(null);
   const [showTaskCompletionPrompt, setShowTaskCompletionPrompt] = useState(false);
+  const [showMockExamPrompt, setShowMockExamPrompt] = useState(false);
+  const [isMockExamModalOpen, setIsMockExamModalOpen] = useState(false);
   const [taskMarkedComplete, setTaskMarkedComplete] = useState(false);
 
   // Accurate timing refs (immune to tab throttling)
@@ -273,12 +277,15 @@ export function FocusTimer({
         if (selectedTaskId) {
           setShowTaskCompletionPrompt(true);
         }
+        if (activeMode === "exam" || activeMode === "mock" || sessionNotes.toLowerCase().includes("exam") || sessionNotes.toLowerCase().includes("mock")) {
+          setShowMockExamPrompt(true);
+        }
         if (onSessionComplete) onSessionComplete(data.session);
       }
     } catch (err) {
       console.error("Failed to save focus session:", err);
     }
-  }, [durationMinutes, onSessionComplete, selectedHabitId, selectedTaskId, sessionNotes, tasks]);
+  }, [activeMode, durationMinutes, onSessionComplete, selectedHabitId, selectedTaskId, sessionNotes, tasks]);
 
   const chimeRef = useRef(playChime);
   chimeRef.current = playChime;
@@ -942,6 +949,53 @@ export function FocusTimer({
           </div>
         </div>
       )}
+
+      {showMockExamPrompt && (
+        <div className="w-full max-w-md p-4 mt-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-2xl space-y-3">
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300">
+              <Award className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-gray-900 dark:text-gray-100">
+                Exam Session Finished!
+              </p>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                Would you like to log your score for this mock test?
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setShowMockExamPrompt(false);
+                setIsMockExamModalOpen(true);
+              }}
+              className="flex-1 py-2 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition-colors text-center"
+            >
+              Log Score (e.g. 84/100)
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowMockExamPrompt(false)}
+              className="py-2 px-3 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-medium text-xs transition-colors"
+            >
+              Later
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Mock Exam Score Modal */}
+      <MockExamModal
+        isOpen={isMockExamModalOpen}
+        onClose={() => setIsMockExamModalOpen(false)}
+        initialTitle={sessionNotes || "Mock Exam"}
+        defaultDurationMinutes={durationMinutes}
+        focusSessionId={lastCompletedSession?._id}
+      />
 
       {taskMarkedComplete && (
         <div className="w-full max-w-md p-3.5 mt-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-2xl text-xs font-bold text-emerald-900 dark:text-emerald-200 flex items-center gap-2">
