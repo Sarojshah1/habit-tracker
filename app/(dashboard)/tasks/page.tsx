@@ -129,8 +129,8 @@ export default function TasksPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Tasks</h1>
-          <p className="text-sm text-gray-500 mt-1 font-medium">
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Tasks</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">
             Turn your plans into completed work.
           </p>
         </div>
@@ -149,20 +149,20 @@ export default function TasksPage() {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-1.5 p-1.5 bg-white border border-gray-100 rounded-2xl shadow-xs overflow-x-auto select-none">
+      <div className="flex items-center gap-1.5 p-1.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xs overflow-x-auto select-none">
         <button
           type="button"
           onClick={() => setActiveFilter("today")}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 ${
             activeFilter === "today"
               ? "bg-forest-700 text-white shadow-xs"
-              : "text-gray-600 hover:text-gray-900"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
           }`}
         >
           <span>Today</span>
           <span
             className={`text-[10px] px-2 py-0.5 rounded-full ${
-              activeFilter === "today" ? "bg-forest-600 text-white" : "bg-gray-100 text-gray-600"
+              activeFilter === "today" ? "bg-forest-600 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
             }`}
           >
             {counts.today}
@@ -175,13 +175,13 @@ export default function TasksPage() {
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 ${
             activeFilter === "upcoming"
               ? "bg-forest-700 text-white shadow-xs"
-              : "text-gray-600 hover:text-gray-900"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
           }`}
         >
           <span>Upcoming</span>
           <span
             className={`text-[10px] px-2 py-0.5 rounded-full ${
-              activeFilter === "upcoming" ? "bg-forest-600 text-white" : "bg-gray-100 text-gray-600"
+              activeFilter === "upcoming" ? "bg-forest-600 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
             }`}
           >
             {counts.upcoming}
@@ -194,13 +194,13 @@ export default function TasksPage() {
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 ${
             activeFilter === "high_priority"
               ? "bg-forest-700 text-white shadow-xs"
-              : "text-gray-600 hover:text-gray-900"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
           }`}
         >
           <span>High Priority</span>
           <span
             className={`text-[10px] px-2 py-0.5 rounded-full ${
-              activeFilter === "high_priority" ? "bg-forest-600 text-white" : "bg-gray-100 text-gray-600"
+              activeFilter === "high_priority" ? "bg-forest-600 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
             }`}
           >
             {counts.high_priority}
@@ -213,13 +213,13 @@ export default function TasksPage() {
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 ${
             activeFilter === "completed"
               ? "bg-forest-700 text-white shadow-xs"
-              : "text-gray-600 hover:text-gray-900"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
           }`}
         >
           <span>Completed</span>
           <span
             className={`text-[10px] px-2 py-0.5 rounded-full ${
-              activeFilter === "completed" ? "bg-forest-600 text-white" : "bg-gray-100 text-gray-600"
+              activeFilter === "completed" ? "bg-forest-600 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
             }`}
           >
             {counts.completed}
@@ -232,13 +232,13 @@ export default function TasksPage() {
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 ${
             activeFilter === "all"
               ? "bg-forest-700 text-white shadow-xs"
-              : "text-gray-600 hover:text-gray-900"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
           }`}
         >
           <span>All Tasks</span>
           <span
             className={`text-[10px] px-2 py-0.5 rounded-full ${
-              activeFilter === "all" ? "bg-forest-600 text-white" : "bg-gray-100 text-gray-600"
+              activeFilter === "all" ? "bg-forest-600 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
             }`}
           >
             {counts.all}

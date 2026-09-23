@@ -58,31 +58,31 @@ export function Modal({
 
       {/* Modal Dialog */}
       <div
-        className={`relative bg-white w-full ${maxWidthClasses[maxWidth]} rounded-2xl shadow-elevated border border-gray-100 overflow-hidden z-10 my-8 transition-all transform animate-in fade-in zoom-in-95 duration-150`}
+        className={`relative bg-white dark:bg-gray-900 w-full ${maxWidthClasses[maxWidth]} rounded-2xl shadow-elevated border border-gray-100 dark:border-gray-800 overflow-hidden z-10 my-8 transition-all transform animate-in fade-in zoom-in-95 duration-150`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
       >
-        <div className="flex items-start justify-between p-6 border-b border-gray-100">
+        <div className="flex items-start justify-between p-6 border-b border-gray-100 dark:border-gray-800">
           <div>
-            <h3 id="modal-title" className="text-lg font-bold text-gray-900">
+            <h3 id="modal-title" className="text-lg font-bold text-gray-900 dark:text-gray-100">
               {title}
             </h3>
             {description && (
-              <p className="text-xs text-gray-500 mt-1 font-medium">{description}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">{description}</p>
             )}
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6 max-h-[75vh] overflow-y-auto">{children}</div>
+        <div className="p-6 max-h-[75vh] overflow-y-auto text-gray-900 dark:text-gray-100">{children}</div>
       </div>
     </div>
   );

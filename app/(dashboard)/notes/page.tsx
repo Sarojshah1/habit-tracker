@@ -111,8 +111,8 @@ export default function NotesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Notes</h1>
-          <p className="text-sm text-gray-500 mt-1 font-medium">
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Notes</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">
             Write, plan, and organize your thoughts, study schedules, and reflections.
           </p>
         </div>
@@ -130,16 +130,16 @@ export default function NotesPage() {
       {/* Main Split Layout: Notes List (4 cols) & Editor (8 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[600px]">
         {/* Sidebar Notes List (4 cols) */}
-        <div className="lg:col-span-4 bg-white rounded-2xl border border-gray-100 p-4 shadow-sm flex flex-col">
+        <div className="lg:col-span-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 shadow-sm flex flex-col">
           {/* Search Box */}
           <div className="relative mb-3">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search notes..."
-              className="w-full pl-9 pr-3.5 py-2 text-xs bg-gray-50 border border-gray-200 rounded-xl outline-none focus:bg-white focus:border-forest-600 transition-all"
+              className="w-full pl-9 pr-3.5 py-2 text-xs bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 transition-all text-gray-900 dark:text-gray-100"
             />
           </div>
 
@@ -147,11 +147,11 @@ export default function NotesPage() {
           {isLoading ? (
             <div className="space-y-3 py-2">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-20 bg-gray-100 rounded-xl animate-pulse" />
+                <div key={i} className="h-20 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />
               ))}
             </div>
           ) : filteredNotes.length === 0 ? (
-            <div className="p-8 text-center text-xs text-gray-400 font-medium my-auto">
+            <div className="p-8 text-center text-xs text-gray-400 dark:text-gray-500 font-medium my-auto">
               No notes found. Click &quot;New Note&quot; to start.
             </div>
           ) : (
@@ -171,31 +171,31 @@ export default function NotesPage() {
                     onClick={() => setSelectedNote(n)}
                     className={`p-3.5 rounded-xl border transition-all cursor-pointer select-none ${
                       isSelected
-                        ? "bg-forest-50/60 border-forest-200 shadow-xs"
-                        : "bg-white border-gray-100/80 hover:bg-gray-50/80"
+                        ? "bg-forest-50/60 dark:bg-forest-900/20 border-forest-200 dark:border-forest-800 shadow-xs"
+                        : "bg-white dark:bg-gray-900 border-gray-100/80 dark:border-gray-800 hover:bg-gray-50/80 dark:hover:bg-gray-800/80"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <h4
                         className={`text-xs font-bold truncate ${
-                          isSelected ? "text-forest-900" : "text-gray-900"
+                          isSelected ? "text-forest-900 dark:text-forest-300" : "text-gray-900 dark:text-gray-100"
                         }`}
                       >
                         {n.title || "Untitled Note"}
                       </h4>
                       {n.pinned && (
-                        <Pin className="w-3.5 h-3.5 text-forest-700 shrink-0 fill-current" />
+                        <Pin className="w-3.5 h-3.5 text-forest-700 dark:text-forest-400 shrink-0 fill-current" />
                       )}
                     </div>
 
-                    <p className="text-[11px] text-gray-500 mt-1 line-clamp-2 leading-relaxed font-normal">
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 leading-relaxed font-normal">
                       {preview}
                     </p>
 
-                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100/60 text-[10px] text-gray-400">
+                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100/60 dark:border-gray-800 text-[10px] text-gray-400 dark:text-gray-500">
                       <span>{dateStr}</span>
                       {n.tags?.length > 0 && (
-                        <span className="font-semibold text-forest-700 bg-forest-100 px-1.5 py-0.5 rounded">
+                        <span className="font-semibold text-forest-700 dark:text-forest-400 bg-forest-100 dark:bg-forest-900/40 px-1.5 py-0.5 rounded">
                           #{n.tags[0]}
                         </span>
                       )}

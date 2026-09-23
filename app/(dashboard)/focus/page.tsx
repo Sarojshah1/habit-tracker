@@ -62,8 +62,8 @@ function FocusContent() {
   if (isLoading) {
     return (
       <div className="space-y-6 max-w-2xl mx-auto py-8">
-        <div className="h-10 bg-gray-200 rounded-xl w-1/3 animate-pulse mx-auto" />
-        <div className="w-80 h-80 rounded-full bg-gray-100 animate-pulse mx-auto" />
+        <div className="h-10 bg-gray-200 dark:bg-gray-800 rounded-xl w-1/3 animate-pulse mx-auto" />
+        <div className="w-80 h-80 rounded-full bg-gray-100 dark:bg-gray-800 animate-pulse mx-auto" />
       </div>
     );
   }
@@ -83,7 +83,7 @@ function FocusContent() {
           <Sparkles className="w-3.5 h-3.5 text-forest-600" />
           Distraction-Free Mode
         </div>
-        <h1 className="text-3xl font-black text-gray-900 tracking-tight">Focus Mode</h1>
+        <h1 className="text-3xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Focus Mode</h1>
         <p className="text-sm text-gray-500 mt-1 font-medium">
           Eliminate distractions. Set your timer and immerse yourself in your work.
         </p>
@@ -99,32 +99,32 @@ function FocusContent() {
       />
 
       {/* Focus Stats & Recent History */}
-      <div className="max-w-2xl mx-auto pt-8 border-t border-gray-100">
+      <div className="max-w-2xl mx-auto pt-8 border-t border-gray-100 dark:border-gray-800">
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="bg-white p-4 rounded-2xl border border-gray-100 text-center shadow-xs">
-            <p className="text-xs font-semibold text-gray-400">Total Focus Time</p>
-            <p className="text-2xl font-black text-gray-900 mt-1">
+          <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 text-center shadow-xs">
+            <p className="text-xs font-semibold text-gray-400 dark:text-gray-500">Total Focus Time</p>
+            <p className="text-2xl font-black text-gray-900 dark:text-gray-100 mt-1">
               {focusHours > 0 ? `${focusHours}h ${remainingMins}m` : `${remainingMins}m`}
             </p>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl border border-gray-100 text-center shadow-xs">
-            <p className="text-xs font-semibold text-gray-400">Completed Sessions</p>
-            <p className="text-2xl font-black text-gray-900 mt-1">{totalSessions}</p>
+          <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 text-center shadow-xs">
+            <p className="text-xs font-semibold text-gray-400 dark:text-gray-500">Completed Sessions</p>
+            <p className="text-2xl font-black text-gray-900 dark:text-gray-100 mt-1">{totalSessions}</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-xs">
-          <h3 className="text-base font-bold text-gray-900 mb-4 pb-3 border-b border-gray-100">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-xs">
+          <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 mb-4 pb-3 border-b border-gray-100 dark:border-gray-800">
             Recent Focus Sessions
           </h3>
 
           {sessions.length === 0 ? (
-            <p className="text-center text-xs text-gray-400 py-6 font-medium">
+            <p className="text-center text-xs text-gray-400 dark:text-gray-500 py-6 font-medium">
               No sessions completed yet. Start your first focus timer above!
             </p>
           ) : (
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-gray-50 dark:divide-gray-800">
               {sessions.slice(0, 5).map((s) => {
                 const dateStr = new Date(s.completedAt || s.startedAt).toLocaleDateString(
                   "en-US",
@@ -134,18 +134,18 @@ function FocusContent() {
                 return (
                   <div key={s._id} className="py-3 flex items-center justify-between text-xs">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-forest-50 text-forest-700 flex items-center justify-center font-bold">
+                      <div className="w-8 h-8 rounded-xl bg-forest-50 dark:bg-forest-950/60 text-forest-700 dark:text-forest-400 flex items-center justify-center font-bold">
                         <Clock className="w-4 h-4" />
                       </div>
                       <div>
-                        <p className="font-bold text-gray-900">
+                        <p className="font-bold text-gray-900 dark:text-gray-100">
                           {s.habitId?.name || "General Deep Work"}
                         </p>
-                        <p className="text-gray-400 text-[11px] font-medium">{dateStr}</p>
+                        <p className="text-gray-400 dark:text-gray-500 text-[11px] font-medium">{dateStr}</p>
                       </div>
                     </div>
 
-                    <span className="font-bold text-forest-800 bg-forest-50 px-2.5 py-1 rounded-full">
+                    <span className="font-bold text-forest-800 dark:text-forest-300 bg-forest-50 dark:bg-forest-950/60 px-2.5 py-1 rounded-full">
                       {s.duration} min
                     </span>
                   </div>

@@ -101,10 +101,10 @@ export default function GoalsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-gray-100 tracking-tight">
             Goals
           </h1>
-          <p className="text-sm text-gray-500 mt-1 font-medium">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">
             Turn your habits into measurable progress.
           </p>
         </div>
@@ -126,7 +126,7 @@ export default function GoalsPage() {
       <GoalSummaryCards stats={stats} />
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 p-1.5 bg-white border border-gray-100 rounded-2xl w-fit shadow-xs flex-wrap">
+      <div className="flex items-center gap-2 p-1.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl w-fit shadow-xs flex-wrap">
         {[
           { id: "active", label: `Active (${counts.active})` },
           { id: "all", label: `All (${counts.all})` },
@@ -143,7 +143,7 @@ export default function GoalsPage() {
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                 isSelected
                   ? "bg-forest-700 text-white shadow-xs"
-                  : "text-gray-500 hover:text-gray-900"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
               }`}
             >
               {tab.label}

@@ -102,10 +102,10 @@ export default function HabitsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-gray-100 tracking-tight">
             My Habits
           </h1>
-          <p className="text-sm text-gray-500 mt-1 font-medium">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">
             Build habits that create the life and academic success you want.
           </p>
         </div>
@@ -124,14 +124,14 @@ export default function HabitsPage() {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 p-1.5 bg-white border border-gray-100 rounded-2xl w-fit shadow-xs">
+      <div className="flex items-center gap-2 p-1.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl w-fit shadow-xs">
         <button
           type="button"
           onClick={() => setFilter("active")}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
             filter === "active"
               ? "bg-forest-700 text-white shadow-xs"
-              : "text-gray-500 hover:text-gray-900"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
           }`}
         >
           Active ({counts.active})
@@ -143,7 +143,7 @@ export default function HabitsPage() {
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
             filter === "all"
               ? "bg-forest-700 text-white shadow-xs"
-              : "text-gray-500 hover:text-gray-900"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
           }`}
         >
           All Habits ({counts.all})
@@ -155,7 +155,7 @@ export default function HabitsPage() {
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
             filter === "archived"
               ? "bg-forest-700 text-white shadow-xs"
-              : "text-gray-500 hover:text-gray-900"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
           }`}
         >
           Archived ({counts.archived})
@@ -195,7 +195,7 @@ export default function HabitsPage() {
             return (
               <div
                 key={habit._id}
-                className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between"
+                className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between"
               >
                 <div>
                   {/* Top Bar: Icon + Title + Menu */}
@@ -206,10 +206,10 @@ export default function HabitsPage() {
                     >
                       <HabitIcon name={habit.icon} color={habit.color} size="md" />
                       <div className="min-w-0">
-                        <h3 className="text-base font-bold text-gray-900 truncate hover:text-forest-700 transition-colors">
+                        <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 truncate hover:text-forest-700 dark:hover:text-forest-400 transition-colors">
                           {habit.name}
                         </h3>
-                        <p className="text-xs text-gray-400 font-medium flex items-center gap-1.5 mt-0.5">
+                        <p className="text-xs text-gray-400 dark:text-gray-500 font-medium flex items-center gap-1.5 mt-0.5">
                           <Clock className="w-3.5 h-3.5" />
                           <span>{habit.schedule?.time || "Anytime"}</span>
                           <span>•</span>
@@ -221,7 +221,7 @@ export default function HabitsPage() {
                     <button
                       type="button"
                       onClick={() => setSelectedHabitDetail(habit)}
-                      className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                      className="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                       aria-label="Options"
                     >
                       <MoreVertical className="w-4 h-4" />
@@ -229,28 +229,28 @@ export default function HabitsPage() {
                   </div>
 
                   {habit.description && (
-                    <p className="text-xs text-gray-500 mt-3 line-clamp-2 leading-relaxed font-medium">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 line-clamp-2 leading-relaxed font-medium">
                       {habit.description}
                     </p>
                   )}
 
                   {/* Streak & Completion Stats */}
-                  <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-gray-100 text-xs">
-                    <div className="p-2.5 rounded-xl bg-orange-50/60 flex items-center gap-2">
-                      <Flame className="w-4 h-4 text-orange-600 shrink-0" />
+                  <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 text-xs">
+                    <div className="p-2.5 rounded-xl bg-orange-50/60 dark:bg-orange-950/20 flex items-center gap-2">
+                      <Flame className="w-4 h-4 text-orange-600 dark:text-orange-400 shrink-0" />
                       <div>
-                        <p className="text-[10px] text-gray-400 font-semibold leading-none">Streak</p>
-                        <p className="text-sm font-black text-gray-900 mt-0.5">
+                        <p className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold leading-none">Streak</p>
+                        <p className="text-sm font-black text-gray-900 dark:text-gray-100 mt-0.5">
                           {stats.currentStreak} Days
                         </p>
                       </div>
                     </div>
 
-                    <div className="p-2.5 rounded-xl bg-forest-50/60 flex items-center gap-2">
-                      <TrendingUp className="w-4 h-4 text-forest-700 shrink-0" />
+                    <div className="p-2.5 rounded-xl bg-forest-50/60 dark:bg-forest-950/20 flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-forest-700 dark:text-forest-400 shrink-0" />
                       <div>
-                        <p className="text-[10px] text-gray-400 font-semibold leading-none">Rate</p>
-                        <p className="text-sm font-black text-forest-900 mt-0.5">
+                        <p className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold leading-none">Rate</p>
+                        <p className="text-sm font-black text-forest-900 dark:text-forest-200 mt-0.5">
                           {stats.completionRate}%
                         </p>
                       </div>
@@ -259,9 +259,9 @@ export default function HabitsPage() {
 
                   {/* Progress Bar */}
                   <div className="mt-3">
-                    <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                    <div className="w-full bg-gray-100 dark:bg-gray-800 h-1.5 rounded-full overflow-hidden">
                       <div
-                        className="bg-forest-600 h-full rounded-full transition-all duration-300"
+                        className="bg-forest-600 dark:bg-forest-500 h-full rounded-full transition-all duration-300"
                         style={{ width: `${stats.completionRate}%` }}
                       />
                     </div>
@@ -269,13 +269,13 @@ export default function HabitsPage() {
                 </div>
 
                 {/* Footer Controls: Active Switch & Details */}
-                <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-100 text-xs">
+                <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-100 dark:border-gray-800 text-xs">
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => handleToggleActive(habit)}
                       className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                        habit.active ? "bg-forest-700" : "bg-gray-200"
+                        habit.active ? "bg-forest-700" : "bg-gray-200 dark:bg-gray-700"
                       }`}
                       aria-label="Toggle active"
                     >
@@ -285,7 +285,7 @@ export default function HabitsPage() {
                         }`}
                       />
                     </button>
-                    <span className="text-gray-500 font-medium">
+                    <span className="text-gray-500 dark:text-gray-400 font-medium">
                       {habit.active ? "Active" : "Paused"}
                     </span>
                   </div>
@@ -293,7 +293,7 @@ export default function HabitsPage() {
                   <button
                     type="button"
                     onClick={() => setSelectedHabitDetail(habit)}
-                    className="font-bold text-forest-700 hover:text-forest-800 hover:underline"
+                    className="font-bold text-forest-700 dark:text-forest-400 hover:text-forest-800 dark:hover:text-forest-300 hover:underline"
                   >
                     View Details
                   </button>

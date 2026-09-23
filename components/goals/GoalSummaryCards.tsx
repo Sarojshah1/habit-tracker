@@ -21,7 +21,7 @@ export function GoalSummaryCards({ stats }: GoalSummaryCardsProps) {
         value={String(stats.activeGoals)}
         subtitle="Currently in progress"
         icon={Target}
-        colorClass="text-forest-700 bg-forest-50"
+        colorClass="text-forest-700 dark:text-forest-300 bg-forest-50 dark:bg-forest-950/40"
         badgeText="Active"
       />
 
@@ -30,7 +30,7 @@ export function GoalSummaryCards({ stats }: GoalSummaryCardsProps) {
         value={String(stats.completedGoals)}
         subtitle="Targets achieved"
         icon={CheckCircle2}
-        colorClass="text-emerald-600 bg-emerald-50"
+        colorClass="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40"
         badgeText="Success"
       />
 
@@ -39,7 +39,7 @@ export function GoalSummaryCards({ stats }: GoalSummaryCardsProps) {
         value={String(stats.atRiskGoals)}
         subtitle="Behind pace or overdue"
         icon={AlertTriangle}
-        colorClass={stats.atRiskGoals > 0 ? "text-amber-600 bg-amber-50" : "text-gray-500 bg-gray-50"}
+        colorClass={stats.atRiskGoals > 0 ? "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40" : "text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800"}
         badgeText={stats.atRiskGoals > 0 ? "Attention" : undefined}
       />
 
@@ -48,7 +48,7 @@ export function GoalSummaryCards({ stats }: GoalSummaryCardsProps) {
         value={`${stats.overallProgress}%`}
         subtitle="Average active goal completion"
         icon={TrendingUp}
-        colorClass="text-blue-600 bg-blue-50"
+        colorClass="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40"
       />
     </div>
   );

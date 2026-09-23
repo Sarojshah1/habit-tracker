@@ -179,7 +179,7 @@ export function HabitFormModal({
 
         {/* Habit Name */}
         <div>
-          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
             Habit Name *
           </label>
           <input
@@ -187,15 +187,15 @@ export function HabitFormModal({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g., Study for 2 hours, Read a book..."
-            className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none transition-all"
+            className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none transition-all"
             required
           />
-          {errors.name && <p className="text-xs text-red-600 mt-1">{errors.name}</p>}
+          {errors.name && <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.name}</p>}
         </div>
 
         {/* Description */}
         <div>
-          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
             Description
           </label>
           <textarea
@@ -203,17 +203,17 @@ export function HabitFormModal({
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
             placeholder="Why is this habit important to you? What is your routine?"
-            className="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none transition-all resize-none"
+            className="w-full px-3.5 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none transition-all resize-none"
           />
         </div>
 
         {/* Icon & Color Selector */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">
               Icon
             </label>
-            <div className="grid grid-cols-7 gap-1.5 max-h-32 overflow-y-auto p-1.5 bg-gray-50 rounded-xl border border-gray-200">
+            <div className="grid grid-cols-7 gap-1.5 max-h-32 overflow-y-auto p-1.5 bg-gray-50 dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700">
               {PRESET_ICONS.map((ic) => (
                 <button
                   type="button"
@@ -221,8 +221,8 @@ export function HabitFormModal({
                   onClick={() => setIcon(ic)}
                   className={`p-1.5 rounded-lg flex items-center justify-center transition-all ${
                     icon === ic
-                      ? "bg-white shadow-sm ring-2 ring-forest-700 text-forest-700"
-                      : "text-gray-500 hover:bg-white hover:text-gray-900"
+                      ? "bg-white dark:bg-gray-700 shadow-sm ring-2 ring-forest-700 text-forest-700"
+                      : "text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
                   }`}
                 >
                   <HabitIcon name={ic} size="sm" color={icon === ic ? color : "#64748B"} />
@@ -232,10 +232,10 @@ export function HabitFormModal({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">
               Color Accent
             </label>
-            <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-xl border border-gray-200">
+            <div className="flex flex-wrap gap-2 p-2 bg-gray-50 dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700">
               {PRESET_COLORS.map((c) => (
                 <button
                   type="button"
@@ -243,7 +243,7 @@ export function HabitFormModal({
                   onClick={() => setColor(c)}
                   className={`w-7 h-7 rounded-full transition-transform ${
                     color === c
-                      ? "scale-110 ring-2 ring-offset-2 ring-gray-900"
+                      ? "scale-110 ring-2 ring-offset-2 ring-gray-900 dark:ring-gray-100 dark:ring-offset-gray-900"
                       : "hover:scale-105"
                   }`}
                   style={{ backgroundColor: c }}
@@ -257,13 +257,13 @@ export function HabitFormModal({
         {/* Frequency & Schedule */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
               Frequency
             </label>
             <select
               value={frequency}
               onChange={(e) => setFrequency(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none"
+              className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none"
             >
               <option value="daily">Every Day (Daily)</option>
               <option value="specific_days">Specific Days of the Week</option>
@@ -273,14 +273,14 @@ export function HabitFormModal({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
               Scheduled Time
             </label>
             <input
               type="time"
               value={time}
               onChange={(e) => setTime(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none"
+              className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none"
             />
           </div>
         </div>
@@ -288,7 +288,7 @@ export function HabitFormModal({
         {/* Specific Days Picker */}
         {frequency === "specific_days" && (
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
               Days of the Week
             </label>
             <div className="flex gap-1.5">
@@ -302,7 +302,7 @@ export function HabitFormModal({
                     className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
                       isSelected
                         ? "bg-forest-700 text-white shadow-xs"
-                        : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
                     }`}
                   >
                     {d.label}
@@ -316,7 +316,7 @@ export function HabitFormModal({
         {/* Times per week */}
         {frequency === "times_per_week" && (
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
               Target Times per Week: {timesPerWeek}
             </label>
             <input
@@ -333,19 +333,19 @@ export function HabitFormModal({
         {/* Start Date & Reminder */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
               Start Date
             </label>
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none"
+              className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
               Reminder Note (Optional)
             </label>
             <input
@@ -353,18 +353,18 @@ export function HabitFormModal({
               value={reminder}
               onChange={(e) => setReminder(e.target.value)}
               placeholder="e.g. Set alarm, prep desk"
-              className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none"
+              className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none"
             />
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
           <button
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+            className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
             Cancel
           </button>

@@ -32,7 +32,7 @@ export function GoalProgressChart({
 }: GoalProgressChartProps) {
   if (!history || history.length === 0) {
     return (
-      <div className="h-48 flex items-center justify-center text-xs text-gray-400 font-medium">
+      <div className="h-48 flex items-center justify-center text-xs text-gray-400 dark:text-gray-500 font-medium">
         No progress history recorded yet.
       </div>
     );
@@ -59,7 +59,7 @@ export function GoalProgressChart({
               <stop offset="95%" stopColor={color} stopOpacity={0.0} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-gray-100 dark:text-gray-800" vertical={false} />
           <XAxis
             dataKey="displayDate"
             stroke="#94a3b8"
@@ -79,7 +79,7 @@ export function GoalProgressChart({
               if (active && payload && payload.length) {
                 const pt = payload[0].payload;
                 return (
-                  <div className="bg-gray-900 text-white p-3 rounded-xl text-xs shadow-lg space-y-1">
+                  <div className="bg-gray-900 dark:bg-gray-800 text-white p-3 rounded-xl text-xs shadow-lg space-y-1 border border-gray-800 dark:border-gray-700">
                     <p className="font-bold">{pt.date}</p>
                     <p className="text-forest-300">
                       Progress: {pt.value} / {targetValue} {unit}

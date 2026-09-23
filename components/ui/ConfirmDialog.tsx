@@ -31,18 +31,18 @@ export function ConfirmDialog({
     <Modal isOpen={isOpen} onClose={onClose} title={title} maxWidth="sm">
       <div className="space-y-4">
         {isDestructive && (
-          <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-2">
+          <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 flex items-center justify-center mx-auto mb-2">
             <AlertTriangle className="w-6 h-6" />
           </div>
         )}
-        <p className="text-sm text-gray-600 text-center">{message}</p>
+        <p className="text-sm text-gray-600 dark:text-gray-300 text-center">{message}</p>
 
         <div className="flex items-center gap-3 pt-4">
           <button
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
           >
             {cancelText}
           </button>

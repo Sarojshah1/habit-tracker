@@ -76,15 +76,33 @@ export const metadata: Metadata = {
   },
 };
 
+import { ThemeProvider } from "@/lib/context/ThemeContext";
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full scroll-smooth">
-      <body className="h-full font-sans bg-[#F8FAF9] text-gray-900 antialiased">
-        {children}
+    <html lang="en" className="h-full scroll-smooth" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var t = localStorage.getItem('habittrack_theme') || 'system';
+                  var isDark = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                  if (isDark) document.documentElement.classList.add('dark');
+                  else document.documentElement.classList.remove('dark');
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className="h-full font-sans bg-[#F8FAF9] dark:bg-gray-950 text-gray-900 dark:text-gray-100 antialiased transition-colors duration-200">
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

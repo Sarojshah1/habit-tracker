@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Sidebar } from "./Sidebar";
 import { TopHeader } from "./TopHeader";
+import { CommandPalette } from "../ui/CommandPalette";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -30,7 +31,10 @@ export function AppShell({ children }: AppShellProps) {
   }, []);
 
   return (
-    <div className="min-h-screen flex bg-[#F8FAF9]">
+    <div className="min-h-screen flex bg-[#F8FAF9] dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-200">
+      {/* Global Command Palette (Cmd+K) */}
+      <CommandPalette />
+
       {/* Sidebar (Desktop persistent + Mobile drawer) */}
       <Sidebar
         isOpen={mobileMenuOpen}

@@ -13,8 +13,17 @@
     --radius: 0.75rem;
   }
 
+  .dark {
+    --background: 222 47% 7%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+    --border: 217 33% 17%;
+    --ring: 156 42% 48%;
+  }
+
   body {
-    @apply bg-surface-light text-gray-900 antialiased selection:bg-forest-100 selection:text-forest-900;
+    @apply bg-surface-light text-gray-900 antialiased selection:bg-forest-100 selection:text-forest-900 dark:bg-gray-950 dark:text-gray-100;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }

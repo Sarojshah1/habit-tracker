@@ -39,15 +39,15 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-white border-r border-gray-100/90 w-64 p-5 select-none">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900 border-r border-gray-100/90 dark:border-gray-800 w-64 p-5 select-none transition-colors duration-200">
       {/* Brand Header */}
-      <div className="flex items-center justify-between pb-6 mb-2 border-b border-gray-100">
+      <div className="flex items-center justify-between pb-6 mb-2 border-b border-gray-100 dark:border-gray-800">
         <Logo size="md" href="/dashboard" />
         {onClose && (
           <button
             type="button"
             onClick={onClose}
-            className="lg:hidden p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+            className="lg:hidden p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
             aria-label="Close sidebar"
           >
             <X className="w-5 h-5" />
@@ -69,22 +69,22 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               onClick={onClose}
               className={`flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 group ${
                 isActive
-                  ? "bg-forest-50 text-forest-800 font-semibold shadow-xs"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50/80"
+                  ? "bg-forest-50 dark:bg-forest-950/70 text-forest-800 dark:text-forest-200 font-semibold shadow-xs"
+                  : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50/80 dark:hover:bg-gray-800/80"
               }`}
             >
               <Icon
                 className={`w-5 h-5 transition-colors ${
                   isActive
-                    ? "text-forest-700"
-                    : "text-gray-400 group-hover:text-gray-600"
+                    ? "text-forest-700 dark:text-forest-400"
+                    : "text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"
                 }`}
                 strokeWidth={isActive ? 2.3 : 2}
               />
               <span>{item.name}</span>
 
               {isActive && (
-                <div className="ml-auto w-1.5 h-4 rounded-full bg-forest-700" />
+                <div className="ml-auto w-1.5 h-4 rounded-full bg-forest-700 dark:bg-forest-400" />
               )}
             </Link>
           );
@@ -92,15 +92,15 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       </nav>
 
       {/* Motivational Card at Bottom */}
-      <div className="pt-4 border-t border-gray-100">
-        <div className="bg-gradient-to-br from-forest-50/90 to-emerald-50/50 border border-forest-100/80 rounded-2xl p-4 relative overflow-hidden">
-          <div className="absolute top-2 right-2 text-forest-300">
+      <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+        <div className="bg-gradient-to-br from-forest-50/90 to-emerald-50/50 dark:from-forest-950/40 dark:to-gray-850/40 border border-forest-100/80 dark:border-forest-900/40 rounded-2xl p-4 relative overflow-hidden">
+          <div className="absolute top-2 right-2 text-forest-300 dark:text-forest-700">
             <Sparkles className="w-4 h-4" />
           </div>
-          <p className="text-xs font-bold text-forest-900 uppercase tracking-wider mb-1">
+          <p className="text-xs font-bold text-forest-900 dark:text-forest-200 uppercase tracking-wider mb-1">
             Small Steps, Brighter Future
           </p>
-          <p className="text-xs text-forest-700 leading-relaxed font-medium">
+          <p className="text-xs text-forest-700 dark:text-forest-400 leading-relaxed font-medium">
             Stay consistent. Keep growing every single day.
           </p>
         </div>
@@ -119,11 +119,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       {isOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
-            className="fixed inset-0 bg-gray-900/40 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-gray-900/40 dark:bg-black/70 backdrop-blur-xs transition-opacity"
             onClick={onClose}
             aria-hidden="true"
           />
-          <div className="fixed inset-y-0 left-0 max-w-xs w-full bg-white shadow-xl z-10 animate-in slide-in-from-left duration-200">
+          <div className="fixed inset-y-0 left-0 max-w-xs w-full bg-white dark:bg-gray-900 shadow-xl z-10 animate-in slide-in-from-left duration-200">
             {sidebarContent}
           </div>
         </div>

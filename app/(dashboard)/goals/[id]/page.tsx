@@ -125,7 +125,7 @@ export default function GoalDetailPage() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="h-10 bg-gray-200 rounded-xl w-1/4 animate-pulse" />
+        <div className="h-10 bg-gray-200 dark:bg-gray-800 rounded-xl w-1/4 animate-pulse" />
         <LoadingSkeleton count={3} />
       </div>
     );
@@ -158,23 +158,23 @@ export default function GoalDetailPage() {
   const isOverdue = progress.effectiveStatus === "overdue" && !isCompleted;
   const isAtRisk = progress.isAtRisk && !isCompleted && !isPaused && !isArchived;
 
-  let badgeColor = "bg-forest-50 text-forest-700 border-forest-200";
+  let badgeColor = "bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 border-forest-200 dark:border-forest-800";
   let badgeLabel = "Active";
 
   if (isCompleted) {
-    badgeColor = "bg-emerald-100 text-emerald-800 border-emerald-300";
+    badgeColor = "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800";
     badgeLabel = "Completed";
   } else if (isPaused) {
-    badgeColor = "bg-amber-100 text-amber-800 border-amber-200";
+    badgeColor = "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800";
     badgeLabel = "Paused";
   } else if (isArchived) {
-    badgeColor = "bg-gray-100 text-gray-700 border-gray-200";
+    badgeColor = "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700";
     badgeLabel = "Archived";
   } else if (isOverdue) {
-    badgeColor = "bg-red-100 text-red-800 border-red-200";
+    badgeColor = "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 border-red-200 dark:border-red-800";
     badgeLabel = "Overdue";
   } else if (isAtRisk) {
-    badgeColor = "bg-orange-100 text-orange-800 border-orange-200";
+    badgeColor = "bg-orange-100 dark:bg-orange-900/40 text-orange-800 dark:text-orange-300 border-orange-200 dark:border-orange-800";
     badgeLabel = "At Risk";
   }
 
@@ -189,7 +189,7 @@ export default function GoalDetailPage() {
       <div>
         <Link
           href="/goals"
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-forest-700 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-forest-700 dark:hover:text-forest-400 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Goals
@@ -197,14 +197,14 @@ export default function GoalDetailPage() {
       </div>
 
       {/* Main Goal Hero Card */}
-      <div className="bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 pb-6 border-b border-gray-100">
+      <div className="bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 p-6 sm:p-8 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 pb-6 border-b border-gray-100 dark:border-gray-800">
           <div className="flex items-start gap-4 min-w-0">
             <HabitIcon name={goal.icon || "target"} color={goal.color || "#1B4332"} size="lg" />
 
             <div className="min-w-0">
               <div className="flex items-center gap-2.5 flex-wrap">
-                <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-gray-100 tracking-tight">
                   {goal.title}
                 </h1>
                 <span
@@ -215,12 +215,12 @@ export default function GoalDetailPage() {
               </div>
 
               {goal.description && (
-                <p className="text-sm text-gray-600 mt-2 leading-relaxed font-medium max-w-2xl">
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 leading-relaxed font-medium max-w-2xl">
                   {goal.description}
                 </p>
               )}
 
-              <div className="flex items-center gap-4 mt-3 text-xs text-gray-400 font-medium flex-wrap">
+              <div className="flex items-center gap-4 mt-3 text-xs text-gray-400 dark:text-gray-500 font-medium flex-wrap">
                 <span className="capitalize">
                   Type: <strong>{goal.type?.replace("_", " ")}</strong>
                 </span>
@@ -242,7 +242,7 @@ export default function GoalDetailPage() {
             <button
               type="button"
               onClick={() => setIsEditModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               <Edit className="w-3.5 h-3.5" />
               Edit Goal
@@ -251,16 +251,16 @@ export default function GoalDetailPage() {
             <button
               type="button"
               onClick={handlePauseToggle}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               {isPaused ? (
                 <>
-                  <Play className="w-3.5 h-3.5 text-forest-600" />
+                  <Play className="w-3.5 h-3.5 text-forest-600 dark:text-forest-400" />
                   Resume
                 </>
               ) : (
                 <>
-                  <Pause className="w-3.5 h-3.5 text-amber-600" />
+                  <Pause className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                   Pause
                 </>
               )}
@@ -269,7 +269,7 @@ export default function GoalDetailPage() {
             <button
               type="button"
               onClick={handleArchiveToggle}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               <Archive className="w-3.5 h-3.5" />
               {isArchived ? "Restore" : "Archive"}
@@ -278,7 +278,7 @@ export default function GoalDetailPage() {
             <button
               type="button"
               onClick={() => setIsDeleteDialogOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-red-100 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-red-100 dark:border-red-900/60 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
             >
               <Trash2 className="w-3.5 h-3.5" />
               Delete
@@ -291,16 +291,16 @@ export default function GoalDetailPage() {
           <div className="md:col-span-8 space-y-3">
             <div className="flex items-baseline justify-between gap-4">
               <div>
-                <span className="text-3xl sm:text-4xl font-black text-gray-900">
+                <span className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-gray-100">
                   {progress.currentValue}
                 </span>
-                <span className="text-xl font-bold text-gray-400 ml-1">
+                <span className="text-xl font-bold text-gray-400 dark:text-gray-500 ml-1">
                   / {progress.targetValue} {goal.unit}
                 </span>
               </div>
               <span
                 className={`text-2xl font-black ${
-                  isCompleted ? "text-emerald-600" : "text-forest-700"
+                  isCompleted ? "text-emerald-600 dark:text-emerald-400" : "text-forest-700 dark:text-forest-300"
                 }`}
               >
                 {progress.percentage}%
@@ -309,7 +309,7 @@ export default function GoalDetailPage() {
 
             {/* Large Progress Bar */}
             <div
-              className="w-full bg-gray-100 h-4 rounded-full overflow-hidden"
+              className="w-full bg-gray-100 dark:bg-gray-800 h-4 rounded-full overflow-hidden"
               role="progressbar"
               aria-valuenow={progress.percentage}
               aria-valuemin={0}
@@ -318,21 +318,21 @@ export default function GoalDetailPage() {
               <div
                 className={`h-full rounded-full transition-all duration-700 ${
                   isCompleted
-                    ? "bg-emerald-600"
+                    ? "bg-emerald-600 dark:bg-emerald-500"
                     : isPaused
-                    ? "bg-amber-500"
+                    ? "bg-amber-500 dark:bg-amber-400"
                     : isOverdue
-                    ? "bg-red-500"
-                    : "bg-forest-600"
+                    ? "bg-red-500 dark:bg-red-400"
+                    : "bg-forest-600 dark:bg-forest-500"
                 }`}
                 style={{ width: `${progress.percentage}%` }}
               />
             </div>
 
-            <div className="flex items-center justify-between text-xs text-gray-500 font-medium pt-1">
+            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 font-medium pt-1">
               <span className="flex items-center gap-1.5">
-                <Clock className={`w-4 h-4 ${isOverdue ? "text-red-500" : "text-gray-400"}`} />
-                <span className={isOverdue ? "text-red-600 font-bold" : ""}>
+                <Clock className={`w-4 h-4 ${isOverdue ? "text-red-500 dark:text-red-400" : "text-gray-400 dark:text-gray-500"}`} />
+                <span className={isOverdue ? "text-red-600 dark:text-red-400 font-bold" : ""}>
                   {progress.deadlineText}
                 </span>
               </span>
@@ -343,10 +343,10 @@ export default function GoalDetailPage() {
           </div>
 
           {/* Quick Stats Pill or Manual Control */}
-          <div className="md:col-span-4 p-4 rounded-2xl bg-gray-50/80 border border-gray-100 flex flex-col justify-center">
+          <div className="md:col-span-4 p-4 rounded-2xl bg-gray-50/80 dark:bg-gray-800/80 border border-gray-100 dark:border-gray-700 flex flex-col justify-center">
             {goal.trackingMode === "manual" ? (
               <div className="space-y-3">
-                <p className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                <p className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   Update Progress (Manual)
                 </p>
                 <div className="flex items-center gap-2">
@@ -354,7 +354,7 @@ export default function GoalDetailPage() {
                     type="button"
                     onClick={() => handleManualProgressSave(Math.max(0, manualValue - 1))}
                     disabled={isUpdatingProgress || manualValue <= 0}
-                    className="p-2 rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                    className="p-2 rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
@@ -364,28 +364,28 @@ export default function GoalDetailPage() {
                     value={manualValue}
                     onChange={(e) => setManualValue(parseInt(e.target.value, 10) || 0)}
                     onBlur={() => handleManualProgressSave(manualValue)}
-                    className="w-full text-center py-2 px-3 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-900 focus:outline-none focus:border-forest-600"
+                    className="w-full text-center py-2 px-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm font-bold text-gray-900 dark:text-gray-100 focus:outline-none focus:border-forest-600"
                   />
                   <button
                     type="button"
                     onClick={() => handleManualProgressSave(manualValue + 1)}
                     disabled={isUpdatingProgress}
-                    className="p-2 rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                    className="p-2 rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
-                <p className="text-[11px] text-gray-400 text-center font-medium">
+                <p className="text-[11px] text-gray-400 dark:text-gray-500 text-center font-medium">
                   Directly adjust value or type in new number
                 </p>
               </div>
             ) : (
               <div className="space-y-2 text-center">
-                <div className="w-8 h-8 rounded-xl bg-forest-100 text-forest-700 flex items-center justify-center mx-auto">
+                <div className="w-8 h-8 rounded-xl bg-forest-100 dark:bg-forest-950/60 text-forest-700 dark:text-forest-400 flex items-center justify-center mx-auto">
                   <Sparkles className="w-4 h-4" />
                 </div>
-                <p className="text-xs font-bold text-gray-900">Automatic Habit Tracking</p>
-                <p className="text-[11px] text-gray-500 leading-relaxed font-medium">
+                <p className="text-xs font-bold text-gray-900 dark:text-gray-100">Automatic Habit Tracking</p>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
                   Progress is automatically computed from your habit check-ins. No manual entry needed.
                 </p>
               </div>
@@ -395,17 +395,17 @@ export default function GoalDetailPage() {
       </div>
 
       {/* Linked Habits Grid */}
-      <div className="bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+      <div className="bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 p-6 sm:p-8 shadow-sm space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
           <div>
-            <h2 className="text-lg font-bold text-gray-900 tracking-tight">Connected Habits</h2>
-            <p className="text-xs text-gray-400 font-medium">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 tracking-tight">Connected Habits</h2>
+            <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">
               Every completion of these habits contributes directly to this goal.
             </p>
           </div>
           <Link
             href="/habits"
-            className="text-xs font-bold text-forest-700 hover:text-forest-800 inline-flex items-center gap-1"
+            className="text-xs font-bold text-forest-700 dark:text-forest-400 hover:text-forest-800 dark:hover:text-forest-300 inline-flex items-center gap-1"
           >
             Manage Habits
             <ExternalLink className="w-3.5 h-3.5" />
@@ -413,7 +413,7 @@ export default function GoalDetailPage() {
         </div>
 
         {linkedHabits.length === 0 ? (
-          <div className="p-8 text-center text-xs text-gray-400 font-medium">
+          <div className="p-8 text-center text-xs text-gray-400 dark:text-gray-500 font-medium">
             No habits linked to this goal. You can edit this goal to connect existing habits.
           </div>
         ) : (
@@ -428,13 +428,13 @@ export default function GoalDetailPage() {
               return (
                 <div
                   key={typeof habit === "object" ? habit._id : habit}
-                  className="p-4 rounded-2xl bg-gray-50/70 border border-gray-100 flex items-center justify-between gap-3"
+                  className="p-4 rounded-2xl bg-gray-50/70 dark:bg-gray-800/70 border border-gray-100 dark:border-gray-700 flex items-center justify-between gap-3"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <HabitIcon name={hIcon} color={hColor} size="md" />
                     <div className="min-w-0">
-                      <p className="text-sm font-bold text-gray-900 truncate">{hName}</p>
-                      <p className="text-xs text-gray-400 font-medium mt-0.5 flex items-center gap-1.5">
+                      <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">{hName}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5 flex items-center gap-1.5">
                         <span className="capitalize">{hFreq?.replace("_", " ")}</span>
                         <span>•</span>
                         <span>{hTime}</span>
@@ -444,7 +444,7 @@ export default function GoalDetailPage() {
 
                   <Link
                     href="/habits"
-                    className="p-2 rounded-xl text-gray-400 hover:text-forest-700 hover:bg-white transition-colors shrink-0"
+                    className="p-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-forest-700 dark:hover:text-forest-400 hover:bg-white dark:hover:bg-gray-800 transition-colors shrink-0"
                     title="View in Habits"
                   >
                     <ExternalLink className="w-4 h-4" />
@@ -459,10 +459,10 @@ export default function GoalDetailPage() {
       {/* Progress History Chart & Timeline */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Chart (8 cols) */}
-        <div className="lg:col-span-8 bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm space-y-4">
-          <div className="pb-3 border-b border-gray-100">
-            <h2 className="text-lg font-bold text-gray-900 tracking-tight">Progress Trajectory</h2>
-            <p className="text-xs text-gray-400 font-medium">Cumulative progress recorded over time</p>
+        <div className="lg:col-span-8 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 p-6 sm:p-8 shadow-sm space-y-4">
+          <div className="pb-3 border-b border-gray-100 dark:border-gray-800">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 tracking-tight">Progress Trajectory</h2>
+            <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">Cumulative progress recorded over time</p>
           </div>
 
           <GoalProgressChart
@@ -474,10 +474,10 @@ export default function GoalDetailPage() {
         </div>
 
         {/* Weekly Breakdown / Milestones (4 cols) */}
-        <div className="lg:col-span-4 bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm space-y-4">
-          <div className="pb-3 border-b border-gray-100">
-            <h3 className="text-base font-bold text-gray-900 tracking-tight">Milestones</h3>
-            <p className="text-xs text-gray-400 font-medium">Progress timeline points</p>
+        <div className="lg:col-span-4 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 p-6 sm:p-8 shadow-sm space-y-4">
+          <div className="pb-3 border-b border-gray-100 dark:border-gray-800">
+            <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 tracking-tight">Milestones</h3>
+            <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">Progress timeline points</p>
           </div>
 
           <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
@@ -485,16 +485,16 @@ export default function GoalDetailPage() {
               goal.history.slice(-8).reverse().map((pt: any) => (
                 <div
                   key={pt.date}
-                  className="p-3 rounded-xl bg-gray-50/70 border border-gray-100 flex items-center justify-between text-xs"
+                  className="p-3 rounded-xl bg-gray-50/70 dark:bg-gray-800/70 border border-gray-100 dark:border-gray-700 flex items-center justify-between text-xs"
                 >
-                  <span className="font-semibold text-gray-700">{pt.date}</span>
-                  <span className="font-black text-forest-800">
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">{pt.date}</span>
+                  <span className="font-black text-forest-800 dark:text-forest-300">
                     {pt.value} / {goal.targetValue} ({pt.percentage}%)
                   </span>
                 </div>
               ))
             ) : (
-              <p className="text-xs text-gray-400 text-center py-6">No milestone points yet.</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-6">No milestone points yet.</p>
             )}
           </div>
         </div>

@@ -251,7 +251,7 @@ export function GoalFormModal({
 
         {/* Goal Title */}
         <div>
-          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
             Goal Title *
           </label>
           <input
@@ -259,15 +259,15 @@ export function GoalFormModal({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g., Maintain a 30-day study streak, Read 5 books..."
-            className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none transition-all"
+            className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none transition-all"
             required
           />
-          {errors.title && <p className="text-xs text-red-600 mt-1">{errors.title}</p>}
+          {errors.title && <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.title}</p>}
         </div>
 
         {/* Description */}
         <div>
-          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
             Description (Optional)
           </label>
           <textarea
@@ -275,13 +275,13 @@ export function GoalFormModal({
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
             placeholder="Why is this goal important? What is your strategy?"
-            className="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none transition-all resize-none"
+            className="w-full px-3.5 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none transition-all resize-none"
           />
         </div>
 
         {/* Goal Type Selector */}
         <div>
-          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+          <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">
             Goal Type
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -315,18 +315,18 @@ export function GoalFormModal({
                   onClick={() => handleTypeChange(t.id)}
                   className={`p-3 rounded-xl border text-left transition-all ${
                     isSelected
-                      ? "border-forest-600 bg-forest-50/60 ring-2 ring-forest-600/20"
-                      : "border-gray-200 bg-white hover:bg-gray-50/80"
+                      ? "border-forest-600 bg-forest-50/60 dark:bg-forest-950/40 ring-2 ring-forest-600/20"
+                      : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50/80 dark:hover:bg-gray-700"
                   }`}
                 >
                   <p
                     className={`text-xs font-bold ${
-                      isSelected ? "text-forest-900" : "text-gray-800"
+                      isSelected ? "text-forest-900 dark:text-forest-200" : "text-gray-800 dark:text-gray-200"
                     }`}
                   >
                     {t.label}
                   </p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">{t.desc}</p>
+                  <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">{t.desc}</p>
                 </button>
               );
             })}
@@ -336,23 +336,23 @@ export function GoalFormModal({
         {/* Habit Linking Section */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
               Link Habits {type !== "custom" && "*"}
             </label>
-            <span className="text-[11px] text-gray-400 font-medium">
+            <span className="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
               {selectedHabitIds.length} habit{selectedHabitIds.length === 1 ? "" : "s"} linked
             </span>
           </div>
 
           {userHabits.length === 0 ? (
-            <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 text-xs text-gray-500 flex items-center gap-2">
-              <Info className="w-4 h-4 text-gray-400 shrink-0" />
+            <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
+              <Info className="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0" />
               <span>
                 No active habits found. You can create a habit first or track this goal manually.
               </span>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1 bg-gray-50/50 rounded-xl border border-gray-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1 bg-gray-50/50 dark:bg-gray-800/40 rounded-xl border border-gray-200 dark:border-gray-700">
               {userHabits.map((h) => {
                 const isChecked = selectedHabitIds.includes(h._id);
                 return (
@@ -362,15 +362,15 @@ export function GoalFormModal({
                     onClick={() => toggleHabitSelection(h._id)}
                     className={`p-2.5 rounded-xl border flex items-center justify-between text-left transition-all ${
                       isChecked
-                        ? "bg-forest-50/80 border-forest-300 ring-1 ring-forest-600/30 shadow-xs"
-                        : "bg-white border-gray-200 hover:bg-gray-50"
+                        ? "bg-forest-50/80 dark:bg-forest-950/60 border-forest-300 dark:border-forest-700 ring-1 ring-forest-600/30 shadow-xs"
+                        : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       <HabitIcon name={h.icon} color={h.color} size="sm" />
                       <div className="min-w-0">
-                        <p className="text-xs font-bold text-gray-900 truncate">{h.name}</p>
-                        <p className="text-[10px] text-gray-400 capitalize truncate">
+                        <p className="text-xs font-bold text-gray-900 dark:text-gray-100 truncate">{h.name}</p>
+                        <p className="text-[10px] text-gray-400 dark:text-gray-500 capitalize truncate">
                           {h.frequency?.replace("_", " ")}
                         </p>
                       </div>
@@ -380,7 +380,7 @@ export function GoalFormModal({
                       className={`w-5 h-5 rounded-md flex items-center justify-center border transition-all ${
                         isChecked
                           ? "bg-forest-700 border-forest-700 text-white"
-                          : "border-gray-300 bg-white"
+                          : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
                       }`}
                     >
                       {isChecked && <Check className="w-3.5 h-3.5" strokeWidth={3} />}
@@ -390,22 +390,22 @@ export function GoalFormModal({
               })}
             </div>
           )}
-          {errors.habits && <p className="text-xs text-red-600 mt-1">{errors.habits}</p>}
+          {errors.habits && <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.habits}</p>}
         </div>
 
         {/* Tracking Mode Notice (if custom) */}
         {type === "custom" && (
-          <div className="p-3 bg-blue-50/60 rounded-xl border border-blue-200 flex items-center justify-between text-xs">
+          <div className="p-3 bg-blue-50/60 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-900/40 flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-blue-600 shrink-0" />
-              <span className="text-blue-900 font-medium">
+              <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+              <span className="text-blue-900 dark:text-blue-200 font-medium">
                 {selectedHabitIds.length > 0
                   ? "Automatically tracked using linked habits."
                   : "Manually tracked goal (update progress directly on the goal page)."}
               </span>
             </div>
             {selectedHabitIds.length === 0 && (
-              <span className="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full uppercase">
+              <span className="text-[10px] font-bold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/60 px-2 py-0.5 rounded-full uppercase">
                 Manual Mode
               </span>
             )}
@@ -415,7 +415,7 @@ export function GoalFormModal({
         {/* Target and Unit */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
               Target Value *
             </label>
             <input
@@ -423,14 +423,14 @@ export function GoalFormModal({
               min={1}
               value={targetValue}
               onChange={(e) => setTargetValue(Math.max(1, parseInt(e.target.value, 10) || 1))}
-              className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none"
+              className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none"
               required
             />
-            {errors.targetValue && <p className="text-xs text-red-600 mt-1">{errors.targetValue}</p>}
+            {errors.targetValue && <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.targetValue}</p>}
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
               Unit *
             </label>
             <input
@@ -438,7 +438,7 @@ export function GoalFormModal({
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
               placeholder="e.g. days, times, books, hours"
-              className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none"
+              className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none"
               required
             />
           </div>
@@ -447,21 +447,21 @@ export function GoalFormModal({
         {/* Start Date & End Date */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
               Start Date *
             </label>
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none"
+              className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none"
               required
             />
-            {errors.startDate && <p className="text-xs text-red-600 mt-1">{errors.startDate}</p>}
+            {errors.startDate && <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.startDate}</p>}
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
               End Date / Deadline *
             </label>
             <input
@@ -469,20 +469,20 @@ export function GoalFormModal({
               value={endDate}
               min={startDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none"
+              className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20 outline-none"
               required
             />
-            {errors.endDate && <p className="text-xs text-red-600 mt-1">{errors.endDate}</p>}
+            {errors.endDate && <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.endDate}</p>}
           </div>
         </div>
 
         {/* Icon & Color Selector */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">
               Goal Icon
             </label>
-            <div className="grid grid-cols-7 gap-1.5 max-h-28 overflow-y-auto p-1.5 bg-gray-50 rounded-xl border border-gray-200">
+            <div className="grid grid-cols-7 gap-1.5 max-h-28 overflow-y-auto p-1.5 bg-gray-50 dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700">
               {PRESET_ICONS.map((ic) => (
                 <button
                   type="button"
@@ -490,8 +490,8 @@ export function GoalFormModal({
                   onClick={() => setIcon(ic)}
                   className={`p-1.5 rounded-lg flex items-center justify-center transition-all ${
                     icon === ic
-                      ? "bg-white shadow-sm ring-2 ring-forest-700 text-forest-700"
-                      : "text-gray-500 hover:bg-white hover:text-gray-900"
+                      ? "bg-white dark:bg-gray-700 shadow-sm ring-2 ring-forest-700 text-forest-700"
+                      : "text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
                   }`}
                 >
                   <HabitIcon name={ic} size="sm" color={icon === ic ? color : "#64748B"} />
@@ -501,10 +501,10 @@ export function GoalFormModal({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">
               Color Accent
             </label>
-            <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-xl border border-gray-200">
+            <div className="flex flex-wrap gap-2 p-2 bg-gray-50 dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700">
               {PRESET_COLORS.map((c) => (
                 <button
                   type="button"
@@ -512,7 +512,7 @@ export function GoalFormModal({
                   onClick={() => setColor(c)}
                   className={`w-7 h-7 rounded-full transition-transform ${
                     color === c
-                      ? "scale-110 ring-2 ring-offset-2 ring-gray-900"
+                      ? "scale-110 ring-2 ring-offset-2 ring-gray-900 dark:ring-gray-100 dark:ring-offset-gray-900"
                       : "hover:scale-105"
                   }`}
                   style={{ backgroundColor: c }}
@@ -524,12 +524,12 @@ export function GoalFormModal({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
           <button
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+            className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
             Cancel
           </button>
