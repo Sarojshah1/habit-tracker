@@ -20,10 +20,10 @@ export async function GET(req: NextRequest) {
       query.subject = subject;
     }
 
-    const exams = await MockExam.find(query).sort({ date: -1, createdAt: -1 }).limit(limit);
-
-    // Get unique subjects
-    const subjects = await MockExam.distinct("subject", { userId: user._id });
+    const [exams, subjects] = await Promise.all([
+      MockExam.find(query).sort({ date: -1, createdAt: -1 }).limit(limit).lean(),
+      MockExam.distinct("subject", { userId: user._id }),
+    ]);
 
     // Calculate aggregated metrics
     const totalExams = exams.length;

@@ -95,6 +95,7 @@ const TaskSchema = new Schema<ITask>(
 
 TaskSchema.index({ userId: 1, status: 1 });
 TaskSchema.index({ userId: 1, dueDate: 1 });
+TaskSchema.index({ userId: 1, dueDate: 1, priority: -1 });
 TaskSchema.index({ userId: 1, priority: 1 });
 TaskSchema.index({ userId: 1, goalId: 1 });
 TaskSchema.index({ userId: 1, habitId: 1 });

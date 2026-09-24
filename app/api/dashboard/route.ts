@@ -32,45 +32,168 @@ export async function GET(req: NextRequest) {
     const timezone = user.timezone || "UTC";
     const todayDateStr = getUserTodayDateString(timezone);
 
-    // 1. Fetch active habits
-    const activeHabits = await Habit.find({
-      userId: user._id,
-      archived: false,
-      active: true,
-    }).sort({ "schedule.time": 1, createdAt: 1 });
+    // Compute date ranges beforehand for concurrent queries
+    const weekStartDate = getDateDaysAgoFrom(todayDateStr, 6);
+    const [currYear, currMonth] = todayDateStr.split("-").map(Number);
+    const daysInMonth = new Date(currYear, currMonth, 0).getDate();
+    const monthPrefix = `${currYear}-${String(currMonth).padStart(2, "0")}`;
+    const ninetyDaysAgo = getDateDaysAgoFrom(todayDateStr, 89);
 
-    // 2. Fetch today's completions
-    const todayCompletions = await HabitCompletion.find({
-      userId: user._id,
-      date: todayDateStr,
-    });
+    // Fetch all independent collections concurrently with lean() for fast serverless execution
+    const [
+      activeHabits,
+      todayCompletions,
+      completedDates,
+      weekCompletions,
+      allUserCompletions,
+      rawGoals,
+      recentActivity,
+      monthCompletions,
+      todayTasksRaw,
+      todayPlan,
+      todayReview,
+      todayTimeBlocks,
+      todayFocusSessions,
+      ninetyDayCompletions,
+    ] = await Promise.all([
+      // 1. Fetch active habits
+      Habit.find({
+        userId: user._id,
+        archived: false,
+        active: true,
+      })
+        .sort({ "schedule.time": 1, createdAt: 1 })
+        .lean(),
+
+      // 2. Fetch today's completions
+      HabitCompletion.find({
+        userId: user._id,
+        date: todayDateStr,
+      })
+        .select("habitId status notes")
+        .lean(),
+
+      // 3. Completed dates for overall streaks
+      HabitCompletion.distinct("date", {
+        userId: user._id,
+        status: "completed",
+      }),
+
+      // 4. Completions for past 7 days
+      HabitCompletion.find({
+        userId: user._id,
+        date: { $gte: weekStartDate, $lte: todayDateStr },
+        status: "completed",
+      })
+        .select("date")
+        .lean(),
+
+      // 5. User completions for active goals
+      HabitCompletion.find({
+        userId: user._id,
+        status: "completed",
+      })
+        .select("habitId date status")
+        .lean(),
+
+      // 6. Active goals
+      Goal.find({
+        userId: user._id,
+        status: "active",
+      })
+        .populate("habitIds", "name icon color")
+        .populate("associatedHabitIds", "name icon color")
+        .sort({ createdAt: -1 })
+        .lean(),
+
+      // 7. Recent activity (capped to 8)
+      Activity.find({
+        userId: user._id,
+      })
+        .sort({ createdAt: -1 })
+        .limit(8)
+        .lean(),
+
+      // 8. Month completions
+      HabitCompletion.find({
+        userId: user._id,
+        date: { $gte: `${monthPrefix}-01`, $lte: `${monthPrefix}-${daysInMonth}` },
+      })
+        .select("date status")
+        .lean(),
+
+      // 9. Today's tasks
+      Task.find({ userId: user._id, dueDate: todayDateStr })
+        .populate("goalId", "title icon color")
+        .populate("habitId", "name icon color")
+        .sort({ priority: -1, createdAt: 1 })
+        .lean(),
+
+      // 10. Today's daily plan
+      DailyPlan.findOne({ userId: user._id, date: todayDateStr })
+        .populate({
+          path: "priorityTaskIds",
+          select: "title priority status dueDate estimatedMinutes actualMinutes",
+        })
+        .lean(),
+
+      // 11. Today's daily review
+      DailyReview.findOne({ userId: user._id, date: todayDateStr }).lean(),
+
+      // 12. Today's time blocks
+      TimeBlock.find({
+        userId: user._id,
+        start: {
+          $gte: new Date(`${todayDateStr}T00:00:00.000Z`),
+          $lte: new Date(`${todayDateStr}T23:59:59.999Z`),
+        },
+      })
+        .sort({ start: 1 })
+        .lean(),
+
+      // 13. Today's focus sessions
+      FocusSession.find({
+        userId: user._id,
+        status: "completed",
+        startedAt: {
+          $gte: new Date(`${todayDateStr}T00:00:00.000Z`),
+          $lte: new Date(`${todayDateStr}T23:59:59.999Z`),
+        },
+      })
+        .select("duration")
+        .lean(),
+
+      // 14. 90-day heatmap completions
+      HabitCompletion.find({
+        userId: user._id,
+        date: { $gte: ninetyDaysAgo, $lte: todayDateStr },
+        status: { $in: ["completed", "frozen"] },
+      })
+        .select("date")
+        .lean(),
+    ]);
 
     const completionMap = new Map<string, { status: string; notes?: string }>();
-    todayCompletions.forEach((c) => {
+    todayCompletions.forEach((c: any) => {
       completionMap.set(c.habitId.toString(), { status: c.status, notes: c.notes });
     });
 
     // 3. Today's scheduled habits
     const todayHabits = activeHabits
-      .filter((h) => isHabitScheduledForDate(h, todayDateStr, timezone))
-      .map((h) => {
+      .filter((h: any) => isHabitScheduledForDate(h, todayDateStr, timezone))
+      .map((h: any) => {
         const record = completionMap.get(h._id.toString());
         return {
-          ...h.toObject(),
+          ...h,
           todayStatus: record ? record.status : "pending",
           todayNotes: record ? record.notes : "",
         };
       });
 
-    const completedTodayCount = todayHabits.filter((h) => h.todayStatus === "completed").length;
+    const completedTodayCount = todayHabits.filter((h: any) => h.todayStatus === "completed").length;
     const totalTodayHabits = todayHabits.length;
 
     // 4. Streaks (calculated from all historical completed dates)
-    const completedDates = await HabitCompletion.distinct("date", {
-      userId: user._id,
-      status: "completed",
-    });
-
     const { currentStreak, longestStreak } = calculateOverallStreaks(completedDates, todayDateStr);
 
     // 5. Weekly Progress (last 7 days: 6 days ago up to today)
@@ -79,22 +202,14 @@ export async function GET(req: NextRequest) {
     let totalWeeklyExpected = 0;
     let totalWeeklyCompleted = 0;
 
-    // Find completions in the last 7 days
-    const weekStartDate = getDateDaysAgoFrom(todayDateStr, 6);
-    const weekCompletions = await HabitCompletion.find({
-      userId: user._id,
-      date: { $gte: weekStartDate, $lte: todayDateStr },
-      status: "completed",
-    });
-
     const weekCompletionCountsByDate = new Map<string, number>();
-    weekCompletions.forEach((c) => {
+    weekCompletions.forEach((c: any) => {
       weekCompletionCountsByDate.set(c.date, (weekCompletionCountsByDate.get(c.date) || 0) + 1);
     });
 
     for (let i = 6; i >= 0; i--) {
       const dateStr = getDateDaysAgoFrom(todayDateStr, i);
-      const scheduledCount = activeHabits.filter((h) => isHabitScheduledForDate(h, dateStr, timezone)).length;
+      const scheduledCount = activeHabits.filter((h: any) => isHabitScheduledForDate(h, dateStr, timezone)).length;
       const completedCount = weekCompletionCountsByDate.get(dateStr) || 0;
       const pct = scheduledCount > 0 ? Math.round((completedCount / scheduledCount) * 100) : 0;
 
@@ -116,52 +231,23 @@ export async function GET(req: NextRequest) {
       totalWeeklyExpected > 0 ? Math.min(100, Math.round((totalWeeklyCompleted / totalWeeklyExpected) * 100)) : 0;
 
     // 6. Active Goals with dynamic progress
-    const allUserCompletions = await HabitCompletion.find({
-       userId: user._id,
-       status: "completed",
-    }).select("habitId date status");
-
-    const rawGoals = await Goal.find({
-      userId: user._id,
-      status: "active",
-    })
-      .populate("habitIds", "name icon color")
-      .populate("associatedHabitIds", "name icon color")
-      .sort({ createdAt: -1 });
-
-    const activeGoals = rawGoals.map((g) => {
+    const activeGoals = rawGoals.map((g: any) => {
       const progress = calculateGoalProgress(g, allUserCompletions, timezone, todayDateStr);
       const habits =
         g.habitIds && g.habitIds.length > 0
           ? g.habitIds
           : g.associatedHabitIds || [];
       return {
-        ...g.toObject(),
+        ...g,
         habitIds: habits,
         currentValue: progress.currentValue,
         progress,
       };
     });
 
-    // 7. Recent Activity
-    const recentActivity = await Activity.find({
-      userId: user._id,
-    })
-      .sort({ createdAt: -1 })
-      .limit(8);
-
     // 8. Mini monthly calendar data (current month)
-    const [currYear, currMonth] = todayDateStr.split("-").map(Number);
-    const daysInMonth = new Date(currYear, currMonth, 0).getDate();
-    const monthPrefix = `${currYear}-${String(currMonth).padStart(2, "0")}`;
-
-    const monthCompletions = await HabitCompletion.find({
-      userId: user._id,
-      date: { $gte: `${monthPrefix}-01`, $lte: `${monthPrefix}-${daysInMonth}` },
-    });
-
     const monthCompletionsByDate = new Map<string, { completed: number; skipped: number }>();
-    monthCompletions.forEach((c) => {
+    monthCompletions.forEach((c: any) => {
       const current = monthCompletionsByDate.get(c.date) || { completed: 0, skipped: 0 };
       if (c.status === "completed") current.completed++;
       if (c.status === "skipped") current.skipped++;
@@ -171,7 +257,7 @@ export async function GET(req: NextRequest) {
     const monthCalendarDays = [];
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${monthPrefix}-${String(day).padStart(2, "0")}`;
-      const scheduledCount = activeHabits.filter((h) => isHabitScheduledForDate(h, dateStr, timezone)).length;
+      const scheduledCount = activeHabits.filter((h: any) => isHabitScheduledForDate(h, dateStr, timezone)).length;
       const rec = monthCompletionsByDate.get(dateStr) || { completed: 0, skipped: 0 };
 
       let status = "none";
@@ -198,41 +284,14 @@ export async function GET(req: NextRequest) {
     }
 
     // 9. Today's Tasks & Priorities
-    const [todayTasksRaw, todayPlan, todayReview, todayTimeBlocks, todayFocusSessions] = await Promise.all([
-      Task.find({ userId: user._id, dueDate: todayDateStr })
-        .populate("goalId", "title icon color")
-        .populate("habitId", "name icon color")
-        .sort({ priority: -1, createdAt: 1 }),
-      DailyPlan.findOne({ userId: user._id, date: todayDateStr }).populate({
-        path: "priorityTaskIds",
-        select: "title priority status dueDate estimatedMinutes actualMinutes",
-      }),
-      DailyReview.findOne({ userId: user._id, date: todayDateStr }),
-      TimeBlock.find({
-        userId: user._id,
-        start: {
-          $gte: new Date(`${todayDateStr}T00:00:00.000Z`),
-          $lte: new Date(`${todayDateStr}T23:59:59.999Z`),
-        },
-      }).sort({ start: 1 }),
-      FocusSession.find({
-        userId: user._id,
-        status: "completed",
-        startedAt: {
-          $gte: new Date(`${todayDateStr}T00:00:00.000Z`),
-          $lte: new Date(`${todayDateStr}T23:59:59.999Z`),
-        },
-      }),
-    ]);
-
-    const todayTasks = todayTasksRaw.filter((t) => t.status !== "cancelled");
-    const completedTasksCount = todayTasks.filter((t) => t.status === "completed").length;
+    const todayTasks = todayTasksRaw.filter((t: any) => t.status !== "cancelled");
+    const completedTasksCount = todayTasks.filter((t: any) => t.status === "completed").length;
 
     // Top priorities: From dailyPlan if exists, or top high/medium priority tasks
     let todayPriorities: any[] = [];
     if (todayPlan?.priorityTaskIds && todayPlan.priorityTaskIds.length > 0) {
-      const priorityIds = new Set(todayPlan.priorityTaskIds.map((id) => id.toString()));
-      todayPriorities = todayTasks.filter((t) => priorityIds.has(t._id.toString()));
+      const priorityIds = new Set(todayPlan.priorityTaskIds.map((item: any) => (item._id || item).toString()));
+      todayPriorities = todayTasks.filter((t: any) => priorityIds.has(t._id.toString()));
     }
     if (todayPriorities.length === 0) {
       todayPriorities = todayTasks.slice(0, 3);
@@ -240,8 +299,8 @@ export async function GET(req: NextRequest) {
 
     // Today's schedule: Combine user TimeBlocks + tasks that have scheduledStart/End
     const scheduledTasksAsBlocks = todayTasks
-      .filter((t) => t.scheduledStart && t.scheduledEnd)
-      .map((t) => ({
+      .filter((t: any) => t.scheduledStart && t.scheduledEnd)
+      .map((t: any) => ({
         _id: `task-sched-${t._id}`,
         title: t.title,
         start: t.scheduledStart!,
@@ -258,7 +317,7 @@ export async function GET(req: NextRequest) {
     // Focus Target & Completed Focus Time
     const focusTargetMinutes = todayPlan?.focusTargetMinutes || 120;
     const focusCompletedMinutes = todayFocusSessions.reduce(
-      (acc, s) => acc + (s.duration || 0),
+      (acc: number, s: any) => acc + (s.duration || 0),
       0
     );
 
@@ -273,15 +332,8 @@ export async function GET(req: NextRequest) {
     );
 
     // 90-Day Discipline Matrix for Habit Heatmap
-    const ninetyDaysAgo = getDateDaysAgoFrom(todayDateStr, 89);
-    const ninetyDayCompletions = await HabitCompletion.find({
-      userId: user._id,
-      date: { $gte: ninetyDaysAgo, $lte: todayDateStr },
-      status: { $in: ["completed", "frozen"] },
-    }).select("date");
-
     const countByDateMap = new Map<string, number>();
-    ninetyDayCompletions.forEach((c) => {
+    ninetyDayCompletions.forEach((c: any) => {
       countByDateMap.set(c.date, (countByDateMap.get(c.date) || 0) + 1);
     });
 

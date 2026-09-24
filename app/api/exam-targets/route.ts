@@ -29,43 +29,55 @@ export async function GET(req: NextRequest) {
     const user = await getAuthenticatedUser(req);
     if (!user) return unauthorizedResponse();
 
-    const targets = await ExamTarget.find({ userId: user._id }).sort({ examDate: 1 });
+    const targets = await ExamTarget.find({ userId: user._id }).sort({ examDate: 1 }).lean();
     const today = new Date().toISOString().split("T")[0];
 
+    // Fetch all user's mock exams in one single query to eliminate N+1 latency
+    const allMockExams = await MockExam.find({ userId: user._id })
+      .select("subject percentage date")
+      .sort({ date: -1 })
+      .lean();
+
+    // Group mock exams by lowercase subject in memory
+    const mockExamsBySubject = new Map<string, any[]>();
+    for (const m of allMockExams) {
+      const subKey = (m.subject || "").toLowerCase().trim();
+      if (!mockExamsBySubject.has(subKey)) {
+        mockExamsBySubject.set(subKey, []);
+      }
+      const list = mockExamsBySubject.get(subKey)!;
+      if (list.length < 5) {
+        list.push(m);
+      }
+    }
+
     // Enrich with days left and linked mock exams stats
-    const enriched = await Promise.all(
-      targets.map(async (target) => {
-        const examDateObj = new Date(target.examDate);
-        const todayObj = new Date(today);
-        const diffTime = examDateObj.getTime() - todayObj.getTime();
-        const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const enriched = targets.map((target: any) => {
+      const examDateObj = new Date(target.examDate);
+      const todayObj = new Date(today);
+      const diffTime = examDateObj.getTime() - todayObj.getTime();
+      const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        // Find recent mock exams for this subject
-        const mockExams = await MockExam.find({
-          userId: user._id,
-          subject: new RegExp(`^${target.subject}$`, "i"),
-        })
-          .sort({ date: -1 })
-          .limit(5);
+      const subKey = (target.subject || "").toLowerCase().trim();
+      const mockExams = mockExamsBySubject.get(subKey) || [];
 
-        let latestMockScore: number | null = null;
-        let avgMockScore: number | null = null;
-        if (mockExams.length > 0) {
-          latestMockScore = mockExams[0].percentage;
-          const sum = mockExams.reduce((acc, curr) => acc + curr.percentage, 0);
-          avgMockScore = Math.round((sum / mockExams.length) * 10) / 10;
-        }
+      let latestMockScore: number | null = null;
+      let avgMockScore: number | null = null;
+      if (mockExams.length > 0) {
+        latestMockScore = mockExams[0].percentage;
+        const sum = mockExams.reduce((acc: number, curr: any) => acc + curr.percentage, 0);
+        avgMockScore = Math.round((sum / mockExams.length) * 10) / 10;
+      }
 
-        return {
-          ...target.toObject(),
-          daysLeft,
-          isUpcoming: daysLeft >= 0,
-          latestMockScore,
-          avgMockScore,
-          mockCount: mockExams.length,
-        };
-      })
-    );
+      return {
+        ...target,
+        daysLeft,
+        isUpcoming: daysLeft >= 0,
+        latestMockScore,
+        avgMockScore,
+        mockCount: mockExams.length,
+      };
+    });
 
     return NextResponse.json({ success: true, targets: enriched });
   } catch (error) {

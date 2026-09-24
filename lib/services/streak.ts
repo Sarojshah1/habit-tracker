@@ -7,7 +7,7 @@ export interface StreakStats {
   longestStreak: number;
 }
 
-export function isHabitScheduledForDate(habit: IHabit, dateStr: string, timezone: string = "UTC"): boolean {
+export function isHabitScheduledForDate(habit: any, dateStr: string, timezone: string = "UTC"): boolean {
   // If habit started after this date, it is not scheduled
   if (habit.startDate && habit.startDate > dateStr) {
     return false;
@@ -127,8 +127,8 @@ export function calculateOverallStreaks(
  * Calculates streak and completion stats for an individual habit
  */
 export function calculateHabitStats(
-  habit: IHabit,
-  completions: IHabitCompletion[],
+  habit: any,
+  completions: any[],
   todayDateStr: string,
   timezone: string = "UTC"
 ) {

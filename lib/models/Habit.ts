@@ -94,6 +94,7 @@ const HabitSchema = new Schema<IHabit>(
 
 HabitSchema.index({ userId: 1, active: 1 });
 HabitSchema.index({ userId: 1, archived: 1 });
+HabitSchema.index({ userId: 1, archived: 1, active: 1 });
 
 export const Habit: Model<IHabit> =
   mongoose.models.Habit || mongoose.model<IHabit>("Habit", HabitSchema);

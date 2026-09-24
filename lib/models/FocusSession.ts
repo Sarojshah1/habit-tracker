@@ -67,6 +67,7 @@ const FocusSessionSchema = new Schema<IFocusSession>(
 );
 
 FocusSessionSchema.index({ userId: 1, startedAt: -1 });
+FocusSessionSchema.index({ userId: 1, status: 1, startedAt: -1 });
 
 export const FocusSession: Model<IFocusSession> =
   mongoose.models.FocusSession ||
