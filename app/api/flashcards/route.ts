@@ -24,19 +24,19 @@ export async function GET(req: NextRequest) {
       query.dueDate = { $lte: today };
     }
 
-    const cards = await Flashcard.find(query).sort({ dueDate: 1, createdAt: -1 });
-    const decks = await Flashcard.distinct("deck", { userId: user._id });
-
-    // Aggregate stats
-    const totalCards = await Flashcard.countDocuments({ userId: user._id });
-    const dueCardsCount = await Flashcard.countDocuments({
-      userId: user._id,
-      dueDate: { $lte: today },
-    });
-    const masteredCardsCount = await Flashcard.countDocuments({
-      userId: user._id,
-      intervalDays: { $gte: 14 },
-    });
+    const [cards, decks, totalCards, dueCardsCount, masteredCardsCount] = await Promise.all([
+      Flashcard.find(query).sort({ dueDate: 1, createdAt: -1 }).lean(),
+      Flashcard.distinct("deck", { userId: user._id }),
+      Flashcard.countDocuments({ userId: user._id }),
+      Flashcard.countDocuments({
+        userId: user._id,
+        dueDate: { $lte: today },
+      }),
+      Flashcard.countDocuments({
+        userId: user._id,
+        intervalDays: { $gte: 14 },
+      }),
+    ]);
 
     return NextResponse.json({
       success: true,

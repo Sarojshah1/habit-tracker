@@ -26,34 +26,36 @@ export async function GET(req: NextRequest) {
       query.archived = true;
     }
 
-    const habits = await Habit.find(query).sort({ createdAt: -1 });
+    const [habits, totalCount, activeCount, archivedCount] = await Promise.all([
+      Habit.find(query).sort({ createdAt: -1 }).lean(),
+      Habit.countDocuments({ userId: user._id }),
+      Habit.countDocuments({ userId: user._id, archived: false, active: true }),
+      Habit.countDocuments({ userId: user._id, archived: true }),
+    ]);
 
     const todayDateStr = getUserTodayDateString(user.timezone || "UTC");
 
-    // Fetch all completions for this user to compute stats
-    const habitIds = habits.map((h) => h._id);
+    // Fetch completions with projection and lean()
+    const habitIds = habits.map((h: any) => h._id);
     const completions = await HabitCompletion.find({
       userId: user._id,
       habitId: { $in: habitIds },
-    });
+    })
+      .select("habitId date status")
+      .lean();
 
-    const enrichedHabits = habits.map((h) => {
+    const enrichedHabits = habits.map((h: any) => {
       const stats = calculateHabitStats(h, completions, todayDateStr, user.timezone);
       const todayRecord = completions.find(
-        (c) => c.habitId.toString() === h._id.toString() && c.date === todayDateStr
+        (c: any) => c.habitId.toString() === h._id.toString() && c.date === todayDateStr
       );
 
       return {
-        ...h.toObject(),
+        ...h,
         stats,
         todayStatus: todayRecord ? todayRecord.status : "pending",
       };
     });
-
-    // Also return counts for filters
-    const totalCount = await Habit.countDocuments({ userId: user._id });
-    const activeCount = await Habit.countDocuments({ userId: user._id, archived: false, active: true });
-    const archivedCount = await Habit.countDocuments({ userId: user._id, archived: true });
 
     return NextResponse.json({
       success: true,

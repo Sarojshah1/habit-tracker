@@ -11,10 +11,12 @@ export async function GET(req: NextRequest) {
     const user = await getAuthenticatedUser(req);
     if (!user) return unauthorizedResponse();
 
-    const notes = await Note.find({ userId: user._id, archived: false }).sort({
-      pinned: -1,
-      updatedAt: -1,
-    });
+    const notes = await Note.find({ userId: user._id, archived: false })
+      .sort({
+        pinned: -1,
+        updatedAt: -1,
+      })
+      .lean();
 
     return NextResponse.json({ success: true, notes });
   } catch (error) {

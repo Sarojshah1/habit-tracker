@@ -112,19 +112,24 @@ export async function getUserTasks(
     query.$or = [{ title: regex }, { description: regex }];
   }
 
-  const tasks = await Task.find(query)
-    .populate("goalId", "title icon color status")
-    .populate("habitId", "name icon color frequency")
-    .sort({ dueDate: 1, priority: -1, createdAt: -1 });
+  const [tasks, allUserTasks] = await Promise.all([
+    Task.find(query)
+      .populate("goalId", "title icon color status")
+      .populate("habitId", "name icon color frequency")
+      .sort({ dueDate: 1, priority: -1, createdAt: -1 })
+      .lean(),
+    Task.find({ userId })
+      .select("status dueDate priority")
+      .lean(),
+  ]);
 
   // Counts for UI filters
-  const allUserTasks = await Task.find({ userId });
   const counts = {
-    all: allUserTasks.filter((t) => t.status !== "cancelled").length,
-    today: allUserTasks.filter((t) => t.dueDate === todayStr && t.status !== "cancelled").length,
-    upcoming: allUserTasks.filter((t) => t.dueDate > todayStr && t.status !== "cancelled").length,
-    completed: allUserTasks.filter((t) => t.status === "completed").length,
-    high_priority: allUserTasks.filter((t) => t.priority === "high" && t.status !== "completed").length,
+    all: allUserTasks.filter((t: any) => t.status !== "cancelled").length,
+    today: allUserTasks.filter((t: any) => t.dueDate === todayStr && t.status !== "cancelled").length,
+    upcoming: allUserTasks.filter((t: any) => t.dueDate > todayStr && t.status !== "cancelled").length,
+    completed: allUserTasks.filter((t: any) => t.status === "completed").length,
+    high_priority: allUserTasks.filter((t: any) => t.priority === "high" && t.status !== "completed").length,
   };
 
   return { tasks, counts, todayDate: todayStr };

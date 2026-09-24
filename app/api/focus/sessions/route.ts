@@ -17,7 +17,8 @@ export async function GET(req: NextRequest) {
       .populate("habitId", "name icon color")
       .populate("taskId", "title priority dueDate estimatedMinutes actualMinutes")
       .sort({ startedAt: -1 })
-      .limit(30);
+      .limit(30)
+      .lean();
 
     const totalMinutes = sessions
       .filter((s) => s.status === "completed")

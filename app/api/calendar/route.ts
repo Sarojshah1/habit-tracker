@@ -31,35 +31,35 @@ export async function GET(req: NextRequest) {
     const startDate = `${year}-${monthStr}-01`;
     const endDate = `${year}-${monthStr}-${String(daysInMonth).padStart(2, "0")}`;
 
-    // Active & archived habits that existed during or before this month
-    const habits = await Habit.find({
-      userId: user._id,
-      startDate: { $lte: endDate },
-    });
-
-    const completions = await HabitCompletion.find({
-      userId: user._id,
-      date: { $gte: startDate, $lte: endDate },
-    });
-
-    // Target exams and mock exams for this month
-    const examTargets = await ExamTarget.find({
-      userId: user._id,
-      examDate: { $gte: startDate, $lte: endDate },
-    });
-
-    const mockExams = await MockExam.find({
-      userId: user._id,
-      date: { $gte: startDate, $lte: endDate },
-    });
-
-    // Active goals that overlap with this month
-    const activeGoals = await Goal.find({
-      userId: user._id,
-      status: { $in: ["active", "completed"] },
-      startDate: { $lte: endDate },
-      endDate: { $gte: startDate },
-    }).select("title icon color habitIds associatedHabitIds startDate endDate");
+    // Fetch calendar data concurrently with lean()
+    const [habits, completions, examTargets, mockExams, activeGoals] = await Promise.all([
+      Habit.find({
+        userId: user._id,
+        startDate: { $lte: endDate },
+      }).lean(),
+      HabitCompletion.find({
+        userId: user._id,
+        date: { $gte: startDate, $lte: endDate },
+      })
+        .select("habitId date status notes")
+        .lean(),
+      ExamTarget.find({
+        userId: user._id,
+        examDate: { $gte: startDate, $lte: endDate },
+      }).lean(),
+      MockExam.find({
+        userId: user._id,
+        date: { $gte: startDate, $lte: endDate },
+      }).lean(),
+      Goal.find({
+        userId: user._id,
+        status: { $in: ["active", "completed"] },
+        startDate: { $lte: endDate },
+        endDate: { $gte: startDate },
+      })
+        .select("title icon color habitIds associatedHabitIds startDate endDate")
+        .lean(),
+    ]);
 
     // Map completions by date -> habitId -> status
     const completionByDateAndHabit = new Map<string, Map<string, { status: string; notes?: string }>>();

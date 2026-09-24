@@ -27,17 +27,31 @@ export async function GET(req: NextRequest) {
 
     const startDate = getDateDaysAgoFrom(todayDateStr, daysCount - 1);
 
-    // 1. Fetch habits and completions
-    const habits = await Habit.find({ userId: user._id, archived: false, active: true });
-    const allCompletions = await HabitCompletion.find({ userId: user._id });
-    const rangeCompletions = allCompletions.filter((c) => c.date >= startDate && c.date <= todayDateStr);
+    // 1. Fetch habits, completions, focus sessions, and goals concurrently with lean()
+    const [habits, allCompletions, focusSessions, userGoals] = await Promise.all([
+      Habit.find({ userId: user._id, archived: false, active: true }).lean(),
+      HabitCompletion.find({ userId: user._id })
+        .select("habitId date status")
+        .lean(),
+      FocusSession.find({ userId: user._id, status: "completed" })
+        .select("duration")
+        .lean(),
+      Goal.find({
+        userId: user._id,
+        status: { $ne: "archived" },
+      })
+        .populate("habitIds", "name icon color")
+        .populate("associatedHabitIds", "name icon color")
+        .lean(),
+    ]);
+
+    const rangeCompletions = allCompletions.filter((c: any) => c.date >= startDate && c.date <= todayDateStr);
 
     // 2. Summary stats
-    const totalHabitsCompleted = allCompletions.filter((c) => c.status === "completed").length;
+    const totalHabitsCompleted = allCompletions.filter((c: any) => c.status === "completed").length;
 
     // Time spent in focus sessions
-    const focusSessions = await FocusSession.find({ userId: user._id, status: "completed" });
-    const totalFocusMinutes = focusSessions.reduce((acc, s) => acc + (s.duration || 0), 0);
+    const totalFocusMinutes = focusSessions.reduce((acc: number, s: any) => acc + (s.duration || 0), 0);
     const focusHours = Math.floor(totalFocusMinutes / 60);
     const focusRemainingMins = totalFocusMinutes % 60;
     const focusTimeString = focusHours > 0 ? `${focusHours}h ${focusRemainingMins}m` : `${focusRemainingMins}m`;
@@ -178,14 +192,7 @@ export async function GET(req: NextRequest) {
     }));
 
     // 7. Goal Performance Analytics
-    const userGoals = await Goal.find({
-      userId: user._id,
-      status: { $ne: "archived" },
-    })
-      .populate("habitIds", "name icon color")
-      .populate("associatedHabitIds", "name icon color");
-
-    const goalsWithProgress = userGoals.map((g) => {
+    const goalsWithProgress = userGoals.map((g: any) => {
       const progress = calculateGoalProgress(g, allCompletions, timezone, todayDateStr);
       return {
         id: g._id.toString(),

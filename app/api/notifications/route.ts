@@ -13,14 +13,16 @@ export async function GET(req: NextRequest) {
     // Dynamically evaluate and sync notifications based on habits, tasks, and reviews
     await syncUserNotifications(user);
 
-    const notifications = await Notification.find({ userId: user._id })
-      .sort({ createdAt: -1 })
-      .limit(30);
-
-    const unreadCount = await Notification.countDocuments({
-      userId: user._id,
-      read: false,
-    });
+    const [notifications, unreadCount] = await Promise.all([
+      Notification.find({ userId: user._id })
+        .sort({ createdAt: -1 })
+        .limit(30)
+        .lean(),
+      Notification.countDocuments({
+        userId: user._id,
+        read: false,
+      }),
+    ]);
 
     return NextResponse.json({
       success: true,

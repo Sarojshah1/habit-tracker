@@ -400,16 +400,19 @@ export async function getUserGoals(
   filter: string = "all",
   timezone: string = "UTC"
 ) {
-  const allGoals = await Goal.find({ userId })
-    .populate("habitIds", "name icon color frequency schedule")
-    .populate("associatedHabitIds", "name icon color frequency schedule")
-    .populate("taskIds", "title status priority dueDate estimatedMinutes actualMinutes")
-    .sort({ createdAt: -1 });
-
-  const completions = await HabitCompletion.find({
-    userId,
-    status: "completed",
-  }).select("habitId date status");
+  const [allGoals, completions] = await Promise.all([
+    Goal.find({ userId })
+      .populate("habitIds", "name icon color frequency schedule")
+      .populate("associatedHabitIds", "name icon color frequency schedule")
+      .populate("taskIds", "title status priority dueDate estimatedMinutes actualMinutes")
+      .sort({ createdAt: -1 }),
+    HabitCompletion.find({
+      userId,
+      status: "completed",
+    })
+      .select("habitId date status")
+      .lean(),
+  ]);
 
   const goalsWithProgress = [];
   for (const goal of allGoals) {

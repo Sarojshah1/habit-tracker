@@ -56,6 +56,7 @@ const HabitCompletionSchema = new Schema<IHabitCompletion>(
 // Compound unique index to guarantee no duplicate completions for the same habit on the same date
 HabitCompletionSchema.index({ userId: 1, habitId: 1, date: 1 }, { unique: true });
 HabitCompletionSchema.index({ userId: 1, date: 1 });
+HabitCompletionSchema.index({ userId: 1, status: 1, date: 1 });
 
 export const HabitCompletion: Model<IHabitCompletion> =
   mongoose.models.HabitCompletion ||
