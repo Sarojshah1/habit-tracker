@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 export type CompletionStatus = "completed" | "skipped" | "missed" | "frozen";
+export type HabitCompletionType = "full" | "micro";
 
 export interface IHabitCompletion extends Document {
   _id: mongoose.Types.ObjectId;
@@ -9,6 +10,7 @@ export interface IHabitCompletion extends Document {
   date: string; // YYYY-MM-DD
   completedAt: Date;
   status: CompletionStatus;
+  completionType?: HabitCompletionType;
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -41,6 +43,11 @@ const HabitCompletionSchema = new Schema<IHabitCompletion>(
       type: String,
       enum: ["completed", "skipped", "missed", "frozen"],
       default: "completed",
+    },
+    completionType: {
+      type: String,
+      enum: ["full", "micro"],
+      default: "full",
     },
     notes: {
       type: String,

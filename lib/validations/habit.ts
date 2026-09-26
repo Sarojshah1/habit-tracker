@@ -18,6 +18,7 @@ export const habitSchema = z.object({
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid start date format (YYYY-MM-DD)"),
   goalId: z.string().optional(),
   habitStackAfterHabitId: z.string().optional().nullable(),
+  twoMinuteVersion: z.string().max(120, "2-minute version is too long").optional().default(""),
 });
 
 export const habitUpdateSchema = habitSchema.partial().extend({
@@ -29,6 +30,7 @@ export const completionSchema = z.object({
   habitId: z.string().min(1, "Habit ID is required"),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
   status: z.enum(["completed", "skipped", "missed"]).default("completed"),
+  completionType: z.enum(["full", "micro"]).optional().default("full"),
   notes: z.string().max(500).optional().default(""),
 });
 

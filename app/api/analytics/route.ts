@@ -233,6 +233,36 @@ export async function GET(req: NextRequest) {
       goals: goalsWithProgress,
     };
 
+    // Calculate Day-of-Week consistency breakdown (Monday - Sunday)
+    const dayStats = [
+      { day: "Mon", scheduled: 0, completed: 0, dayIndex: 1 },
+      { day: "Tue", scheduled: 0, completed: 0, dayIndex: 2 },
+      { day: "Wed", scheduled: 0, completed: 0, dayIndex: 3 },
+      { day: "Thu", scheduled: 0, completed: 0, dayIndex: 4 },
+      { day: "Fri", scheduled: 0, completed: 0, dayIndex: 5 },
+      { day: "Sat", scheduled: 0, completed: 0, dayIndex: 6 },
+      { day: "Sun", scheduled: 0, completed: 0, dayIndex: 0 },
+    ];
+
+    for (let i = daysCount - 1; i >= 0; i--) {
+      const dStr = getDateDaysAgoFrom(todayDateStr, i);
+      const dIdx = getUserDayOfWeek(dStr, timezone);
+      const stat = dayStats.find((s) => s.dayIndex === dIdx);
+      if (stat) {
+        const scheduled = habits.filter((h) => isHabitScheduledForDate(h, dStr, timezone)).length;
+        const comp = rangeCompletions.filter((c: any) => c.date === dStr && c.status === "completed").length;
+        stat.scheduled += scheduled;
+        stat.completed += comp;
+      }
+    }
+
+    const dayOfWeekStats = dayStats.map((s) => ({
+      day: s.day,
+      scheduled: s.scheduled,
+      completed: s.completed,
+      rate: s.scheduled > 0 ? Math.min(100, Math.round((s.completed / s.scheduled) * 100)) : 0,
+    }));
+
     return NextResponse.json({
       success: true,
       summary: {
@@ -247,6 +277,7 @@ export async function GET(req: NextRequest) {
       rankedHabits: habitStatsList,
       weeklyActivity,
       goalMetrics,
+      dayOfWeekStats,
     });
   } catch (error) {
     console.error("GET /api/analytics error:", error);

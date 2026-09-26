@@ -14,6 +14,8 @@ import {
   TrendingUp,
   RotateCcw,
   Shield,
+  Zap,
+  Check,
 } from "lucide-react";
 import { HabitIcon } from "@/components/ui/HabitIcon";
 import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
@@ -24,13 +26,10 @@ import { HabitDetailModal } from "@/components/habits/HabitDetailModal";
 import { GoalFormModal } from "@/components/goals/GoalFormModal";
 import { StreakFreezeModal } from "@/components/habits/StreakFreezeModal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useDataCache } from "@/lib/hooks/useDataCache";
 
 export default function HabitsPage() {
-  const [habits, setHabits] = useState<any[]>([]);
-  const [counts, setCounts] = useState({ all: 0, active: 0, archived: 0 });
   const [filter, setFilter] = useState<"all" | "active" | "archived">("active");
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(false);
 
   // Modals
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -40,63 +39,188 @@ export default function HabitsPage() {
   const [editingHabit, setEditingHabit] = useState<any>(null);
   const [selectedHabitDetail, setSelectedHabitDetail] = useState<any>(null);
   const [deletingHabit, setDeletingHabit] = useState<any>(null);
+  const [stackedPrompt, setStackedPrompt] = useState<{
+    id: string;
+    name: string;
+    icon: string;
+    color: string;
+    twoMinuteVersion?: string;
+  } | null>(null);
 
   const fetchHabits = React.useCallback(async () => {
-    try {
-      setError(false);
-      const res = await fetch(`/api/habits?filter=${filter}`);
-      if (!res.ok) throw new Error("Failed to fetch habits");
-      const data = await res.json();
-      if (data.success) {
-        setHabits(data.habits);
-        setCounts(data.counts);
-      } else {
-        setError(true);
-      }
-    } catch (err) {
-      console.error("Habits error:", err);
-      setError(true);
-    } finally {
-      setIsLoading(false);
-    }
+    const res = await fetch(`/api/habits?filter=${filter}`);
+    if (!res.ok) throw new Error("Failed to fetch habits");
+    const data = await res.json();
+    if (!data.success) throw new Error("Unsuccessful habits response");
+    return data;
   }, [filter]);
 
-  useEffect(() => {
-    fetchHabits();
-  }, [fetchHabits]);
+  const {
+    data,
+    isLoading,
+    error,
+    mutate,
+    revalidate,
+  } = useDataCache(`/api/habits?filter=${filter}`, fetchHabits, { ttlMs: 60000 });
+
+  const habits: any[] = data?.habits || [];
+  const counts = data?.counts || { all: 0, active: 0, archived: 0 };
+
+  const handleLogCompletion = async (habit: any, completionType: "full" | "micro" = "full") => {
+    const todayStr = new Date().toISOString().split("T")[0];
+    const isCompleted = habit.todayStatus === "completed";
+    const nextStatus = isCompleted ? "pending" : "completed";
+
+    // Instant optimistic update
+    mutate((prev: any) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        habits: (prev.habits || []).map((h: any) =>
+          h._id === habit._id
+            ? {
+                ...h,
+                todayStatus: nextStatus,
+                todayCompletionType: nextStatus === "completed" ? completionType : "full",
+                stats: {
+                  ...h.stats,
+                  currentStreak:
+                    nextStatus === "completed"
+                      ? (h.stats?.currentStreak || 0) + 1
+                      : Math.max(0, (h.stats?.currentStreak || 1) - 1),
+                  totalCompletions:
+                    nextStatus === "completed"
+                      ? (h.stats?.totalCompletions || 0) + 1
+                      : Math.max(0, (h.stats?.totalCompletions || 1) - 1),
+                },
+              }
+            : h
+        ),
+      };
+    });
+
+    try {
+      const res = await fetch("/api/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          habitId: habit._id,
+          date: todayStr,
+          status: nextStatus === "completed" ? "completed" : "pending",
+          action: nextStatus === "completed" ? "save" : "remove",
+          completionType,
+        }),
+      });
+
+      if (!res.ok) {
+        revalidate(true);
+      } else {
+        const json = await res.json();
+        if (json.nextStackedHabit) {
+          setStackedPrompt(json.nextStackedHabit);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to log completion:", err);
+      revalidate(true);
+    }
+  };
 
   const handleToggleActive = async (habit: any) => {
+    const newActive = !habit.active;
+
+    // Instant optimistic toggle
+    mutate((prev: any) => {
+      if (!prev) return prev;
+      let updatedHabits = (prev.habits || []).map((h: any) =>
+        h._id === habit._id ? { ...h, active: newActive } : h
+      );
+      if (filter === "active" && !newActive) {
+        updatedHabits = updatedHabits.filter((h: any) => h._id !== habit._id);
+      }
+      return {
+        ...prev,
+        habits: updatedHabits,
+        counts: {
+          ...prev.counts,
+          active: Math.max(0, (prev.counts?.active || 0) + (newActive ? 1 : -1)),
+        },
+      };
+    });
+
     try {
       const res = await fetch(`/api/habits/${habit._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ active: !habit.active }),
+        body: JSON.stringify({ active: newActive }),
       });
-      if (res.ok) {
-        fetchHabits();
-      }
+      if (!res.ok) revalidate(true);
     } catch (err) {
       console.error("Failed to toggle active:", err);
+      revalidate(true);
     }
   };
 
   const handleArchive = async (habit: any) => {
+    const newArchived = !habit.archived;
+
+    // Instant optimistic archive
+    mutate((prev: any) => {
+      if (!prev) return prev;
+      let updatedHabits = (prev.habits || []).map((h: any) =>
+        h._id === habit._id ? { ...h, archived: newArchived } : h
+      );
+      if (filter === "active" && newArchived) {
+        updatedHabits = updatedHabits.filter((h: any) => h._id !== habit._id);
+      } else if (filter === "archived" && !newArchived) {
+        updatedHabits = updatedHabits.filter((h: any) => h._id !== habit._id);
+      }
+      return {
+        ...prev,
+        habits: updatedHabits,
+        counts: {
+          ...prev.counts,
+          archived: Math.max(0, (prev.counts?.archived || 0) + (newArchived ? 1 : -1)),
+          active: Math.max(0, (prev.counts?.active || 0) + (newArchived ? -1 : 1)),
+        },
+      };
+    });
+
     try {
-      await fetch(`/api/habits/${habit._id}/archive`, { method: "POST" });
-      fetchHabits();
+      const res = await fetch(`/api/habits/${habit._id}/archive`, { method: "POST" });
+      if (!res.ok) revalidate(true);
     } catch (err) {
       console.error("Failed to toggle archive:", err);
+      revalidate(true);
     }
   };
 
   const handleDeleteConfirm = async () => {
     if (!deletingHabit) return;
+    const habitId = deletingHabit._id;
+    setDeletingHabit(null);
+
+    // Instant optimistic deletion
+    mutate((prev: any) => {
+      if (!prev) return prev;
+      const updatedHabits = (prev.habits || []).filter((h: any) => h._id !== habitId);
+      return {
+        ...prev,
+        habits: updatedHabits,
+        counts: {
+          ...prev.counts,
+          all: Math.max(0, (prev.counts?.all || 0) - 1),
+          active: Math.max(0, (prev.counts?.active || 0) - 1),
+        },
+      };
+    });
+
     try {
-      await fetch(`/api/habits/${deletingHabit._id}`, { method: "DELETE" });
-      setDeletingHabit(null);
-      fetchHabits();
+      const res = await fetch(`/api/habits/${habitId}`, { method: "DELETE" });
+      if (!res.ok) revalidate(true);
     } catch (err) {
       console.error("Failed to delete habit:", err);
+      revalidate(true);
     }
   };
 
@@ -177,11 +301,48 @@ export default function HabitsPage() {
         </button>
       </div>
 
+      {/* Stacked Habit Follow-up Banner */}
+      {stackedPrompt && (
+        <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🔗</span>
+            <div>
+              <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">
+                Habit Stack Triggered!
+              </p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mt-0.5">
+                Next up in your stack: <span className="font-bold text-forest-700 dark:text-forest-400">{stackedPrompt.name}</span>
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                const targetHabit = habits.find((h: any) => h._id === stackedPrompt.id);
+                if (targetHabit) handleLogCompletion(targetHabit, "full");
+                setStackedPrompt(null);
+              }}
+              className="px-3.5 py-1.5 bg-forest-700 hover:bg-forest-800 text-white rounded-xl font-bold text-xs transition-colors shadow-xs"
+            >
+              Complete Now
+            </button>
+            <button
+              type="button"
+              onClick={() => setStackedPrompt(null)}
+              className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-xs font-bold"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Habit Cards Grid */}
       {isLoading ? (
         <LoadingSkeleton count={4} />
       ) : error ? (
-        <ErrorState onRetry={fetchHabits} />
+        <ErrorState onRetry={() => revalidate(false)} />
       ) : habits.length === 0 ? (
         <EmptyState
           icon={CheckCircle2}
@@ -199,7 +360,7 @@ export default function HabitsPage() {
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {habits.map((habit) => {
+          {habits.map((habit: any) => {
             const stats = habit.stats || {
               currentStreak: 0,
               bestStreak: 0,
@@ -243,14 +404,66 @@ export default function HabitsPage() {
                     </button>
                   </div>
 
+                  {/* Stacked Anchor Habit Badge */}
+                  {habit.habitStackAfterHabitId && (
+                    <div className="mt-2.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-forest-50 dark:bg-forest-950/40 border border-forest-100 dark:border-forest-900/40 text-[11px] font-semibold text-forest-700 dark:text-forest-300">
+                      <span>🔗</span>
+                      <span>Stacked after: {habit.habitStackAfterHabitId.name || "Anchor"}</span>
+                    </div>
+                  )}
+
                   {habit.description && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 line-clamp-2 leading-relaxed font-medium">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2.5 line-clamp-2 leading-relaxed font-medium">
                       {habit.description}
                     </p>
                   )}
 
+                  {/* Daily Check-in & Micro Fallback Action */}
+                  <div className="mt-3.5 pt-3 border-t border-dashed border-gray-100 dark:border-gray-800">
+                    {habit.todayStatus === "completed" ? (
+                      <div className="flex items-center justify-between">
+                        <button
+                          type="button"
+                          onClick={() => handleLogCompletion(habit)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-forest-100/80 dark:bg-forest-900/40 text-forest-800 dark:text-forest-200 font-bold text-xs border border-forest-200/80 dark:border-forest-800 hover:opacity-80 transition-opacity"
+                        >
+                          <Check className="w-3.5 h-3.5" strokeWidth={3} />
+                          <span>{habit.todayCompletionType === "micro" ? "2-Min Done" : "Done Today"}</span>
+                        </button>
+                        {habit.todayCompletionType === "micro" && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/40">
+                            ⚡ 2-Min Micro
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleLogCompletion(habit, "full")}
+                          className="flex-1 py-1.5 rounded-xl bg-forest-50 hover:bg-forest-100 dark:bg-forest-950/40 dark:hover:bg-forest-900/50 text-forest-700 dark:text-forest-300 font-bold text-xs border border-forest-200/60 dark:border-forest-800/40 transition-colors flex items-center justify-center gap-1.5"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Check In</span>
+                        </button>
+
+                        {habit.twoMinuteVersion && (
+                          <button
+                            type="button"
+                            onClick={() => handleLogCompletion(habit, "micro")}
+                            className="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 font-bold text-xs border border-amber-200 dark:border-amber-800/40 transition-colors flex items-center gap-1"
+                            title={`Bad-Day Fallback: ${habit.twoMinuteVersion}`}
+                          >
+                            <Zap className="w-3 h-3" />
+                            <span>2-Min</span>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
                   {/* Streak & Completion Stats */}
-                  <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 text-xs">
+                  <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-gray-100 dark:border-gray-800 text-xs">
                     <div className="p-2.5 rounded-xl bg-orange-50/60 dark:bg-orange-950/20 flex items-center gap-2">
                       <Flame className="w-4 h-4 text-orange-600 dark:text-orange-400 shrink-0" />
                       <div>
@@ -326,8 +539,9 @@ export default function HabitsPage() {
           setIsFormModalOpen(false);
           setEditingHabit(null);
         }}
-        onSuccess={fetchHabits}
+        onSuccess={() => revalidate(true)}
         initialData={editingHabit}
+        availableHabits={habits}
       />
 
       {/* Habit Detail Modal */}
@@ -358,7 +572,7 @@ export default function HabitsPage() {
           setIsGoalModalOpen(false);
           setGoalPreselectedHabitId(undefined);
         }}
-        onSuccess={fetchHabits}
+        onSuccess={() => revalidate(true)}
         initialHabitId={goalPreselectedHabitId}
       />
 
@@ -366,7 +580,7 @@ export default function HabitsPage() {
       <StreakFreezeModal
         isOpen={isFreezeModalOpen}
         onClose={() => setIsFreezeModalOpen(false)}
-        onSuccess={fetchHabits}
+        onSuccess={() => revalidate(true)}
       />
 
       {/* Delete Confirmation */}

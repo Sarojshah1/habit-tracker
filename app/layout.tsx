@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://habittrack.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://habit-tracker-seven-gold-53.vercel.app";
 
 export const viewport: Viewport = {
   themeColor: "#1B4332",
@@ -33,8 +33,9 @@ export const metadata: Metadata = {
     "consistency tracker",
     "college productivity tool",
     "study notes and habits",
+    "exam prep routine planner",
   ],
-  authors: [{ name: "HabitTrack Team" }],
+  authors: [{ name: "HabitTrack Team", url: siteUrl }],
   creator: "HabitTrack",
   publisher: "HabitTrack",
   formatDetection: {
@@ -53,12 +54,21 @@ export const metadata: Metadata = {
     siteName: "HabitTrack",
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "HabitTrack — Free Habit Tracker & Study Focus for Students",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "HabitTrack — Student Habit Tracker & Study Focus",
     description:
       "Build habits that shape your future. Schedule routines, track streaks, and master deep focus for academic success.",
+    images: ["/twitter-image"],
   },
   robots: {
     index: true,
@@ -72,11 +82,18 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: "/icon",
+    apple: "/apple-icon",
+  },
+  manifest: "/manifest.webmanifest",
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
   },
 };
 
 import { ThemeProvider } from "@/lib/context/ThemeContext";
+import { PwaRegister } from "@/components/pwa/PwaRegister";
+import { PwaInstallPrompt } from "@/components/pwa/PwaInstallPrompt";
 
 export default function RootLayout({
   children,
@@ -102,7 +119,11 @@ export default function RootLayout({
         />
       </head>
       <body className="h-full font-sans bg-[#F8FAF9] dark:bg-gray-950 text-gray-900 dark:text-gray-100 antialiased transition-colors duration-200">
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          {children}
+          <PwaRegister />
+          <PwaInstallPrompt />
+        </ThemeProvider>
       </body>
     </html>
   );

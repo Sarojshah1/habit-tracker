@@ -7,40 +7,37 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { HabitDetailModal } from "@/components/habits/HabitDetailModal";
 import { HabitFormModal } from "@/components/habits/HabitFormModal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useDataCache } from "@/lib/hooks/useDataCache";
 
 export default function CalendarPage() {
-  const [calendarData, setCalendarData] = useState<any>(null);
   const [currentYear, setCurrentYear] = useState<number>(new Date().getFullYear());
   const [currentMonth, setCurrentMonth] = useState<number>(new Date().getMonth() + 1);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(false);
 
   const [selectedHabitDetail, setSelectedHabitDetail] = useState<any>(null);
   const [editingHabit, setEditingHabit] = useState<any>(null);
   const [deletingHabit, setDeletingHabit] = useState<any>(null);
 
-  const fetchCalendarData = async (yr: number, mo: number) => {
-    try {
-      setError(false);
-      const res = await fetch(`/api/calendar?year=${yr}&month=${mo}`);
-      if (!res.ok) throw new Error("Failed to load calendar");
-      const data = await res.json();
-      if (data.success) {
-        setCalendarData(data.calendar);
-      } else {
-        setError(true);
-      }
-    } catch (err) {
-      console.error("Calendar fetch error:", err);
-      setError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCalendarData(currentYear, currentMonth);
+  const fetchCalendar = React.useCallback(async () => {
+    const res = await fetch(`/api/calendar?year=${currentYear}&month=${currentMonth}`);
+    if (!res.ok) throw new Error("Failed to load calendar");
+    const data = await res.json();
+    if (!data.success) throw new Error("Unsuccessful calendar response");
+    return data;
   }, [currentYear, currentMonth]);
+
+  const {
+    data,
+    isLoading,
+    error,
+    mutate,
+    revalidate,
+  } = useDataCache(
+    `/api/calendar?year=${currentYear}&month=${currentMonth}`,
+    fetchCalendar,
+    { ttlMs: 60000 }
+  );
+
+  const calendarData = data?.calendar;
 
   const handleMonthChange = (yr: number, mo: number) => {
     setCurrentYear(yr);
@@ -48,8 +45,43 @@ export default function CalendarPage() {
   };
 
   const handleToggleHabit = async (habitId: string, date: string, status: string) => {
+    // Instant optimistic update on calendar
+    mutate((prev: any) => {
+      if (!prev?.calendar?.days) return prev;
+      const updatedDays = prev.calendar.days.map((day: any) => {
+        if (day.date !== date) return day;
+        const updatedHabits = (day.habits || []).map((h: any) =>
+          h._id === habitId ? { ...h, status } : h
+        );
+        const completedCount = updatedHabits.filter((h: any) => h.status === "completed").length;
+        const totalScheduled = updatedHabits.length;
+        let indicator = "no_activity";
+        if (totalScheduled > 0) {
+          if (completedCount === totalScheduled) indicator = "completed";
+          else if (completedCount > 0) indicator = "partial";
+          else if (date < prev.calendar.todayDate) indicator = "missed";
+        }
+        return {
+          ...day,
+          habits: updatedHabits,
+          completedCount,
+          indicator,
+          completionPercentage:
+            totalScheduled > 0 ? Math.round((completedCount / totalScheduled) * 100) : 0,
+        };
+      });
+
+      return {
+        ...prev,
+        calendar: {
+          ...prev.calendar,
+          days: updatedDays,
+        },
+      };
+    });
+
     try {
-      await fetch("/api/completions", {
+      const res = await fetch("/api/completions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -59,30 +91,61 @@ export default function CalendarPage() {
           action: status === "pending" ? "remove" : "save",
         }),
       });
-      // Refresh calendar
-      fetchCalendarData(currentYear, currentMonth);
+      if (!res.ok) revalidate(true);
     } catch (err) {
       console.error("Toggle habit error:", err);
+      revalidate(true);
     }
   };
 
   const handleDeleteConfirm = async () => {
     if (!deletingHabit) return;
+    const habitId = deletingHabit._id;
+    setDeletingHabit(null);
+
+    // Instant optimistic removal from days
+    mutate((prev: any) => {
+      if (!prev?.calendar?.days) return prev;
+      const updatedDays = prev.calendar.days.map((day: any) => ({
+        ...day,
+        habits: (day.habits || []).filter((h: any) => h._id !== habitId),
+      }));
+      return {
+        ...prev,
+        calendar: { ...prev.calendar, days: updatedDays },
+      };
+    });
+
     try {
-      await fetch(`/api/habits/${deletingHabit._id}`, { method: "DELETE" });
-      setDeletingHabit(null);
-      fetchCalendarData(currentYear, currentMonth);
+      const res = await fetch(`/api/habits/${habitId}`, { method: "DELETE" });
+      if (!res.ok) revalidate(true);
     } catch (err) {
       console.error("Delete habit error:", err);
+      revalidate(true);
     }
   };
 
   const handleArchive = async (habit: any) => {
+    const habitId = habit._id;
+    // Instant optimistic removal
+    mutate((prev: any) => {
+      if (!prev?.calendar?.days) return prev;
+      const updatedDays = prev.calendar.days.map((day: any) => ({
+        ...day,
+        habits: (day.habits || []).filter((h: any) => h._id !== habitId),
+      }));
+      return {
+        ...prev,
+        calendar: { ...prev.calendar, days: updatedDays },
+      };
+    });
+
     try {
-      await fetch(`/api/habits/${habit._id}/archive`, { method: "POST" });
-      fetchCalendarData(currentYear, currentMonth);
+      const res = await fetch(`/api/habits/${habitId}/archive`, { method: "POST" });
+      if (!res.ok) revalidate(true);
     } catch (err) {
       console.error("Archive habit error:", err);
+      revalidate(true);
     }
   };
 
@@ -100,7 +163,7 @@ export default function CalendarPage() {
       {isLoading ? (
         <LoadingSkeleton count={3} />
       ) : error || !calendarData ? (
-        <ErrorState onRetry={() => fetchCalendarData(currentYear, currentMonth)} />
+        <ErrorState onRetry={() => revalidate(false)} />
       ) : (
         <MonthCalendar
           year={calendarData.year}
@@ -110,6 +173,7 @@ export default function CalendarPage() {
           onMonthChange={handleMonthChange}
           onToggleHabit={handleToggleHabit}
           onOpenHabitDetail={(h) => setSelectedHabitDetail(h)}
+          onRefresh={() => revalidate(true)}
         />
       )}
 
@@ -133,7 +197,7 @@ export default function CalendarPage() {
       <HabitFormModal
         isOpen={!!editingHabit}
         onClose={() => setEditingHabit(null)}
-        onSuccess={() => fetchCalendarData(currentYear, currentMonth)}
+        onSuccess={() => revalidate(true)}
         initialData={editingHabit}
       />
 

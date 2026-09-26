@@ -17,6 +17,7 @@ import {
   X,
   GraduationCap,
   Brain,
+  Wallet,
 } from "lucide-react";
 import { Logo } from "../ui/Logo";
 
@@ -30,6 +31,7 @@ const NAV_ITEMS = [
   { name: "My Habits", href: "/habits", icon: CheckSquare },
   { name: "Tasks", href: "/tasks", icon: ListTodo },
   { name: "Calendar", href: "/calendar", icon: Calendar },
+  { name: "Expenses & Hisaab", href: "/expenses", icon: Wallet },
   { name: "Goals", href: "/goals", icon: Target },
   { name: "Mock Exams", href: "/exams", icon: GraduationCap },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },

@@ -12,7 +12,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     const user = await getAuthenticatedUser(req);
     if (!user) return unauthorizedResponse();
 
-    const habit = await Habit.findOne({ _id: params.id, userId: user._id });
+    const habit = await Habit.findOne({ _id: params.id, userId: user._id }).populate(
+      "habitStackAfterHabitId",
+      "name icon color"
+    );
     if (!habit) {
       return NextResponse.json({ success: false, message: "Habit not found" }, { status: 404 });
     }
@@ -59,7 +62,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       { _id: params.id, userId: user._id },
       { $set: parsed.data },
       { new: true }
-    );
+    ).populate("habitStackAfterHabitId", "name icon color");
 
     if (!habit) {
       return NextResponse.json({ success: false, message: "Habit not found" }, { status: 404 });

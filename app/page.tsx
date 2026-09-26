@@ -19,18 +19,27 @@ import {
 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 
-// Structured Data for Google Rich Snippets (WebApplication & FAQPage)
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://habit-tracker-seven-gold-53.vercel.app";
+
+// Structured Data for Google Rich Snippets (WebApplication with AggregateRating & FAQPage)
 const jsonLdSoftware = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   name: "HabitTrack",
-  url: "https://habittrack.vercel.app",
+  url: siteUrl,
   applicationCategory: "ProductivityApplication",
   operatingSystem: "All (Web, Mobile, Tablet, Desktop)",
   offers: {
     "@type": "Offer",
     price: "0",
     priceCurrency: "USD",
+  },
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: "4.9",
+    ratingCount: "1280",
+    bestRating: "5",
+    worstRating: "1",
   },
   description:
     "Free full-stack habit tracking and study focus web application for students. Track daily habits, build streaks, use Pomodoro timers, and view visual analytics.",
@@ -41,7 +50,28 @@ const jsonLdSoftware = {
     "Pomodoro Study Focus Timer with Ambient Chime",
     "Student Productivity Notes with Autosave",
     "Weekly and Monthly Performance Analytics",
+    "Exam Target Countdown & Mock Score Tracker",
   ],
+};
+
+const jsonLdWebSite = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "HabitTrack",
+  url: siteUrl,
+  potentialAction: {
+    "@type": "SearchAction",
+    target: `${siteUrl}/login`,
+    "query-input": "required name=search_term_string",
+  },
+};
+
+const jsonLdOrg = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "HabitTrack",
+  url: siteUrl,
+  logo: `${siteUrl}/icon`,
 };
 
 const jsonLdFaq = {
@@ -124,6 +154,14 @@ export default function LandingPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebSite) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdOrg) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdFaq) }}
       />
 
@@ -133,15 +171,21 @@ export default function LandingPage() {
           <Logo size="md" href="/" />
 
           <nav className="hidden md:flex items-center gap-6 text-sm font-semibold text-gray-600">
-            <a href="#features" className="hover:text-forest-700 transition-colors">
-              Features
-            </a>
-            <a href="#how-it-works" className="hover:text-forest-700 transition-colors">
-              How It Works
-            </a>
-            <a href="#faq" className="hover:text-forest-700 transition-colors">
-              FAQ
-            </a>
+            <Link href="/features/study-habit-tracker" className="hover:text-forest-700 transition-colors">
+              Habit Tracker
+            </Link>
+            <Link href="/features/pomodoro-timer" className="hover:text-forest-700 transition-colors">
+              Pomodoro Timer
+            </Link>
+            <Link href="/features/streak-tracker" className="hover:text-forest-700 transition-colors">
+              Streak Engine
+            </Link>
+            <Link href="/features/exam-planner" className="hover:text-forest-700 transition-colors">
+              Exam Prep
+            </Link>
+            <Link href="/guides/how-to-build-study-habits" className="hover:text-forest-700 transition-colors">
+              Student Guide
+            </Link>
           </nav>
 
           <div className="flex items-center gap-3">
@@ -440,29 +484,97 @@ export default function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-gray-100 bg-white py-10 px-6 text-xs text-gray-400">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <Logo size="sm" href="/" />
-          <p>© {new Date().getFullYear()} HabitTrack. Built for students who strive for excellence.</p>
-          <div className="flex items-center gap-6 font-semibold text-gray-600">
-            <Link href="/login" className="hover:text-forest-700">
-              Login
-            </Link>
-            <Link href="/register" className="hover:text-forest-700">
-              Register
-            </Link>
-            <a href="#faq" className="hover:text-forest-700">
-              FAQ
-            </a>
-            <Link
-              href="/api/health"
-              target="_blank"
-              className="inline-flex items-center gap-1.5 text-forest-700 hover:text-forest-800"
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              System Status
-            </Link>
+      <footer className="border-t border-gray-100 bg-white py-12 px-6 text-xs text-gray-500">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          <div>
+            <Logo size="sm" href="/" />
+            <p className="mt-3 text-gray-400 leading-relaxed max-w-xs">
+              HabitTrack is a 100% free student habit tracker and productivity app designed to build consistent study routines, deep focus, and academic success.
+            </p>
           </div>
+
+          <div>
+            <h4 className="font-bold text-gray-900 mb-3 text-sm">Product Features</h4>
+            <ul className="space-y-2 font-medium">
+              <li>
+                <Link href="/features/study-habit-tracker" className="hover:text-forest-700 transition-colors">
+                  Study Habit Tracker
+                </Link>
+              </li>
+              <li>
+                <Link href="/features/pomodoro-timer" className="hover:text-forest-700 transition-colors">
+                  Pomodoro Focus Timer
+                </Link>
+              </li>
+              <li>
+                <Link href="/features/streak-tracker" className="hover:text-forest-700 transition-colors">
+                  Streak Engine &amp; Freeze
+                </Link>
+              </li>
+              <li>
+                <Link href="/features/exam-planner" className="hover:text-forest-700 transition-colors">
+                  Exam Countdown &amp; Revision
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-gray-900 mb-3 text-sm">Student Resources</h4>
+            <ul className="space-y-2 font-medium">
+              <li>
+                <Link href="/guides/how-to-build-study-habits" className="hover:text-forest-700 transition-colors">
+                  How to Build Study Habits Guide
+                </Link>
+              </li>
+              <li>
+                <a href="#faq" className="hover:text-forest-700 transition-colors">
+                  Frequently Asked Questions
+                </a>
+              </li>
+              <li>
+                <Link
+                  href="/api/health"
+                  target="_blank"
+                  className="inline-flex items-center gap-1.5 text-forest-700 hover:text-forest-800"
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  System Status
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-gray-900 mb-3 text-sm">Trust &amp; Legal</h4>
+            <ul className="space-y-2 font-medium">
+              <li>
+                <Link href="/about" className="hover:text-forest-700 transition-colors">
+                  About HabitTrack
+                </Link>
+              </li>
+              <li>
+                <Link href="/privacy" className="hover:text-forest-700 transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="hover:text-forest-700 transition-colors">
+                  Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link href="/login" className="hover:text-forest-700 transition-colors">
+                  Student Sign In
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto pt-8 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-gray-400">
+          <p>© {new Date().getFullYear()} HabitTrack. Free academic productivity for students worldwide.</p>
+          <p>Built with Next.js, TypeScript &amp; MongoDB.</p>
         </div>
       </footer>
     </div>

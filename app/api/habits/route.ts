@@ -27,7 +27,10 @@ export async function GET(req: NextRequest) {
     }
 
     const [habits, totalCount, activeCount, archivedCount] = await Promise.all([
-      Habit.find(query).sort({ createdAt: -1 }).lean(),
+      Habit.find(query)
+        .populate("habitStackAfterHabitId", "name icon color")
+        .sort({ createdAt: -1 })
+        .lean(),
       Habit.countDocuments({ userId: user._id }),
       Habit.countDocuments({ userId: user._id, archived: false, active: true }),
       Habit.countDocuments({ userId: user._id, archived: true }),
@@ -41,7 +44,7 @@ export async function GET(req: NextRequest) {
       userId: user._id,
       habitId: { $in: habitIds },
     })
-      .select("habitId date status")
+      .select("habitId date status completionType")
       .lean();
 
     const enrichedHabits = habits.map((h: any) => {
@@ -54,6 +57,7 @@ export async function GET(req: NextRequest) {
         ...h,
         stats,
         todayStatus: todayRecord ? todayRecord.status : "pending",
+        todayCompletionType: (todayRecord as any)?.completionType || "full",
       };
     });
 
@@ -90,7 +94,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, description, icon, color, frequency, schedule, reminder, startDate, goalId } = parsed.data;
+    const {
+      name,
+      description,
+      icon,
+      color,
+      frequency,
+      schedule,
+      reminder,
+      startDate,
+      goalId,
+      habitStackAfterHabitId,
+      twoMinuteVersion,
+    } = parsed.data;
 
     const habit = await Habit.create({
       userId: user._id,
@@ -102,6 +118,8 @@ export async function POST(req: NextRequest) {
       schedule,
       reminder,
       startDate,
+      habitStackAfterHabitId: habitStackAfterHabitId || undefined,
+      twoMinuteVersion: twoMinuteVersion || "",
       active: true,
       archived: false,
     });

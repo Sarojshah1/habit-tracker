@@ -156,6 +156,32 @@ export function HabitDetailModal({
           </div>
         )}
 
+        {/* Atomic Habits Details */}
+        {(habit.habitStackAfterHabitId || habit.twoMinuteVersion) && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {habit.habitStackAfterHabitId && (
+              <div className="p-3 bg-forest-50/70 dark:bg-forest-950/30 rounded-xl border border-forest-100 dark:border-forest-900/40 text-xs">
+                <span className="font-bold text-forest-900 dark:text-forest-200 flex items-center gap-1.5 mb-0.5">
+                  <span>🔗</span> Stacked Anchor
+                </span>
+                <p className="text-gray-600 dark:text-gray-300">
+                  Triggered after: <span className="font-semibold text-gray-900 dark:text-gray-100">{habit.habitStackAfterHabitId?.name || "Anchor Habit"}</span>
+                </p>
+              </div>
+            )}
+            {habit.twoMinuteVersion && (
+              <div className="p-3 bg-amber-50/70 dark:bg-amber-950/30 rounded-xl border border-amber-100 dark:border-amber-900/40 text-xs">
+                <span className="font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5 mb-0.5">
+                  <span>⚡</span> 2-Minute Rule Version
+                </span>
+                <p className="text-gray-600 dark:text-gray-300">
+                  {habit.twoMinuteVersion}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Linked Goals Section */}
         <div className="space-y-3 pt-2 border-t border-gray-100 dark:border-gray-800">
           <div className="flex items-center justify-between">

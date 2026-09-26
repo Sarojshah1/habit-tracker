@@ -5,8 +5,12 @@ import { HabitCompletion } from "@/lib/models/HabitCompletion";
 import { Goal } from "@/lib/models/Goal";
 import { ExamTarget } from "@/lib/models/ExamTarget";
 import { MockExam } from "@/lib/models/MockExam";
+import { Expense } from "@/lib/models/Expense";
+import { UtilityLog } from "@/lib/models/UtilityLog";
+import { Budget } from "@/lib/models/Budget";
 import { getUserTodayDateString, getUserDayOfWeek } from "@/lib/utils/date";
 import { isHabitScheduledForDate } from "@/lib/services/streak";
+import { syncRecurringItemsForUser } from "@/lib/services/recurring";
 
 export const dynamic = "force-dynamic";
 
@@ -15,8 +19,11 @@ export async function GET(req: NextRequest) {
     const user = await getAuthenticatedUser(req);
     if (!user) return unauthorizedResponse();
 
-    const timezone = user.timezone || "UTC";
+    const timezone = user.timezone || "Asia/Kathmandu";
     const todayDateStr = getUserTodayDateString(timezone);
+
+    // Auto-sync daily recurring transactions (like milk or subscriptions)
+    await syncRecurringItemsForUser(user._id, timezone);
 
     const url = new URL(req.url);
     const yearParam = url.searchParams.get("year");
@@ -32,7 +39,16 @@ export async function GET(req: NextRequest) {
     const endDate = `${year}-${monthStr}-${String(daysInMonth).padStart(2, "0")}`;
 
     // Fetch calendar data concurrently with lean()
-    const [habits, completions, examTargets, mockExams, activeGoals] = await Promise.all([
+    const [
+      habits,
+      completions,
+      examTargets,
+      mockExams,
+      activeGoals,
+      expenses,
+      utilityLogs,
+      budget,
+    ] = await Promise.all([
       Habit.find({
         userId: user._id,
         startDate: { $lte: endDate },
@@ -41,7 +57,7 @@ export async function GET(req: NextRequest) {
         userId: user._id,
         date: { $gte: startDate, $lte: endDate },
       })
-        .select("habitId date status notes")
+        .select("habitId date status notes completionType")
         .lean(),
       ExamTarget.find({
         userId: user._id,
@@ -59,18 +75,48 @@ export async function GET(req: NextRequest) {
       })
         .select("title icon color habitIds associatedHabitIds startDate endDate")
         .lean(),
+      Expense.find({
+        userId: user._id,
+        date: { $gte: startDate, $lte: endDate },
+      }).lean(),
+      UtilityLog.find({
+        userId: user._id,
+        date: { $gte: startDate, $lte: endDate },
+      }).lean(),
+      Budget.findOne({
+        userId: user._id,
+        month: `${year}-${monthStr}`,
+      }).lean(),
     ]);
 
     // Map completions by date -> habitId -> status
-    const completionByDateAndHabit = new Map<string, Map<string, { status: string; notes?: string }>>();
-    completions.forEach((c) => {
+    const completionByDateAndHabit = new Map<
+      string,
+      Map<string, { status: string; notes?: string; completionType?: string }>
+    >();
+    completions.forEach((c: any) => {
       if (!completionByDateAndHabit.has(c.date)) {
         completionByDateAndHabit.set(c.date, new Map());
       }
       completionByDateAndHabit.get(c.date)!.set(c.habitId.toString(), {
         status: c.status,
         notes: c.notes,
+        completionType: c.completionType,
       });
+    });
+
+    // Map expenses by date
+    const expensesByDate = new Map<string, any[]>();
+    expenses.forEach((e: any) => {
+      const arr = expensesByDate.get(e.date) || [];
+      arr.push(e);
+      expensesByDate.set(e.date, arr);
+    });
+
+    // Map utilities by date
+    const utilitiesByDate = new Map<string, any>();
+    utilityLogs.forEach((u: any) => {
+      utilitiesByDate.set(u.date, u);
     });
 
     // Generate days data
@@ -84,14 +130,18 @@ export async function GET(req: NextRequest) {
         .filter((h) => !h.archived && isHabitScheduledForDate(h, dateStr, timezone))
         .map((h) => {
           const completionInfo = dayHabitMap.get(h._id.toString());
-          const status = completionInfo ? completionInfo.status : dateStr < todayDateStr ? "missed" : "pending";
+          const status = completionInfo
+            ? completionInfo.status
+            : dateStr < todayDateStr
+            ? "missed"
+            : "pending";
 
           // Find active goals that this habit contributes to on this date
           const contributingGoals = activeGoals
             .filter((g) => {
-              const ids = (g.habitIds && g.habitIds.length > 0 ? g.habitIds : g.associatedHabitIds || []).map(
-                (id: any) => id.toString()
-              );
+              const ids = (
+                g.habitIds && g.habitIds.length > 0 ? g.habitIds : g.associatedHabitIds || []
+              ).map((id: any) => id.toString());
               return ids.includes(h._id.toString()) && dateStr >= g.startDate && dateStr <= g.endDate;
             })
             .map((g) => ({
@@ -110,6 +160,7 @@ export async function GET(req: NextRequest) {
             frequency: h.frequency,
             status,
             notes: completionInfo ? completionInfo.notes : "",
+            completionType: completionInfo ? completionInfo.completionType : undefined,
             contributingGoals,
           };
         });
@@ -131,9 +182,31 @@ export async function GET(req: NextRequest) {
         }
       }
 
-      const completionPercentage = totalScheduled > 0 ? Math.round((completedCount / totalScheduled) * 100) : 0;
+      const completionPercentage =
+        totalScheduled > 0 ? Math.round((completedCount / totalScheduled) * 100) : 0;
       const dayExams = examTargets.filter((t) => t.examDate === dateStr);
       const dayMockExams = mockExams.filter((m) => m.date === dateStr);
+
+      // Financial & Household Utility metrics for this day
+      const dayExpenses = expensesByDate.get(dateStr) || [];
+      const dayUtility = utilitiesByDate.get(dateStr);
+
+      const totalExpense = dayExpenses
+        .filter((e) => e.type === "expense")
+        .reduce((sum, e) => sum + Number(e.amount || 0), 0);
+
+      const totalIncome = dayExpenses
+        .filter((e) => e.type === "income")
+        .reduce((sum, e) => sum + Number(e.amount || 0), 0);
+
+      const waterJars = dayUtility ? Number(dayUtility.waterJars || 0) : 0;
+      const electricityUnits = dayUtility ? Number(dayUtility.electricityUnits || 0) : 0;
+      const milkPackets = dayUtility ? Number(dayUtility.milkPackets || 0) : 0;
+      const gasCylinderReplaced = dayUtility ? Boolean(dayUtility.gasCylinderReplaced) : false;
+
+      const isRentDue = budget?.rentDueDate === d && (budget?.rentAmount || 0) > 0;
+      const isWifiDue = budget?.wifiDueDate === d && (budget?.wifiAmount || 0) > 0;
+      const isNoSpendDay = dateStr <= todayDateStr && totalExpense === 0;
 
       days.push({
         date: dateStr,
@@ -152,8 +225,44 @@ export async function GET(req: NextRequest) {
         habits: scheduledHabits,
         exams: dayExams,
         mockExams: dayMockExams,
+        // New Household & Expense Fields
+        totalExpense,
+        totalIncome,
+        isNoSpendDay,
+        waterJars,
+        electricityUnits,
+        milkPackets,
+        gasCylinderReplaced,
+        isRentDue,
+        rentAmount: isRentDue ? budget?.rentAmount : 0,
+        isWifiDue,
+        wifiAmount: isWifiDue ? budget?.wifiAmount : 0,
+        expenses: dayExpenses,
       });
     }
+
+    const totalExpenseMonth = expenses
+      .filter((e) => e.type === "expense")
+      .reduce((sum, e) => sum + Number(e.amount || 0), 0);
+
+    const totalIncomeMonth = expenses
+      .filter((e) => e.type === "income")
+      .reduce((sum, e) => sum + Number(e.amount || 0), 0);
+
+    const totalWaterJars = utilityLogs.reduce(
+      (sum, u) => sum + Number(u.waterJars || 0),
+      0
+    );
+
+    const totalElectricityUnits = utilityLogs.reduce(
+      (sum, u) => sum + Number(u.electricityUnits || 0),
+      0
+    );
+
+    const totalMilkPackets = utilityLogs.reduce(
+      (sum, u) => sum + Number(u.milkPackets || 0),
+      0
+    );
 
     return NextResponse.json({
       success: true,
@@ -162,6 +271,18 @@ export async function GET(req: NextRequest) {
         month,
         todayDate: todayDateStr,
         days,
+        householdSummary: {
+          totalExpenseMonth,
+          totalIncomeMonth,
+          totalWaterJars,
+          totalElectricityUnits,
+          totalMilkPackets,
+          rentAmount: budget?.rentAmount || 0,
+          rentDueDate: budget?.rentDueDate || 1,
+          wifiAmount: budget?.wifiAmount || 0,
+          wifiDueDate: budget?.wifiDueDate || 15,
+          monthlyLimit: budget?.monthlyLimit || 20000,
+        },
       },
     });
   } catch (error) {

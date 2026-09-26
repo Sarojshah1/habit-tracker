@@ -14,6 +14,9 @@ import "@/lib/models/DailyPlan";
 import "@/lib/models/DailyReview";
 import "@/lib/models/Routine";
 import "@/lib/models/Notification";
+import "@/lib/models/ExamTarget";
+import "@/lib/models/MockExam";
+import "@/lib/models/Flashcard";
 
 interface MongooseCache {
   conn: typeof mongoose | null;
@@ -45,8 +48,9 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
   if (!cached!.promise || mongoose.connection.readyState === 0) {
     const opts: mongoose.ConnectOptions = {
       bufferCommands: false,
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 8000, // 8 seconds timeout to prevent lambda hanging
+      maxPoolSize: 20,
+      minPoolSize: 2,
+      serverSelectionTimeoutMS: 5000,
     };
 
     cached!.promise = mongoose.connect(uri, opts).then((mongooseInstance) => {
