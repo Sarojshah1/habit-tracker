@@ -20,6 +20,7 @@ export interface IHabit extends Document {
   reminder?: string;
   startDate: string; // YYYY-MM-DD
   habitStackAfterHabitId?: mongoose.Types.ObjectId;
+  twoMinuteVersion?: string;
   archived: boolean;
   active: boolean;
   createdAt: Date;
@@ -75,6 +76,12 @@ const HabitSchema = new Schema<IHabit>(
     habitStackAfterHabitId: {
       type: Schema.Types.ObjectId,
       ref: "Habit",
+    },
+    twoMinuteVersion: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: [120, "2-minute version cannot exceed 120 characters"],
     },
     archived: {
       type: Boolean,

@@ -31,6 +31,8 @@ import { StatCard } from "@/components/ui/StatCard";
 import { HabitIcon } from "@/components/ui/HabitIcon";
 import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { BadgeShowcase } from "@/components/analytics/BadgeShowcase";
+import { DayOfWeekConsistency } from "@/components/analytics/DayOfWeekConsistency";
 
 export default function AnalyticsPage() {
   const [data, setData] = useState<any>(null);
@@ -88,11 +90,20 @@ export default function AnalyticsPage() {
           </p>
         </div>
 
-        {/* Date Range Selector */}
-        <div className="flex items-center gap-1.5 p-1 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xs">
-          <button
-            type="button"
-            onClick={() => setRange("7days")}
+        {/* Quick Links & Date Range Selector */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <a
+            href="#discipline-achievements"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded-2xl text-xs font-bold transition-all border border-amber-500/20 shadow-xs"
+          >
+            <Award className="w-3.5 h-3.5" />
+            Badges &amp; Level
+          </a>
+
+          <div className="flex items-center gap-1.5 p-1 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xs">
+            <button
+              type="button"
+              onClick={() => setRange("7days")}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
               range === "7days"
                 ? "bg-forest-700 text-white shadow-xs"
@@ -125,6 +136,7 @@ export default function AnalyticsPage() {
           </button>
         </div>
       </div>
+    </div>
 
       {/* 4 Summary Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -386,6 +398,12 @@ export default function AnalyticsPage() {
           </div>
         </div>
       </div>
+
+      {/* Weekday Consistency Pattern */}
+      {data.dayOfWeekStats && <DayOfWeekConsistency stats={data.dayOfWeekStats} />}
+
+      {/* Gamification Badges & Level Showcase */}
+      <BadgeShowcase />
 
       {/* Goal Performance Analytics Section */}
       {data.goalMetrics && (

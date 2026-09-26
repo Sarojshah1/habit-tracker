@@ -48,13 +48,14 @@ import { DailyPlanModal } from "@/components/planner/DailyPlanModal";
 import { DailyReviewModal } from "@/components/planner/DailyReviewModal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ConsistencyHeatmap } from "@/components/dashboard/ConsistencyHeatmap";
+import { ShareStreakModal } from "@/components/dashboard/ShareStreakModal";
+import { ExamCountdownWidget } from "@/components/dashboard/ExamCountdownWidget";
+import { enqueueOfflineAction } from "@/lib/services/offlineSync";
+import { useDataCache } from "@/lib/hooks/useDataCache";
 import { getGreeting } from "@/lib/utils/date";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [data, setData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(false);
 
   // Modals
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -64,52 +65,79 @@ export default function DashboardPage() {
   const [selectedHabitDetail, setSelectedHabitDetail] = useState<any>(null);
   const [deletingHabit, setDeletingHabit] = useState<any>(null);
 
-  // Planner & Task Modals
+  // Planner, Task & Share Modals
   const [isDailyPlanModalOpen, setIsDailyPlanModalOpen] = useState(false);
   const [isDailyReviewModalOpen, setIsDailyReviewModalOpen] = useState(false);
   const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [stackedPrompt, setStackedPrompt] = useState<{
+    id: string;
+    name: string;
+    icon: string;
+    color: string;
+    twoMinuteVersion?: string;
+  } | null>(null);
 
-  const fetchDashboardData = async () => {
-    try {
-      setError(false);
-      const res = await fetch("/api/dashboard");
-      if (!res.ok) throw new Error("Failed to load");
-      const json = await res.json();
-      if (json.success) {
-        setData(json.data);
-      } else {
-        setError(true);
-      }
-    } catch (err) {
-      console.error("Dashboard load error:", err);
-      setError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchDashboardData();
+  const fetchDashboardData = React.useCallback(async () => {
+    const res = await fetch("/api/dashboard");
+    if (!res.ok) throw new Error("Failed to load dashboard data");
+    const json = await res.json();
+    if (!json.success) throw new Error("Unsuccessful dashboard response");
+    return json.data;
   }, []);
 
-  // Optimistic toggle habit completion
-  const handleToggleHabit = async (habitId: string, currentStatus: string) => {
+  const {
+    data,
+    isLoading,
+    error,
+    mutate,
+    revalidate,
+  } = useDataCache("/api/dashboard", fetchDashboardData, { ttlMs: 60000 });
+
+  useEffect(() => {
+    const handleSyncComplete = () => {
+      revalidate(true);
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("habittrack_sync_completed", handleSyncComplete);
+    }
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("habittrack_sync_completed", handleSyncComplete);
+      }
+    };
+  }, [revalidate]);
+
+  // Instant optimistic toggle habit completion (with offline queueing support)
+  const handleToggleHabit = async (
+    habitId: string,
+    currentStatus: string,
+    completionType: "full" | "micro" = "full"
+  ) => {
     if (!data) return;
 
     const newStatus = currentStatus === "completed" ? "pending" : "completed";
+    const delta = newStatus === "completed" ? 1 : -1;
 
-    // 1. Optimistic UI update
-    setData((prev: any) => {
+    // 1. Instant 0ms Optimistic UI update
+    mutate((prev: any) => {
       if (!prev) return prev;
-      const updatedTodayHabits = prev.todayHabits.map((h: any) => {
+      const updatedTodayHabits = (prev.todayHabits || []).map((h: any) => {
         if (h._id === habitId) {
-          return { ...h, todayStatus: newStatus };
+          return {
+            ...h,
+            todayStatus: newStatus,
+            todayCompletionType: newStatus === "completed" ? completionType : "full",
+          };
         }
         return h;
       });
 
       const completedCount = updatedTodayHabits.filter((h: any) => h.todayStatus === "completed").length;
       const totalCount = updatedTodayHabits.length;
+      const prevStreak = prev.stats?.currentStreak?.count || 0;
+      const newStreak = Math.max(0, prevStreak + delta);
 
       return {
         ...prev,
@@ -117,11 +145,78 @@ export default function DashboardPage() {
         stats: {
           ...prev.stats,
           habitsCompleted: {
-            ...prev.stats.habitsCompleted,
+            ...prev.stats?.habitsCompleted,
             completed: completedCount,
             label: `${completedCount}/${totalCount}`,
           },
+          currentStreak: {
+            ...prev.stats?.currentStreak,
+            count: newStreak,
+            label: `${newStreak} Days`,
+          },
         },
+      };
+    });
+
+    const completionPayload = {
+      habitId,
+      date: data.today.date,
+      status: newStatus === "completed" ? "completed" : "pending",
+      action: newStatus === "completed" ? "save" : "remove",
+      completionType,
+    };
+
+    // If offline, queue for replay when reconnected
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      enqueueOfflineAction({
+        type: "toggle_habit",
+        endpoint: "/api/completions",
+        method: "POST",
+        payload: completionPayload,
+        description: `Habit completion: ${habitId}`,
+      });
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(completionPayload),
+      });
+
+      if (!res.ok) {
+        // Revert on server error
+        revalidate(true);
+      } else {
+        const json = await res.json();
+        if (json.nextStackedHabit) {
+          setStackedPrompt(json.nextStackedHabit);
+        }
+      }
+    } catch (err) {
+      console.warn("Network error during toggle, queuing offline:", err);
+      enqueueOfflineAction({
+        type: "toggle_habit",
+        endpoint: "/api/completions",
+        method: "POST",
+        payload: completionPayload,
+        description: `Habit completion: ${habitId}`,
+      });
+    }
+  };
+
+  const handleSkipHabit = async (habitId: string) => {
+    if (!data) return;
+
+    // Instant optimistic skip
+    mutate((prev: any) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        todayHabits: (prev.todayHabits || []).map((h: any) =>
+          h._id === habitId ? { ...h, todayStatus: "skipped" } : h
+        ),
       };
     });
 
@@ -132,93 +227,128 @@ export default function DashboardPage() {
         body: JSON.stringify({
           habitId,
           date: data.today.date,
-          status: newStatus === "completed" ? "completed" : "pending",
-          action: newStatus === "completed" ? "save" : "remove",
-        }),
-      });
-
-      if (!res.ok) {
-        // Revert on failure
-        fetchDashboardData();
-      } else {
-        // Silently refresh stats & streaks in background
-        fetchDashboardData();
-      }
-    } catch (err) {
-      console.error("Failed to toggle habit:", err);
-      fetchDashboardData();
-    }
-  };
-
-  const handleSkipHabit = async (habitId: string) => {
-    try {
-      await fetch("/api/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          habitId,
-          date: data.today.date,
           status: "skipped",
         }),
       });
-      fetchDashboardData();
+      if (!res.ok) revalidate(true);
     } catch (err) {
       console.error("Failed to skip habit:", err);
+      revalidate(true);
     }
   };
 
   const handleDeleteHabitConfirm = async () => {
-    if (!deletingHabit) return;
-    try {
-      await fetch(`/api/habits/${deletingHabit._id}`, { method: "DELETE" });
-      setDeletingHabit(null);
-      fetchDashboardData();
-    } catch (err) {
-      console.error("Failed to delete habit:", err);
-    }
-  };
+    if (!deletingHabit || !data) return;
+    const habitId = deletingHabit._id;
+    setDeletingHabit(null);
 
-  const handleArchiveHabit = async (habit: any) => {
-    try {
-      await fetch(`/api/habits/${habit._id}/archive`, { method: "POST" });
-      fetchDashboardData();
-    } catch (err) {
-      console.error("Failed to archive habit:", err);
-    }
-  };
-
-  const handleToggleTask = async (task: any) => {
-    const isCompleted = task.status === "completed";
-    const endpoint = isCompleted ? `/api/tasks/${task._id}` : `/api/tasks/${task._id}/complete`;
-    const method = isCompleted ? "PATCH" : "POST";
-    const body = isCompleted ? JSON.stringify({ status: "todo" }) : JSON.stringify({});
-
-    // Optimistic update
-    setData((prev: any) => {
+    // Instant optimistic removal
+    mutate((prev: any) => {
       if (!prev) return prev;
-      const updatedTasks = (prev.todayTasks || []).map((t: any) =>
-        t._id === task._id ? { ...t, status: isCompleted ? "todo" : "completed" } : t
-      );
-      const updatedPriorities = (prev.todayPriorities || []).map((t: any) =>
-        t._id === task._id ? { ...t, status: isCompleted ? "todo" : "completed" } : t
-      );
+      const updated = (prev.todayHabits || []).filter((h: any) => h._id !== habitId);
+      const completedCount = updated.filter((h: any) => h.todayStatus === "completed").length;
       return {
         ...prev,
-        todayTasks: updatedTasks,
-        todayPriorities: updatedPriorities,
+        todayHabits: updated,
+        stats: {
+          ...prev.stats,
+          habitsCompleted: {
+            ...prev.stats?.habitsCompleted,
+            completed: completedCount,
+            total: updated.length,
+            label: `${completedCount}/${updated.length}`,
+          },
+        },
       };
     });
 
     try {
-      await fetch(endpoint, {
+      const res = await fetch(`/api/habits/${habitId}`, { method: "DELETE" });
+      if (!res.ok) revalidate(true);
+    } catch (err) {
+      console.error("Failed to delete habit:", err);
+      revalidate(true);
+    }
+  };
+
+  const handleArchiveHabit = async (habit: any) => {
+    if (!data) return;
+    const habitId = habit._id;
+
+    // Instant optimistic archive
+    mutate((prev: any) => {
+      if (!prev) return prev;
+      const updated = (prev.todayHabits || []).filter((h: any) => h._id !== habitId);
+      const completedCount = updated.filter((h: any) => h.todayStatus === "completed").length;
+      return {
+        ...prev,
+        todayHabits: updated,
+        stats: {
+          ...prev.stats,
+          habitsCompleted: {
+            ...prev.stats?.habitsCompleted,
+            completed: completedCount,
+            total: updated.length,
+            label: `${completedCount}/${updated.length}`,
+          },
+        },
+      };
+    });
+
+    try {
+      const res = await fetch(`/api/habits/${habitId}/archive`, { method: "POST" });
+      if (!res.ok) revalidate(true);
+    } catch (err) {
+      console.error("Failed to archive habit:", err);
+      revalidate(true);
+    }
+  };
+
+  const handleToggleTask = async (task: any) => {
+    if (!data) return;
+    const isCompleted = task.status === "completed";
+    const newStatus = isCompleted ? "todo" : "completed";
+    const endpoint = isCompleted ? `/api/tasks/${task._id}` : `/api/tasks/${task._id}/complete`;
+    const method = isCompleted ? "PATCH" : "POST";
+    const body = isCompleted ? JSON.stringify({ status: "todo" }) : JSON.stringify({});
+
+    // Instant optimistic task toggle
+    mutate((prev: any) => {
+      if (!prev) return prev;
+      const updatedTasks = (prev.todayTasks || []).map((t: any) =>
+        t._id === task._id ? { ...t, status: newStatus } : t
+      );
+      const updatedPriorities = (prev.todayPriorities || []).map((t: any) =>
+        t._id === task._id ? { ...t, status: newStatus } : t
+      );
+      const completedTasksCount = updatedTasks.filter((t: any) => t.status === "completed").length;
+
+      return {
+        ...prev,
+        todayTasks: updatedTasks,
+        todayPriorities: updatedPriorities,
+        stats: {
+          ...prev.stats,
+          tasksCompleted: {
+            ...prev.stats?.tasksCompleted,
+            completed: completedTasksCount,
+            total: updatedTasks.length,
+            label: `${completedTasksCount}/${updatedTasks.length}`,
+          },
+        },
+      };
+    });
+
+    try {
+      const res = await fetch(endpoint, {
         method,
         headers: { "Content-Type": "application/json" },
         body,
       });
-      fetchDashboardData();
+      if (!res.ok) revalidate(true);
     } catch (err) {
       console.error("Failed to toggle task:", err);
-      fetchDashboardData();
+      revalidate(true);
     }
   };
 
@@ -237,7 +367,7 @@ export default function DashboardPage() {
       <ErrorState
         title="Unable to load dashboard"
         message="Could not load your habit statistics right now. Please refresh or try again."
-        onRetry={fetchDashboardData}
+        onRetry={() => revalidate(false)}
       />
     );
   }
@@ -261,6 +391,16 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex items-center gap-2.5 flex-wrap">
+          <button
+            type="button"
+            onClick={() => setIsShareModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/60 hover:bg-orange-100 dark:hover:bg-orange-900/50 text-orange-700 dark:text-orange-400 text-xs font-bold transition-all shadow-xs"
+            title="Share your study streak with classmates"
+          >
+            <Flame className="w-3.5 h-3.5 fill-current" />
+            Share Streak
+          </button>
+
           <button
             type="button"
             onClick={() => setIsDailyPlanModalOpen(true)}
@@ -292,6 +432,9 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
+
+      {/* Target Exam Countdown & Study Readiness Matrix */}
+      <ExamCountdownWidget />
 
       {/* 4 Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -543,6 +686,39 @@ export default function DashboardPage() {
               </button>
             </div>
 
+            {/* Stacked Habit Prompt Banner */}
+            {stackedPrompt && (
+              <div className="mb-3 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xl">🔗</span>
+                  <div className="text-xs">
+                    <p className="font-bold text-emerald-800 dark:text-emerald-300">
+                      Next in your stack: <span className="text-forest-700 dark:text-forest-400 underline">{stackedPrompt.name}</span>
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleToggleHabit(stackedPrompt.id, "pending", "full");
+                      setStackedPrompt(null);
+                    }}
+                    className="px-2.5 py-1 bg-forest-700 hover:bg-forest-800 text-white rounded-xl font-bold text-xs transition-colors shadow-2xs"
+                  >
+                    Complete Now
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStackedPrompt(null)}
+                    className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-xs font-bold"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )}
+
             {data.todayHabits.length === 0 ? (
               <EmptyState
                 icon={CheckCircle2}
@@ -576,7 +752,7 @@ export default function DashboardPage() {
                         {/* Custom Checkbox */}
                         <button
                           type="button"
-                          onClick={() => handleToggleHabit(habit._id, habit.todayStatus)}
+                          onClick={() => handleToggleHabit(habit._id, habit.todayStatus, "full")}
                           className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-150 shrink-0 ${
                             isCompleted
                               ? "bg-forest-700 text-white shadow-xs"
@@ -593,27 +769,53 @@ export default function DashboardPage() {
                         >
                           <HabitIcon name={habit.icon} color={habit.color} size="md" />
                           <div className="min-w-0">
-                            <p
-                              className={`text-sm font-bold truncate transition-colors ${
-                                isCompleted ? "line-through text-gray-400 dark:text-gray-500 font-medium" : "text-gray-900 dark:text-gray-100"
-                              }`}
-                            >
-                              {habit.name}
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <p
+                                className={`text-sm font-bold truncate transition-colors ${
+                                  isCompleted ? "line-through text-gray-400 dark:text-gray-500 font-medium" : "text-gray-900 dark:text-gray-100"
+                                }`}
+                              >
+                                {habit.name}
+                              </p>
+                              {habit.todayCompletionType === "micro" && (
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300">
+                                  ⚡ Micro
+                                </span>
+                              )}
+                            </div>
                             <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-400 dark:text-gray-500 font-medium">
                               <span className="flex items-center gap-1">
                                 <Clock className="w-3 h-3" />
                                 {habit.schedule?.time || "Anytime"}
                               </span>
                               <span>•</span>
-                              <span className="capitalize">{habit.frequency.replace("_", " ")}</span>
+                              <span className="capitalize">{habit.frequency?.replace("_", " ")}</span>
+                              {habit.habitStackAfterHabitId && (
+                                <>
+                                  <span>•</span>
+                                  <span className="text-forest-700 dark:text-forest-400 font-semibold">
+                                    🔗 Stacked
+                                  </span>
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>
                       </div>
 
                       {/* Right Action Menu */}
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1.5">
+                        {!isCompleted && !isSkipped && habit.twoMinuteVersion && (
+                          <button
+                            type="button"
+                            onClick={() => handleToggleHabit(habit._id, habit.todayStatus, "micro")}
+                            className="px-2 py-1 text-[11px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 rounded-lg transition-colors flex items-center gap-1 border border-amber-200 dark:border-amber-800/40"
+                            title={`2-Minute version: ${habit.twoMinuteVersion}`}
+                          >
+                            <Zap className="w-3 h-3" />
+                            <span>2-Min</span>
+                          </button>
+                        )}
                         {!isCompleted && !isSkipped && (
                           <button
                             type="button"
@@ -916,6 +1118,7 @@ export default function DashboardPage() {
         }}
         onSuccess={fetchDashboardData}
         initialData={editingHabit}
+        availableHabits={data?.todayHabits || []}
       />
 
       {/* Add Goal Modal */}
@@ -965,7 +1168,7 @@ export default function DashboardPage() {
       <DailyPlanModal
         isOpen={isDailyPlanModalOpen}
         onClose={() => setIsDailyPlanModalOpen(false)}
-        onSuccess={fetchDashboardData}
+        onSuccess={() => revalidate(true)}
         todayDateStr={data.today?.date || new Date().toISOString().split("T")[0]}
         tasks={data.todayTasks || []}
         initialPlan={data.todayPlan}
@@ -975,7 +1178,7 @@ export default function DashboardPage() {
       <DailyReviewModal
         isOpen={isDailyReviewModalOpen}
         onClose={() => setIsDailyReviewModalOpen(false)}
-        onSuccess={fetchDashboardData}
+        onSuccess={() => revalidate(true)}
         todayDateStr={data.today?.date || new Date().toISOString().split("T")[0]}
         metrics={{
           habitsCompleted: data.stats?.habitsCompleted?.completed ?? 0,
@@ -992,7 +1195,15 @@ export default function DashboardPage() {
       <TaskFormModal
         isOpen={isCreateTaskModalOpen}
         onClose={() => setIsCreateTaskModalOpen(false)}
-        onSuccess={fetchDashboardData}
+        onSuccess={revalidate}
+      />
+
+      {/* Share Streak Viral Modal */}
+      <ShareStreakModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        streakCount={data?.stats?.currentStreak?.count || 0}
+        userName={data?.user?.name || "Student"}
       />
     </div>
   );

@@ -112,24 +112,35 @@ export async function getUserTasks(
     query.$or = [{ title: regex }, { description: regex }];
   }
 
-  const [tasks, allUserTasks] = await Promise.all([
+  const userObjectId = typeof userId === "string" ? new mongoose.Types.ObjectId(userId) : userId;
+
+  const [tasks, [aggregateCounts]] = await Promise.all([
     Task.find(query)
       .populate("goalId", "title icon color status")
       .populate("habitId", "name icon color frequency")
       .sort({ dueDate: 1, priority: -1, createdAt: -1 })
       .lean(),
-    Task.find({ userId })
-      .select("status dueDate priority")
-      .lean(),
+    Task.aggregate([
+      { $match: { userId: userObjectId } },
+      {
+        $facet: {
+          all: [{ $match: { status: { $ne: "cancelled" } } }, { $count: "count" }],
+          today: [{ $match: { dueDate: todayStr, status: { $ne: "cancelled" } } }, { $count: "count" }],
+          upcoming: [{ $match: { dueDate: { $gt: todayStr }, status: { $ne: "cancelled" } } }, { $count: "count" }],
+          completed: [{ $match: { status: "completed" } }, { $count: "count" }],
+          high_priority: [{ $match: { priority: "high", status: { $ne: "completed" } } }, { $count: "count" }],
+        },
+      },
+    ]),
   ]);
 
   // Counts for UI filters
   const counts = {
-    all: allUserTasks.filter((t: any) => t.status !== "cancelled").length,
-    today: allUserTasks.filter((t: any) => t.dueDate === todayStr && t.status !== "cancelled").length,
-    upcoming: allUserTasks.filter((t: any) => t.dueDate > todayStr && t.status !== "cancelled").length,
-    completed: allUserTasks.filter((t: any) => t.status === "completed").length,
-    high_priority: allUserTasks.filter((t: any) => t.priority === "high" && t.status !== "completed").length,
+    all: aggregateCounts?.all?.[0]?.count || 0,
+    today: aggregateCounts?.today?.[0]?.count || 0,
+    upcoming: aggregateCounts?.upcoming?.[0]?.count || 0,
+    completed: aggregateCounts?.completed?.[0]?.count || 0,
+    high_priority: aggregateCounts?.high_priority?.[0]?.count || 0,
   };
 
   return { tasks, counts, todayDate: todayStr };

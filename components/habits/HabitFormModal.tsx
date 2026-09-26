@@ -9,6 +9,7 @@ interface HabitFormModalProps {
   onClose: () => void;
   onSuccess: () => void;
   initialData?: any;
+  availableHabits?: any[];
 }
 
 const PRESET_COLORS = [
@@ -54,6 +55,7 @@ export function HabitFormModal({
   onClose,
   onSuccess,
   initialData,
+  availableHabits = [],
 }: HabitFormModalProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -65,6 +67,8 @@ export function HabitFormModal({
   const [timesPerWeek, setTimesPerWeek] = useState(7);
   const [startDate, setStartDate] = useState(new Date().toISOString().split("T")[0]);
   const [reminder, setReminder] = useState("");
+  const [habitStackAfterHabitId, setHabitStackAfterHabitId] = useState("");
+  const [twoMinuteVersion, setTwoMinuteVersion] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -80,6 +84,12 @@ export function HabitFormModal({
       setTimesPerWeek(initialData.schedule?.timesPerWeek || 7);
       setStartDate(initialData.startDate || new Date().toISOString().split("T")[0]);
       setReminder(initialData.reminder || "");
+      setHabitStackAfterHabitId(
+        initialData.habitStackAfterHabitId?._id ||
+        initialData.habitStackAfterHabitId ||
+        ""
+      );
+      setTwoMinuteVersion(initialData.twoMinuteVersion || "");
     } else {
       setName("");
       setDescription("");
@@ -91,6 +101,8 @@ export function HabitFormModal({
       setTimesPerWeek(7);
       setStartDate(new Date().toISOString().split("T")[0]);
       setReminder("");
+      setHabitStackAfterHabitId("");
+      setTwoMinuteVersion("");
     }
     setErrors({});
   }, [initialData, isOpen]);
@@ -130,6 +142,8 @@ export function HabitFormModal({
         },
         startDate,
         reminder,
+        habitStackAfterHabitId: habitStackAfterHabitId || null,
+        twoMinuteVersion: twoMinuteVersion.trim(),
       };
 
       const url = initialData ? `/api/habits/${initialData._id}` : "/api/habits";
@@ -329,6 +343,60 @@ export function HabitFormModal({
             />
           </div>
         )}
+
+        {/* Atomic Habits Superpowers */}
+        <div className="p-3.5 bg-forest-50/60 dark:bg-forest-950/30 border border-forest-100 dark:border-forest-900/60 rounded-2xl space-y-3.5">
+          <div className="flex items-center gap-2">
+            <span className="text-sm">⚡</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-forest-900 dark:text-forest-200">
+              Atomic Habits Enhancements
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            {/* Habit Stacking */}
+            <div>
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                🔗 Stack After Habit (Anchor)
+              </label>
+              <select
+                value={habitStackAfterHabitId}
+                onChange={(e) => setHabitStackAfterHabitId(e.target.value)}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs text-gray-900 dark:text-gray-100 focus:border-forest-600 outline-none"
+              >
+                <option value="">None (Independent)</option>
+                {availableHabits
+                  .filter((h) => !initialData || h._id !== initialData._id)
+                  .map((h) => (
+                    <option key={h._id} value={h._id}>
+                      After: {h.name}
+                    </option>
+                  ))}
+              </select>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+                Trigger this habit immediately after completing the anchor.
+              </p>
+            </div>
+
+            {/* 2-Minute Rule */}
+            <div>
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                ⚡ 2-Minute / Bad-Day Version
+              </label>
+              <input
+                type="text"
+                value={twoMinuteVersion}
+                onChange={(e) => setTwoMinuteVersion(e.target.value)}
+                placeholder="e.g. Read 1 page, 5 pushups"
+                maxLength={120}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs text-gray-900 dark:text-gray-100 focus:border-forest-600 outline-none"
+              />
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+                Quick fallback to save your streak on exhausted days.
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* Start Date & Reminder */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

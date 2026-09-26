@@ -27,6 +27,7 @@ import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useTheme } from "@/lib/context/ThemeContext";
+import { clearCache } from "@/lib/hooks/useDataCache";
 
 const PRESET_AVATARS = [
   "🎓", "📚", "🚀", "⚡", "🎯", "🌿", "🧠", "💻", "🎨", "🔬", "🏆", "⭐", "☕", "🦉", "💡", "🔥"
@@ -295,6 +296,7 @@ export default function SettingsPage() {
       if (!res.ok || !data.success) {
         setError(data.message || "Failed to save settings");
       } else {
+        clearCache("/api/auth/me");
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 3000);
       }

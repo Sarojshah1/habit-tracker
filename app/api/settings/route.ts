@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUser, unauthorizedResponse } from "@/lib/auth/middleware";
 import { updateSettingsSchema } from "@/lib/validations/settings";
+import { User } from "@/lib/models/User";
 
 export const dynamic = "force-dynamic";
 
@@ -47,77 +48,113 @@ export async function PATCH(req: NextRequest) {
 
     const { profile, preferences } = parsed.data;
 
+    // Fetch the Mongoose document to ensure full document instance and validation integrity
+    const dbUser = await User.findById(user._id);
+    if (!dbUser) return unauthorizedResponse();
+
     if (profile) {
-      if (profile.name) user.name = profile.name.trim();
-      if (profile.timezone) user.timezone = profile.timezone;
-      if (profile.language) user.language = profile.language;
-      if (profile.avatar !== undefined) user.avatar = profile.avatar;
+      if (profile.name) dbUser.name = profile.name.trim();
+      if (profile.timezone) dbUser.timezone = profile.timezone;
+      if (profile.language) dbUser.language = profile.language;
+      if (profile.avatar !== undefined) dbUser.avatar = profile.avatar;
     }
 
     if (preferences) {
+      if (!dbUser.preferences) {
+        dbUser.preferences = {
+          notifications: {
+            habitReminders: true,
+            dailySummary: true,
+            streakReminders: true,
+            goalReminders: true,
+            focusNotifications: true,
+            taskReminders: true,
+            dailyReview: true,
+            weeklyReview: true,
+          },
+          appearance: "light",
+          habitPreferences: {
+            defaultReminderTime: "08:00",
+            weekStartsOn: "monday",
+            defaultHabitView: "list",
+          },
+          dashboardPreferences: {
+            widgets: ["priorities", "tasks", "habits", "schedule", "focus", "goals", "weekly", "activity", "insights"],
+          },
+          taskDefaults: {
+            defaultDurationMinutes: 30,
+          },
+          productivityScoreWeights: {
+            habits: 40,
+            tasks: 40,
+            focus: 20,
+          },
+        };
+      }
+
       if (preferences.notifications) {
-        user.preferences.notifications = {
-          ...user.preferences.notifications,
+        dbUser.preferences.notifications = {
+          ...(dbUser.preferences.notifications || {}),
           ...preferences.notifications,
         };
       }
       if (preferences.appearance) {
-        user.preferences.appearance = preferences.appearance;
+        dbUser.preferences.appearance = preferences.appearance;
       }
       if (preferences.habitPreferences) {
-        user.preferences.habitPreferences = {
-          ...user.preferences.habitPreferences,
+        dbUser.preferences.habitPreferences = {
+          ...(dbUser.preferences.habitPreferences || {}),
           ...preferences.habitPreferences,
         };
       }
       if (preferences.taskDefaults) {
-        user.preferences.taskDefaults = {
+        dbUser.preferences.taskDefaults = {
           defaultDurationMinutes:
             preferences.taskDefaults.defaultDurationMinutes ??
-            user.preferences.taskDefaults?.defaultDurationMinutes ??
+            dbUser.preferences.taskDefaults?.defaultDurationMinutes ??
             30,
         };
       }
       if (preferences.productivityScoreWeights) {
-        user.preferences.productivityScoreWeights = {
+        dbUser.preferences.productivityScoreWeights = {
           habits:
             preferences.productivityScoreWeights.habits ??
-            user.preferences.productivityScoreWeights?.habits ??
+            dbUser.preferences.productivityScoreWeights?.habits ??
             40,
           tasks:
             preferences.productivityScoreWeights.tasks ??
-            user.preferences.productivityScoreWeights?.tasks ??
+            dbUser.preferences.productivityScoreWeights?.tasks ??
             40,
           focus:
             preferences.productivityScoreWeights.focus ??
-            user.preferences.productivityScoreWeights?.focus ??
+            dbUser.preferences.productivityScoreWeights?.focus ??
             20,
         };
       }
       if (preferences.dashboardPreferences) {
-        user.preferences.dashboardPreferences = {
+        dbUser.preferences.dashboardPreferences = {
           widgets:
             preferences.dashboardPreferences.widgets ??
-            user.preferences.dashboardPreferences?.widgets ??
+            dbUser.preferences.dashboardPreferences?.widgets ??
             ["priorities", "tasks", "habits", "schedule", "focus", "goals", "weekly", "activity", "insights"],
         };
       }
     }
 
-    user.markModified("preferences");
-    await user.save();
+    dbUser.markModified("preferences");
+    await dbUser.save();
 
     return NextResponse.json({
       success: true,
       profile: {
-        id: user._id.toString(),
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar,
-        timezone: user.timezone,
-        language: user.language,
+        id: dbUser._id.toString(),
+        name: dbUser.name,
+        email: dbUser.email,
+        avatar: dbUser.avatar,
+        timezone: dbUser.timezone,
+        language: dbUser.language,
       },
-      preferences: user.preferences,
+      preferences: dbUser.preferences,
       message: "Settings saved successfully",
     });
   } catch (error) {

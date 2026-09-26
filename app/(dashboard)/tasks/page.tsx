@@ -18,23 +18,13 @@ import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useDataCache } from "@/lib/hooks/useDataCache";
 
 export default function TasksPage() {
   const router = useRouter();
-  const [tasks, setTasks] = useState<any[]>([]);
-  const [counts, setCounts] = useState<any>({
-    all: 0,
-    today: 0,
-    upcoming: 0,
-    completed: 0,
-    high_priority: 0,
-  });
   const [activeFilter, setActiveFilter] = useState<
     "all" | "today" | "upcoming" | "completed" | "high_priority"
   >("today");
-  const [todayDateStr, setTodayDateStr] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(false);
 
   // Modals
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -42,45 +32,54 @@ export default function TasksPage() {
   const [deletingTask, setDeletingTask] = useState<any>(null);
 
   const fetchTasks = useCallback(async () => {
-    try {
-      setError(false);
-      const res = await fetch(`/api/tasks?status=${activeFilter}`);
-      if (!res.ok) throw new Error("Failed to load tasks");
-      const data = await res.json();
-      if (data.success) {
-        setTasks(data.tasks);
-        setCounts(data.counts);
-        setTodayDateStr(data.todayDate);
-      } else {
-        setError(true);
-      }
-    } catch (err) {
-      console.error("Tasks fetch error:", err);
-      setError(true);
-    } finally {
-      setIsLoading(false);
-    }
+    const res = await fetch(`/api/tasks?status=${activeFilter}`);
+    if (!res.ok) throw new Error("Failed to load tasks");
+    const data = await res.json();
+    if (!data.success) throw new Error("Unsuccessful tasks response");
+    return data;
   }, [activeFilter]);
 
-  useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
+  const {
+    data,
+    isLoading,
+    error,
+    mutate,
+    revalidate,
+  } = useDataCache(`/api/tasks?status=${activeFilter}`, fetchTasks, { ttlMs: 60000 });
+
+  const tasks: any[] = data?.tasks || [];
+  const counts = data?.counts || { all: 0, today: 0, upcoming: 0, completed: 0, high_priority: 0 };
+  const todayDateStr = data?.todayDate || new Date().toISOString().split("T")[0];
 
   const handleToggleComplete = async (task: any) => {
     const isNowCompleted = task.status !== "completed";
+    const newStatus = isNowCompleted ? "completed" : "todo";
 
-    // Optimistic UI update
-    setTasks((prev) =>
-      prev.map((t) =>
+    // Instant optimistic update
+    mutate((prev: any) => {
+      if (!prev) return prev;
+      let updatedTasks = (prev.tasks || []).map((t: any) =>
         t._id === task._id
           ? {
               ...t,
-              status: isNowCompleted ? "completed" : "todo",
+              status: newStatus,
               completedAt: isNowCompleted ? new Date().toISOString() : null,
             }
           : t
-      )
-    );
+      );
+      if (activeFilter === "completed" && !isNowCompleted) {
+        updatedTasks = updatedTasks.filter((t: any) => t._id !== task._id);
+      }
+
+      return {
+        ...prev,
+        tasks: updatedTasks,
+        counts: {
+          ...prev.counts,
+          completed: Math.max(0, (prev.counts?.completed || 0) + (isNowCompleted ? 1 : -1)),
+        },
+      };
+    });
 
     try {
       if (isNowCompleted) {
@@ -92,30 +91,63 @@ export default function TasksPage() {
           body: JSON.stringify({ status: "todo", completedAt: null }),
         });
       }
-      fetchTasks();
+      revalidate(true);
     } catch (err) {
       console.error("Failed to toggle task completion:", err);
-      fetchTasks();
+      revalidate(true);
     }
   };
 
   const handleCancelTask = async (task: any) => {
+    // Instant optimistic removal from view
+    mutate((prev: any) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        tasks: (prev.tasks || []).filter((t: any) => t._id !== task._id),
+        counts: {
+          ...prev.counts,
+          all: Math.max(0, (prev.counts?.all || 0) - 1),
+          today: task.dueDate === todayDateStr ? Math.max(0, (prev.counts?.today || 0) - 1) : prev.counts?.today,
+        },
+      };
+    });
+
     try {
-      await fetch(`/api/tasks/${task._id}/cancel`, { method: "POST" });
-      fetchTasks();
+      const res = await fetch(`/api/tasks/${task._id}/cancel`, { method: "POST" });
+      if (!res.ok) revalidate(true);
     } catch (err) {
       console.error("Failed to cancel task:", err);
+      revalidate(true);
     }
   };
 
   const handleDeleteConfirm = async () => {
     if (!deletingTask) return;
+    const taskId = deletingTask._id;
+    const deletedTask = deletingTask;
+    setDeletingTask(null);
+
+    // Instant optimistic removal
+    mutate((prev: any) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        tasks: (prev.tasks || []).filter((t: any) => t._id !== taskId),
+        counts: {
+          ...prev.counts,
+          all: Math.max(0, (prev.counts?.all || 0) - 1),
+          today: deletedTask.dueDate === todayDateStr ? Math.max(0, (prev.counts?.today || 0) - 1) : prev.counts?.today,
+        },
+      };
+    });
+
     try {
-      await fetch(`/api/tasks/${deletingTask._id}`, { method: "DELETE" });
-      setDeletingTask(null);
-      fetchTasks();
+      const res = await fetch(`/api/tasks/${taskId}`, { method: "DELETE" });
+      if (!res.ok) revalidate(true);
     } catch (err) {
       console.error("Failed to delete task:", err);
+      revalidate(true);
     }
   };
 
@@ -255,7 +287,7 @@ export default function TasksPage() {
         <ErrorState
           title="Unable to load your tasks."
           message="Could not load your task list right now. Please try again."
-          onRetry={fetchTasks}
+          onRetry={() => revalidate(false)}
         />
       ) : tasks.length === 0 ? (
         <EmptyState
@@ -270,7 +302,7 @@ export default function TasksPage() {
         />
       ) : (
         <div className="space-y-3">
-          {tasks.map((task) => (
+          {tasks.map((task: any) => (
             <TaskCard
               key={task._id}
               task={task}
@@ -295,7 +327,7 @@ export default function TasksPage() {
           setIsCreateModalOpen(false);
           setEditingTask(null);
         }}
-        onSuccess={fetchTasks}
+        onSuccess={() => revalidate(true)}
         initialData={editingTask}
       />
 

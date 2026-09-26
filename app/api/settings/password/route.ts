@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { getAuthenticatedUser, unauthorizedResponse } from "@/lib/auth/middleware";
+import { User } from "@/lib/models/User";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +34,10 @@ export async function POST(req: NextRequest) {
 
     const { currentPassword, newPassword } = parsed.data;
 
-    const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+    const dbUser = await User.findById(user._id);
+    if (!dbUser) return unauthorizedResponse();
+
+    const isMatch = await bcrypt.compare(currentPassword, dbUser.passwordHash);
     if (!isMatch) {
       return NextResponse.json(
         { success: false, message: "Current password is incorrect" },
@@ -42,8 +46,8 @@ export async function POST(req: NextRequest) {
     }
 
     const salt = await bcrypt.genSalt(12);
-    user.passwordHash = await bcrypt.hash(newPassword, salt);
-    await user.save();
+    dbUser.passwordHash = await bcrypt.hash(newPassword, salt);
+    await dbUser.save();
 
     return NextResponse.json({
       success: true,

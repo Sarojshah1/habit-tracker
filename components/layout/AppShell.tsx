@@ -5,30 +5,23 @@ import { Sidebar } from "./Sidebar";
 import { TopHeader } from "./TopHeader";
 import { CommandPalette } from "../ui/CommandPalette";
 
+import { useDataCache } from "@/lib/hooks/useDataCache";
+
 interface AppShellProps {
   children: React.ReactNode;
 }
 
 export function AppShell({ children }: AppShellProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState<{ id: string; name: string; email: string; avatar?: string } | null>(null);
 
-  useEffect(() => {
-    async function loadUser() {
-      try {
-        const res = await fetch("/api/auth/me");
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success) {
-            setUser(data.user);
-          }
-        }
-      } catch (err) {
-        console.error("Failed to fetch user in AppShell:", err);
-      }
-    }
-    loadUser();
+  const fetchMe = React.useCallback(async () => {
+    const res = await fetch("/api/auth/me");
+    if (!res.ok) throw new Error("Failed to fetch me");
+    const data = await res.json();
+    return data.user;
   }, []);
+
+  const { data: user } = useDataCache("/api/auth/me", fetchMe, { ttlMs: 300000 });
 
   return (
     <div className="min-h-screen flex bg-[#F8FAF9] dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-200">

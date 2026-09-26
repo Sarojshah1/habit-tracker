@@ -30,7 +30,7 @@ export async function getAuthenticatedUser(req?: NextRequest): Promise<IUser | n
   }
 
   await connectToDatabase();
-  const user = await User.findById(payload.userId).select("-passwordHash").lean<IUser>();
+  const user = await User.findById(payload.userId).select("-passwordHash");
   return user;
 }
 

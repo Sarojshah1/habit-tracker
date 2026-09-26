@@ -39,16 +39,15 @@ export async function GET(req: NextRequest) {
     const monthPrefix = `${currYear}-${String(currMonth).padStart(2, "0")}`;
     const ninetyDaysAgo = getDateDaysAgoFrom(todayDateStr, 89);
 
+    const oneYearAgo = getDateDaysAgoFrom(todayDateStr, 365);
+
     // Fetch all independent collections concurrently with lean() for fast serverless execution
     const [
       activeHabits,
       todayCompletions,
       completedDates,
-      weekCompletions,
-      allUserCompletions,
       rawGoals,
       recentActivity,
-      monthCompletions,
       todayTasksRaw,
       todayPlan,
       todayReview,
@@ -62,6 +61,7 @@ export async function GET(req: NextRequest) {
         archived: false,
         active: true,
       })
+        .populate("habitStackAfterHabitId", "name icon color")
         .sort({ "schedule.time": 1, createdAt: 1 })
         .lean(),
 
@@ -70,33 +70,17 @@ export async function GET(req: NextRequest) {
         userId: user._id,
         date: todayDateStr,
       })
-        .select("habitId status notes")
+        .select("habitId status notes completionType")
         .lean(),
 
-      // 3. Completed dates for overall streaks
+      // 3. Completed dates for overall streaks (last 365 days)
       HabitCompletion.distinct("date", {
         userId: user._id,
         status: "completed",
+        date: { $gte: oneYearAgo },
       }),
 
-      // 4. Completions for past 7 days
-      HabitCompletion.find({
-        userId: user._id,
-        date: { $gte: weekStartDate, $lte: todayDateStr },
-        status: "completed",
-      })
-        .select("date")
-        .lean(),
-
-      // 5. User completions for active goals
-      HabitCompletion.find({
-        userId: user._id,
-        status: "completed",
-      })
-        .select("habitId date status")
-        .lean(),
-
-      // 6. Active goals
+      // 4. Active goals
       Goal.find({
         userId: user._id,
         status: "active",
@@ -106,7 +90,7 @@ export async function GET(req: NextRequest) {
         .sort({ createdAt: -1 })
         .lean(),
 
-      // 7. Recent activity (capped to 8)
+      // 5. Recent activity (capped to 8)
       Activity.find({
         userId: user._id,
       })
@@ -114,22 +98,14 @@ export async function GET(req: NextRequest) {
         .limit(8)
         .lean(),
 
-      // 8. Month completions
-      HabitCompletion.find({
-        userId: user._id,
-        date: { $gte: `${monthPrefix}-01`, $lte: `${monthPrefix}-${daysInMonth}` },
-      })
-        .select("date status")
-        .lean(),
-
-      // 9. Today's tasks
+      // 6. Today's tasks
       Task.find({ userId: user._id, dueDate: todayDateStr })
         .populate("goalId", "title icon color")
         .populate("habitId", "name icon color")
         .sort({ priority: -1, createdAt: 1 })
         .lean(),
 
-      // 10. Today's daily plan
+      // 7. Today's daily plan
       DailyPlan.findOne({ userId: user._id, date: todayDateStr })
         .populate({
           path: "priorityTaskIds",
@@ -137,10 +113,10 @@ export async function GET(req: NextRequest) {
         })
         .lean(),
 
-      // 11. Today's daily review
+      // 8. Today's daily review
       DailyReview.findOne({ userId: user._id, date: todayDateStr }).lean(),
 
-      // 12. Today's time blocks
+      // 9. Today's time blocks
       TimeBlock.find({
         userId: user._id,
         start: {
@@ -151,7 +127,7 @@ export async function GET(req: NextRequest) {
         .sort({ start: 1 })
         .lean(),
 
-      // 13. Today's focus sessions
+      // 10. Today's focus sessions
       FocusSession.find({
         userId: user._id,
         status: "completed",
@@ -163,19 +139,32 @@ export async function GET(req: NextRequest) {
         .select("duration")
         .lean(),
 
-      // 14. 90-day heatmap completions
+      // 11. 90-day heatmap completions (also provides week and month completions)
       HabitCompletion.find({
         userId: user._id,
         date: { $gte: ninetyDaysAgo, $lte: todayDateStr },
-        status: { $in: ["completed", "frozen"] },
+        status: { $in: ["completed", "skipped", "frozen"] },
       })
-        .select("date")
+        .select("habitId date status")
         .lean(),
     ]);
 
-    const completionMap = new Map<string, { status: string; notes?: string }>();
+    // Derive week and month completions from ninetyDayCompletions in memory without extra DB queries
+    const weekCompletions = ninetyDayCompletions.filter(
+      (c: any) => c.date >= weekStartDate && c.date <= todayDateStr && c.status === "completed"
+    );
+    const monthCompletions = ninetyDayCompletions.filter(
+      (c: any) => c.date >= `${monthPrefix}-01` && c.date <= `${monthPrefix}-${daysInMonth}`
+    );
+    const allUserCompletions = ninetyDayCompletions.filter((c: any) => c.status === "completed");
+
+    const completionMap = new Map<string, { status: string; notes?: string; completionType?: string }>();
     todayCompletions.forEach((c: any) => {
-      completionMap.set(c.habitId.toString(), { status: c.status, notes: c.notes });
+      completionMap.set(c.habitId.toString(), {
+        status: c.status,
+        notes: c.notes,
+        completionType: c.completionType || "full",
+      });
     });
 
     // 3. Today's scheduled habits
@@ -186,6 +175,7 @@ export async function GET(req: NextRequest) {
         return {
           ...h,
           todayStatus: record ? record.status : "pending",
+          todayCompletionType: record?.completionType || "full",
           todayNotes: record ? record.notes : "",
         };
       });
