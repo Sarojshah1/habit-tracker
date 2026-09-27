@@ -71,19 +71,68 @@ export async function PATCH(
     if (body.color !== undefined) target.color = body.color;
     if (body.notes !== undefined) target.notes = body.notes;
 
-    // Handle topic toggle or chapter update
-    if (body.chapterId && body.topicId) {
+    const action = body.action;
+
+    if (action === "add_chapter") {
+      const chapterTitle = (body.title || body.chapterTitle || "Untitled Chapter").trim();
+      target.syllabus.push({
+        title: chapterTitle,
+        topics: Array.isArray(body.topics) ? body.topics : [],
+      } as any);
+    } else if (action === "update_chapter" && body.chapterId) {
+      const chapter = target.syllabus.find((c: any) => c._id?.toString() === body.chapterId.toString());
+      if (chapter && body.chapterTitle !== undefined) {
+        chapter.title = body.chapterTitle.trim();
+      }
+    } else if (action === "delete_chapter" && body.chapterId) {
+      target.syllabus = target.syllabus.filter(
+        (c: any) => c._id?.toString() !== body.chapterId.toString()
+      );
+    } else if (action === "add_topic" && body.chapterId) {
+      const chapter = target.syllabus.find((c: any) => c._id?.toString() === body.chapterId.toString());
+      if (chapter) {
+        chapter.topics.push({
+          name: (body.name || "New Topic").trim(),
+          completed: Boolean(body.completed),
+          confidence: body.confidence || "medium",
+          notes: body.notes || "",
+        } as any);
+      }
+    } else if (action === "update_topic" && body.chapterId && body.topicId) {
+      const chapter = target.syllabus.find((c: any) => c._id?.toString() === body.chapterId.toString());
+      if (chapter) {
+        const topic = chapter.topics.find((t: any) => t._id?.toString() === body.topicId.toString());
+        if (topic) {
+          if (body.name !== undefined) topic.name = body.name.trim();
+          if (body.completed !== undefined) topic.completed = Boolean(body.completed);
+          if (body.confidence !== undefined) topic.confidence = body.confidence;
+          if (body.notes !== undefined) topic.notes = body.notes;
+        }
+      }
+    } else if (action === "delete_topic" && body.chapterId && body.topicId) {
+      const chapter = target.syllabus.find((c: any) => c._id?.toString() === body.chapterId.toString());
+      if (chapter) {
+        chapter.topics = chapter.topics.filter(
+          (t: any) => t._id?.toString() !== body.topicId.toString()
+        );
+      }
+    } else if (body.chapterId && body.topicId) {
+      // Direct topic toggle or field update
       const chapter = target.syllabus.find((c: any) => c._id?.toString() === body.chapterId.toString());
       if (chapter) {
         const topic = chapter.topics.find((t: any) => t._id?.toString() === body.topicId.toString());
         if (topic) {
           if (body.completed !== undefined) topic.completed = body.completed;
           if (body.confidence !== undefined) topic.confidence = body.confidence;
+          if (body.name !== undefined) topic.name = body.name.trim();
+          if (body.notes !== undefined) topic.notes = body.notes;
         }
       }
     } else if (body.syllabus !== undefined) {
       target.syllabus = body.syllabus;
     }
+
+    target.markModified("syllabus");
 
     const { totalTopics, completedTopics, syllabusProgress } = computeSyllabusProgress(
       target.syllabus
