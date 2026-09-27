@@ -133,8 +133,16 @@ export function ExamCountdownWidget() {
           </div>
 
           <Link
-            href="/exams"
+            href="/exams?tab=syllabus"
             className="inline-flex items-center text-xs font-bold text-forest-700 dark:text-forest-400 hover:text-forest-800 hover:underline gap-1"
+          >
+            Manage Syllabus
+            <ChevronRight className="w-3.5 h-3.5" />
+          </Link>
+
+          <Link
+            href="/exams"
+            className="inline-flex items-center text-xs font-bold text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 gap-1"
           >
             All Exams
             <ChevronRight className="w-3.5 h-3.5" />
@@ -196,14 +204,20 @@ export function ExamCountdownWidget() {
         {/* 4 Pillars Breakdown Grid */}
         <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-3">
           {/* Pillar 1: Syllabus Coverage */}
-          <div className="bg-white/80 dark:bg-gray-800/60 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 p-3.5 flex flex-col justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-                <BookOpen className="w-3.5 h-3.5" />
+          <Link
+            href="/exams?tab=syllabus"
+            className="bg-white/80 dark:bg-gray-800/60 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 p-3.5 flex flex-col justify-between hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xs transition-all group cursor-pointer"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                  <BookOpen className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  Syllabus
+                </span>
               </div>
-              <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
-                Syllabus
-              </span>
+              <ChevronRight className="w-3 h-3 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
             </div>
             <div className="mt-2.5">
               <div className="text-xl font-black text-gray-900 dark:text-gray-100">
@@ -212,7 +226,7 @@ export function ExamCountdownWidget() {
               <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">
                 {nearestExam.totalTopics > 0
                   ? `${nearestExam.completedTopics}/${nearestExam.totalTopics} topics`
-                  : "Tracked"}
+                  : "Manage chapters →"}
               </p>
             </div>
             <div className="w-full bg-blue-100 dark:bg-blue-950 h-1.5 rounded-full mt-2 overflow-hidden">
@@ -221,17 +235,23 @@ export function ExamCountdownWidget() {
                 style={{ width: `${metrics.syllabusCoverageScore}%` }}
               />
             </div>
-          </div>
+          </Link>
 
           {/* Pillar 2: Mock Tests */}
-          <div className="bg-white/80 dark:bg-gray-800/60 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 p-3.5 flex flex-col justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                <Award className="w-3.5 h-3.5" />
+          <Link
+            href="/exams?tab=mocks"
+            className="bg-white/80 dark:bg-gray-800/60 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 p-3.5 flex flex-col justify-between hover:border-emerald-400 dark:hover:border-emerald-500 hover:shadow-xs transition-all group cursor-pointer"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <Award className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                  Mock Exams
+                </span>
               </div>
-              <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
-                Mock Exams
-              </span>
+              <ChevronRight className="w-3 h-3 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
             </div>
             <div className="mt-2.5">
               <div className="text-xl font-black text-gray-900 dark:text-gray-100">
@@ -247,17 +267,23 @@ export function ExamCountdownWidget() {
                 style={{ width: `${metrics.mockExamScore}%` }}
               />
             </div>
-          </div>
+          </Link>
 
           {/* Pillar 3: Study Habits */}
-          <div className="bg-white/80 dark:bg-gray-800/60 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 p-3.5 flex flex-col justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                <TrendingUp className="w-3.5 h-3.5" />
+          <Link
+            href="/habits"
+            className="bg-white/80 dark:bg-gray-800/60 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 p-3.5 flex flex-col justify-between hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-xs transition-all group cursor-pointer"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                  Study Habits
+                </span>
               </div>
-              <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
-                Study Habits
-              </span>
+              <ChevronRight className="w-3 h-3 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
             </div>
             <div className="mt-2.5">
               <div className="text-xl font-black text-gray-900 dark:text-gray-100">
@@ -273,17 +299,23 @@ export function ExamCountdownWidget() {
                 style={{ width: `${metrics.studyHabitConsistency}%` }}
               />
             </div>
-          </div>
+          </Link>
 
           {/* Pillar 4: Flashcards */}
-          <div className="bg-white/80 dark:bg-gray-800/60 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 p-3.5 flex flex-col justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
-                <Brain className="w-3.5 h-3.5" />
+          <Link
+            href="/flashcards"
+            className="bg-white/80 dark:bg-gray-800/60 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 p-3.5 flex flex-col justify-between hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-xs transition-all group cursor-pointer"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                  <Brain className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                  Flashcards
+                </span>
               </div>
-              <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
-                Flashcards
-              </span>
+              <ChevronRight className="w-3 h-3 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
             </div>
             <div className="mt-2.5">
               <div className="text-xl font-black text-gray-900 dark:text-gray-100">
@@ -299,7 +331,7 @@ export function ExamCountdownWidget() {
                 style={{ width: `${metrics.flashcardMasteryScore}%` }}
               />
             </div>
-          </div>
+          </Link>
         </div>
       </div>
     </div>
