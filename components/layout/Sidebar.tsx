@@ -99,7 +99,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
       {/* Motivational Card at Bottom */}
       <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
-        <div className="bg-gradient-to-br from-forest-50/90 to-emerald-50/50 dark:from-forest-950/40 dark:to-gray-850/40 border border-forest-100/80 dark:border-forest-900/40 rounded-2xl p-4 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-forest-50/90 to-emerald-50/50 dark:from-forest-950/40 dark:to-gray-900/60 border border-forest-100/80 dark:border-forest-900/40 rounded-2xl p-4 relative overflow-hidden">
           <div className="absolute top-2 right-2 text-forest-300 dark:text-forest-700">
             <Sparkles className="w-4 h-4" />
           </div>

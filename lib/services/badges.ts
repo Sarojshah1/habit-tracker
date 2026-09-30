@@ -145,7 +145,13 @@ export async function getUserBadges(userId: string | mongoose.Types.ObjectId, ti
   // Overall streak metrics
   const completedCompletions = completions.filter((c: any) => c.status === "completed");
   const completedDates = Array.from(new Set(completedCompletions.map((c: any) => c.date)));
-  const overallStreaks = calculateOverallStreaks(completedDates, todayStr);
+  const frozenDates = Array.from(
+    new Set([
+      ...completions.filter((c: any) => c.status === "frozen").map((c: any) => c.date),
+      ...(user?.streakFreezes?.usedDates || []),
+    ])
+  );
+  const overallStreaks = calculateOverallStreaks(completedDates, todayStr, frozenDates);
 
   // Highest streak on any individual habit
   let bestHabitStreak = 0;

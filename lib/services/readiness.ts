@@ -134,7 +134,7 @@ export async function calculateStudyReadiness(
   if (studyHabits.length > 0) {
     studyHabitStreak = Math.max(...studyHabits.map((h: any) => h.currentStreak || 0), 0);
     const expected = studyHabits.length * 14;
-    const completedCount = completions.filter((c) => c.status === "completed").length;
+    const completedCount = completions.filter((c) => c.status === "completed" || c.status === "frozen").length;
     studyHabitConsistency = Math.min(
       100,
       Math.round((completedCount / Math.max(1, expected)) * 100)

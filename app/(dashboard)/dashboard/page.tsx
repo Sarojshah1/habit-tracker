@@ -25,6 +25,9 @@ import {
   Zap,
   ChevronRight,
   ListTodo,
+  Volume2,
+  VolumeX,
+  Share2,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -49,7 +52,16 @@ import { DailyReviewModal } from "@/components/planner/DailyReviewModal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ConsistencyHeatmap } from "@/components/dashboard/ConsistencyHeatmap";
 import { ShareStreakModal } from "@/components/dashboard/ShareStreakModal";
+import { StreakCardModal } from "@/components/dashboard/StreakCardModal";
 import { ExamCountdownWidget } from "@/components/dashboard/ExamCountdownWidget";
+import { AiStudyCoachWidget } from "@/components/dashboard/AiStudyCoachWidget";
+import { Confetti, triggerConfetti } from "@/components/ui/Confetti";
+import {
+  playHabitCompleteSound,
+  playStreakMilestoneSound,
+  isSoundEnabled,
+  setSoundEnabled,
+} from "@/lib/utils/sound";
 import { enqueueOfflineAction } from "@/lib/services/offlineSync";
 import { useDataCache } from "@/lib/hooks/useDataCache";
 import { getGreeting } from "@/lib/utils/date";
@@ -70,6 +82,8 @@ export default function DashboardPage() {
   const [isDailyReviewModalOpen, setIsDailyReviewModalOpen] = useState(false);
   const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isStreakCardModalOpen, setIsStreakCardModalOpen] = useState(false);
+  const [soundOn, setSoundOn] = useState(true);
   const [stackedPrompt, setStackedPrompt] = useState<{
     id: string;
     name: string;
@@ -77,6 +91,16 @@ export default function DashboardPage() {
     color: string;
     twoMinuteVersion?: string;
   } | null>(null);
+
+  useEffect(() => {
+    setSoundOn(isSoundEnabled());
+  }, []);
+
+  const toggleSound = () => {
+    const next = !soundOn;
+    setSoundOn(next);
+    setSoundEnabled(next);
+  };
 
   const fetchDashboardData = React.useCallback(async () => {
     const res = await fetch("/api/dashboard");
@@ -157,6 +181,15 @@ export default function DashboardPage() {
         },
       };
     });
+
+    if (newStatus === "completed") {
+      playHabitCompleteSound();
+      const currentCompleted = (data.todayHabits || []).filter((h: any) => h.todayStatus === "completed").length;
+      if (currentCompleted + 1 >= (data.todayHabits || []).length) {
+        triggerConfetti();
+        playStreakMilestoneSound();
+      }
+    }
 
     const completionPayload = {
       habitId,
@@ -393,9 +426,23 @@ export default function DashboardPage() {
         <div className="flex items-center gap-2.5 flex-wrap">
           <button
             type="button"
-            onClick={() => setIsShareModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/60 hover:bg-orange-100 dark:hover:bg-orange-900/50 text-orange-700 dark:text-orange-400 text-xs font-bold transition-all shadow-xs"
-            title="Share your study streak with classmates"
+            onClick={toggleSound}
+            className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-bold transition-all shadow-xs ${
+              soundOn
+                ? "bg-forest-50 dark:bg-forest-950/60 border-forest-200 dark:border-forest-800/80 text-forest-700 dark:text-emerald-400"
+                : "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400"
+            }`}
+            title={soundOn ? "Sound Effects ON (Click to Mute)" : "Sound Effects Muted (Click to Unmute)"}
+          >
+            {soundOn ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+            <span className="hidden sm:inline">{soundOn ? "Sound ON" : "Muted"}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsStreakCardModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-orange-50 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-800/80 hover:bg-orange-100 dark:hover:bg-orange-900/60 text-orange-700 dark:text-orange-300 text-xs font-bold transition-all shadow-xs"
+            title="Generate high-resolution shareable streak card"
           >
             <Flame className="w-3.5 h-3.5 fill-current" />
             Share Streak
@@ -413,7 +460,7 @@ export default function DashboardPage() {
           <button
             type="button"
             onClick={() => setIsDailyReviewModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-forest-600 dark:hover:border-forest-500 text-gray-700 dark:text-gray-200 hover:text-forest-700 dark:hover:text-forest-400 text-xs font-bold transition-all shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-forest-600 dark:hover:border-forest-500 text-gray-700 dark:text-gray-200 hover:text-forest-700 dark:hover:text-emerald-400 text-xs font-bold transition-all shadow-xs"
           >
             <Moon className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
             {data.todayReview ? "Review Completed" : "Daily Review"}
@@ -432,6 +479,40 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
+
+      {/* 🛡️ Auto-Freeze Alert Banner */}
+      {data.autoFreezeAlert?.triggered && (
+        <div className="bg-gradient-to-r from-blue-950 via-slate-900 to-cyan-950 text-white rounded-3xl p-5 border border-cyan-500/30 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-3">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400/30 flex items-center justify-center text-2xl shrink-0 shadow-inner">
+              ❄️
+            </div>
+            <div>
+              <h4 className="font-extrabold text-sm sm:text-base text-cyan-100 flex items-center gap-2">
+                Auto-Streak Freeze Shielded Your Streak!
+                <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-cyan-400/20 text-cyan-200 border border-cyan-300/30">
+                  {data.autoFreezeAlert.date}
+                </span>
+              </h4>
+              <p className="text-xs text-cyan-200/80 mt-0.5 leading-relaxed">
+                You were away yesterday, so 1 streak freeze was automatically activated to safeguard your{" "}
+                <strong className="text-white font-black">{data.autoFreezeAlert.streakPreserved} days streak</strong>! You have {data.autoFreezeAlert.remainingTokens} freeze tokens remaining.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsStreakCardModalOpen(true)}
+            className="px-4 py-2.5 bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs rounded-xl shadow-md transition-all shrink-0 flex items-center gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            Celebrate Streak
+          </button>
+        </div>
+      )}
+
+      {/* 🧠 AI Study Coach & Behavioral Science Debrief */}
+      <AiStudyCoachWidget />
 
       {/* Target Exam Countdown & Study Readiness Matrix */}
       <ExamCountdownWidget />
@@ -454,6 +535,17 @@ export default function DashboardPage() {
           icon={Flame}
           colorClass="text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40"
           badgeText="Active 🔥"
+          badgeColorClass="bg-orange-100 dark:bg-orange-950/70 text-orange-800 dark:text-orange-300 border border-orange-200/50 dark:border-orange-800/60"
+          actionButton={
+            <button
+              type="button"
+              onClick={() => setIsStreakCardModalOpen(true)}
+              className="p-1.5 rounded-lg bg-orange-100 hover:bg-orange-200 dark:bg-orange-900/40 dark:hover:bg-orange-800/60 text-orange-700 dark:text-orange-300 transition-colors"
+              title="Generate High-Res Streak Card"
+            >
+              <Share2 className="w-4 h-4" />
+            </button>
+          }
         />
 
         <StatCard
@@ -735,6 +827,7 @@ export default function DashboardPage() {
                 {data.todayHabits.map((habit: any) => {
                   const isCompleted = habit.todayStatus === "completed";
                   const isSkipped = habit.todayStatus === "skipped";
+                  const isFrozen = habit.todayStatus === "frozen";
 
                   return (
                     <div
@@ -742,6 +835,8 @@ export default function DashboardPage() {
                       className={`group p-3.5 rounded-2xl border transition-all duration-150 flex items-center justify-between gap-3.5 ${
                         isCompleted
                           ? "bg-forest-50/40 dark:bg-forest-950/20 border-forest-100 dark:border-forest-900/40"
+                          : isFrozen
+                          ? "bg-cyan-50/50 dark:bg-cyan-950/30 border-cyan-200 dark:border-cyan-800/50 shadow-xs"
                           : isSkipped
                           ? "bg-orange-50/30 dark:bg-orange-950/20 border-orange-100 dark:border-orange-900/40 opacity-60"
                           : "bg-white dark:bg-gray-800/60 border-gray-100 dark:border-gray-700/60 hover:border-gray-200 dark:hover:border-gray-600 hover:shadow-xs"
@@ -756,11 +851,17 @@ export default function DashboardPage() {
                           className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-150 shrink-0 ${
                             isCompleted
                               ? "bg-forest-700 text-white shadow-xs"
+                              : isFrozen
+                              ? "bg-cyan-100 dark:bg-cyan-900/60 text-cyan-700 dark:text-cyan-300 border-2 border-cyan-400 dark:border-cyan-600"
                               : "border-2 border-gray-300 dark:border-gray-600 hover:border-forest-600 bg-white dark:bg-gray-800"
                           }`}
                           aria-label={`Mark ${habit.name} ${isCompleted ? "incomplete" : "complete"}`}
                         >
-                          {isCompleted && <Check className="w-3.5 h-3.5" strokeWidth={3} />}
+                          {isCompleted ? (
+                            <Check className="w-3.5 h-3.5" strokeWidth={3} />
+                          ) : isFrozen ? (
+                            <span className="text-xs">❄️</span>
+                          ) : null}
                         </button>
 
                         <div
@@ -780,6 +881,11 @@ export default function DashboardPage() {
                               {habit.todayCompletionType === "micro" && (
                                 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300">
                                   ⚡ Micro
+                                </span>
+                              )}
+                              {isFrozen && (
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-cyan-100 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/40">
+                                  ❄️ Frozen Shield
                                 </span>
                               )}
                             </div>
@@ -1205,6 +1311,22 @@ export default function DashboardPage() {
         streakCount={data?.stats?.currentStreak?.count || 0}
         userName={data?.user?.name || "Student"}
       />
+
+      {/* High-Resolution Downloadable Streak Card Modal */}
+      <StreakCardModal
+        isOpen={isStreakCardModalOpen}
+        onClose={() => setIsStreakCardModalOpen(false)}
+        userName={data?.user?.name || "Student"}
+        currentStreak={data?.stats?.currentStreak?.count || 0}
+        longestStreak={data?.stats?.currentStreak?.longest || 0}
+        totalCompletions={
+          data?.consistencyMatrix?.reduce((acc: number, curr: any) => acc + (curr.count || 0), 0) || 0
+        }
+        consistencyMatrix={data?.consistencyMatrix}
+      />
+
+      {/* Global Particle Confetti */}
+      <Confetti />
     </div>
   );
 }

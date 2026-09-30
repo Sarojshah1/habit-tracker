@@ -13,6 +13,8 @@ import {
   Volume2,
 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
+import { playCardFlipSound, playStreakMilestoneSound } from "@/lib/utils/sound";
+import { triggerConfetti } from "@/components/ui/Confetti";
 
 interface Card {
   _id: string;
@@ -53,6 +55,7 @@ export function FlashcardReviewModal({
   const isFinished = currentIndex >= cards.length;
 
   const handleFlip = () => {
+    playCardFlipSound();
     setIsFlipped(!isFlipped);
   };
 
@@ -67,9 +70,15 @@ export function FlashcardReviewModal({
         body: JSON.stringify({ rating }),
       });
 
+      const nextIndex = currentIndex + 1;
       setReviewedCount((prev) => prev + 1);
       setIsFlipped(false);
-      setCurrentIndex((prev) => prev + 1);
+      setCurrentIndex(nextIndex);
+
+      if (nextIndex >= cards.length) {
+        triggerConfetti();
+        playStreakMilestoneSound();
+      }
     } catch (err) {
       console.error("Failed to grade flashcard:", err);
     } finally {

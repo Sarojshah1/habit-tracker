@@ -60,7 +60,13 @@ export async function GET(req: NextRequest) {
     const completedDates = Array.from(
       new Set(allCompletions.filter((c) => c.status === "completed").map((c) => c.date))
     );
-    const { currentStreak, longestStreak } = calculateOverallStreaks(completedDates, todayDateStr);
+    const frozenDates = Array.from(
+      new Set([
+        ...allCompletions.filter((c) => c.status === "frozen").map((c) => c.date),
+        ...(user.streakFreezes?.usedDates || []),
+      ])
+    );
+    const { currentStreak, longestStreak } = calculateOverallStreaks(completedDates, todayDateStr, frozenDates);
 
     // 3. Line chart trend (daily or weekly buckets)
     const trendData = [];
