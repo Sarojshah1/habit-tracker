@@ -23,6 +23,7 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { HabitFormModal } from "@/components/habits/HabitFormModal";
 import { HabitDetailModal } from "@/components/habits/HabitDetailModal";
+import { playHabitCompleteSound } from "@/lib/utils/sound";
 import { GoalFormModal } from "@/components/goals/GoalFormModal";
 import { StreakFreezeModal } from "@/components/habits/StreakFreezeModal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -98,6 +99,10 @@ export default function HabitsPage() {
         ),
       };
     });
+
+    if (nextStatus === "completed") {
+      playHabitCompleteSound();
+    }
 
     try {
       const res = await fetch("/api/completions", {
@@ -435,6 +440,20 @@ export default function HabitsPage() {
                             ⚡ 2-Min Micro
                           </span>
                         )}
+                      </div>
+                    ) : habit.todayStatus === "frozen" ? (
+                      <div className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-100/80 dark:bg-cyan-900/40 text-cyan-800 dark:text-cyan-200 font-bold text-xs border border-cyan-200 dark:border-cyan-800">
+                          <span>❄️</span>
+                          <span>Streak Frozen</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleLogCompletion(habit, "full")}
+                          className="text-[11px] font-bold text-forest-700 dark:text-forest-400 hover:underline"
+                        >
+                          Check In Anyway
+                        </button>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">

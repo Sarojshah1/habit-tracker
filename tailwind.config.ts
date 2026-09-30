@@ -28,7 +28,11 @@ const config: Config = {
           card: "#ffffff",
           muted: "#f1f5f3",
           border: "#e5eae7",
-        }
+        },
+        gray: {
+          750: "#242c38",
+          850: "#18202c",
+        },
       },
       fontFamily: {
         sans: [

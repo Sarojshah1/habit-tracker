@@ -39,8 +39,8 @@ export function Logo({ size = "md", href = "/dashboard" }: LogoProps) {
           <path d="m7.5 12.5 3 3 6-6" />
         </svg>
       </div>
-      <span className={`${textSizes[size]} text-gray-900 font-extrabold flex items-center`}>
-        Habit<span className="text-forest-700 font-black">Track</span>
+      <span className={`${textSizes[size]} text-gray-900 dark:text-gray-100 font-extrabold flex items-center`}>
+        Habit<span className="text-forest-600 dark:text-forest-400 font-black">Track</span>
       </span>
     </div>
   );

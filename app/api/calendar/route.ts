@@ -167,6 +167,8 @@ export async function GET(req: NextRequest) {
 
       const totalScheduled = scheduledHabits.length;
       const completedCount = scheduledHabits.filter((h) => h.status === "completed").length;
+      const frozenCount = scheduledHabits.filter((h) => h.status === "frozen").length;
+      const isDayFrozen = frozenCount > 0 || (user.streakFreezes?.usedDates || []).includes(dateStr);
       const skippedCount = scheduledHabits.filter((h) => h.status === "skipped").length;
       const missedCount = scheduledHabits.filter((h) => h.status === "missed").length;
       const pendingCount = scheduledHabits.filter((h) => h.status === "pending").length;
@@ -177,13 +179,17 @@ export async function GET(req: NextRequest) {
           indicator = "completed";
         } else if (completedCount > 0) {
           indicator = "partial";
+        } else if (isDayFrozen) {
+          indicator = "partial"; // Protected by streak freeze
         } else if (dateStr < todayDateStr) {
           indicator = "missed";
         }
       }
 
       const completionPercentage =
-        totalScheduled > 0 ? Math.round((completedCount / totalScheduled) * 100) : 0;
+        totalScheduled > 0
+          ? Math.min(100, Math.round(((completedCount + (isDayFrozen ? totalScheduled : 0)) / totalScheduled) * 100))
+          : 0;
       const dayExams = examTargets.filter((t) => t.examDate === dateStr);
       const dayMockExams = mockExams.filter((m) => m.date === dateStr);
 

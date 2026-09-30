@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { FlashcardReviewModal } from "@/components/flashcards/FlashcardReviewModal";
 import { FlashcardFormModal } from "@/components/flashcards/FlashcardFormModal";
+import { FlashcardAiModal } from "@/components/flashcards/FlashcardAiModal";
+import { Confetti } from "@/components/ui/Confetti";
 import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -26,6 +28,7 @@ export default function FlashcardsPage() {
   const [stats, setStats] = useState({ totalCards: 0, dueCardsCount: 0, masteredCardsCount: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -85,7 +88,7 @@ export default function FlashcardsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           {dueCards.length > 0 && (
             <button
               type="button"
@@ -99,8 +102,17 @@ export default function FlashcardsPage() {
 
           <button
             type="button"
+            onClick={() => setIsAiModalOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-forest-600 to-emerald-600 hover:from-forest-700 hover:to-emerald-700 text-white font-bold text-sm shadow-xs transition-all hover:-translate-y-0.5"
+          >
+            <Sparkles className="w-4 h-4 text-emerald-200" />
+            AI Generate Deck
+          </button>
+
+          <button
+            type="button"
             onClick={() => setIsFormModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-850 text-gray-800 dark:text-gray-200 font-bold text-sm shadow-xs transition-all hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-800 dark:text-gray-200 font-bold text-sm shadow-xs transition-all hover:-translate-y-0.5"
           >
             <Plus className="w-4 h-4" strokeWidth={2.5} />
             Add Card
@@ -273,6 +285,16 @@ export default function FlashcardsPage() {
         onClose={() => setIsFormModalOpen(false)}
         onSuccess={fetchCards}
       />
+
+      {/* AI Generate Deck Modal */}
+      <FlashcardAiModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        existingDecks={decks}
+        onCardsCreated={fetchCards}
+      />
+
+      <Confetti />
 
       {/* Delete Confirmation */}
       <ConfirmDialog

@@ -912,7 +912,7 @@ export function FocusTimer({
 
       {/* Post-Session Prompt: Did you finish this task? */}
       {showTaskCompletionPrompt && currentTask && (
-        <div className="w-full max-w-md bg-gradient-to-br from-forest-50 to-emerald-50 dark:from-gray-900 dark:to-gray-850 border-2 border-forest-600 dark:border-forest-500 rounded-3xl p-6 mt-8 shadow-elevated animate-in fade-in zoom-in-95 duration-200">
+        <div className="w-full max-w-md bg-gradient-to-br from-forest-50 to-emerald-50 dark:from-gray-900 dark:to-gray-950 border-2 border-forest-600 dark:border-forest-500 rounded-3xl p-6 mt-8 shadow-elevated animate-in fade-in zoom-in-95 duration-200">
           <div className="flex items-center gap-2 text-forest-900 dark:text-forest-200 font-black text-sm uppercase tracking-wider mb-1">
             <CheckCircle2 className="w-4 h-4 text-forest-700 dark:text-forest-400" />
             Focus Session Complete ({durationMinutes}m)

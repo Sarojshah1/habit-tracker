@@ -13,6 +13,8 @@ import { getUserTodayDateString, getDateDaysAgoFrom, formatFriendlyDate, getUser
 import { calculateOverallStreaks, isHabitScheduledForDate, calculateHabitStats } from "@/lib/services/streak";
 import { calculateGoalProgress } from "@/lib/services/goal";
 import { calculateDailyScore } from "@/lib/services/productivity";
+import { User } from "@/lib/models/User";
+import { logActivity } from "@/lib/services/activity";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +48,7 @@ export async function GET(req: NextRequest) {
       activeHabits,
       todayCompletions,
       completedDates,
+      frozenCompletionsDates,
       rawGoals,
       recentActivity,
       todayTasksRaw,
@@ -77,6 +80,13 @@ export async function GET(req: NextRequest) {
       HabitCompletion.distinct("date", {
         userId: user._id,
         status: "completed",
+        date: { $gte: oneYearAgo },
+      }),
+
+      // 3b. Frozen dates shielded by streak freezes (last 365 days)
+      HabitCompletion.distinct("date", {
+        userId: user._id,
+        status: "frozen",
         date: { $gte: oneYearAgo },
       }),
 
@@ -149,9 +159,104 @@ export async function GET(req: NextRequest) {
         .lean(),
     ]);
 
+    // Combine frozen completions with user.streakFreezes.usedDates for full protection
+    const userFreezeDates = (user.streakFreezes?.usedDates || []).filter((d: string) => d >= oneYearAgo);
+    let frozenDates = Array.from(new Set([...frozenCompletionsDates, ...userFreezeDates]));
+
+    // Auto-Freeze Protection:
+    // If yesterday had 0 habit completions, was not already frozen, user has available freeze tokens,
+    // and shielding yesterday preserves an existing streak
+    let autoFreezeAlert: {
+      triggered: boolean;
+      date: string;
+      remainingTokens: number;
+      streakPreserved: number;
+    } | null = null;
+
+    const yesterdayDateStr = getDateDaysAgoFrom(todayDateStr, 1);
+    const yesterdayHasCompleted = completedDates.includes(yesterdayDateStr);
+    const yesterdayIsFrozen = frozenDates.includes(yesterdayDateStr);
+    const availableFreezes = user.streakFreezes?.available ?? 3;
+
+    if (!yesterdayHasCompleted && !yesterdayIsFrozen && availableFreezes > 0) {
+      const potentialStreak = calculateOverallStreaks(
+        completedDates,
+        todayDateStr,
+        [...frozenDates, yesterdayDateStr]
+      );
+
+      if (potentialStreak.currentStreak > 0) {
+        try {
+          const updatedUsedDates = [...(user.streakFreezes?.usedDates || [])];
+          if (!updatedUsedDates.includes(yesterdayDateStr)) {
+            updatedUsedDates.push(yesterdayDateStr);
+          }
+          const newAvailable = Math.max(0, availableFreezes - 1);
+
+          await User.findByIdAndUpdate(user._id, {
+            $set: {
+              "streakFreezes.available": newAvailable,
+              "streakFreezes.usedDates": updatedUsedDates,
+            },
+          });
+
+          if (activeHabits.length > 0) {
+            await Promise.all(
+              activeHabits.map((h: any) =>
+                HabitCompletion.findOneAndUpdate(
+                  { userId: user._id, habitId: h._id, date: yesterdayDateStr },
+                  {
+                    userId: user._id,
+                    habitId: h._id,
+                    date: yesterdayDateStr,
+                    status: "frozen",
+                    notes: "❄️ Protected by Auto-Streak Freeze",
+                    completedAt: new Date(),
+                  },
+                  { upsert: true }
+                )
+              )
+            );
+          }
+
+          await logActivity({
+            userId: user._id.toString(),
+            type: "habit_completed",
+            entityType: "StreakFreeze",
+            metadata: {
+              title: "❄️ Auto-Freeze Shield Activated",
+              description: `Automatically protected your streak for ${yesterdayDateStr}.`,
+              date: yesterdayDateStr,
+              autoTriggered: true,
+            },
+          });
+
+          frozenDates.push(yesterdayDateStr);
+          if (user.streakFreezes) {
+            user.streakFreezes.available = newAvailable;
+            user.streakFreezes.usedDates = updatedUsedDates;
+          }
+
+          ninetyDayCompletions.push({
+            date: yesterdayDateStr,
+            status: "frozen",
+          } as any);
+
+          autoFreezeAlert = {
+            triggered: true,
+            date: yesterdayDateStr,
+            remainingTokens: newAvailable,
+            streakPreserved: potentialStreak.currentStreak,
+          };
+        } catch (freezeErr) {
+          console.error("Auto-freeze shield error:", freezeErr);
+        }
+      }
+    }
+
     // Derive week and month completions from ninetyDayCompletions in memory without extra DB queries
     const weekCompletions = ninetyDayCompletions.filter(
-      (c: any) => c.date >= weekStartDate && c.date <= todayDateStr && c.status === "completed"
+      (c: any) => c.date >= weekStartDate && c.date <= todayDateStr && (c.status === "completed" || c.status === "frozen")
     );
     const monthCompletions = ninetyDayCompletions.filter(
       (c: any) => c.date >= `${monthPrefix}-01` && c.date <= `${monthPrefix}-${daysInMonth}`
@@ -183,8 +288,8 @@ export async function GET(req: NextRequest) {
     const completedTodayCount = todayHabits.filter((h: any) => h.todayStatus === "completed").length;
     const totalTodayHabits = todayHabits.length;
 
-    // 4. Streaks (calculated from all historical completed dates)
-    const { currentStreak, longestStreak } = calculateOverallStreaks(completedDates, todayDateStr);
+    // 4. Streaks (calculated from all historical completed dates with streak freeze protection)
+    const { currentStreak, longestStreak } = calculateOverallStreaks(completedDates, todayDateStr, frozenDates);
 
     // 5. Weekly Progress (last 7 days: 6 days ago up to today)
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -236,11 +341,12 @@ export async function GET(req: NextRequest) {
     });
 
     // 8. Mini monthly calendar data (current month)
-    const monthCompletionsByDate = new Map<string, { completed: number; skipped: number }>();
+    const monthCompletionsByDate = new Map<string, { completed: number; skipped: number; frozen: number }>();
     monthCompletions.forEach((c: any) => {
-      const current = monthCompletionsByDate.get(c.date) || { completed: 0, skipped: 0 };
+      const current = monthCompletionsByDate.get(c.date) || { completed: 0, skipped: 0, frozen: 0 };
       if (c.status === "completed") current.completed++;
       if (c.status === "skipped") current.skipped++;
+      if (c.status === "frozen") current.frozen++;
       monthCompletionsByDate.set(c.date, current);
     });
 
@@ -248,7 +354,8 @@ export async function GET(req: NextRequest) {
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${monthPrefix}-${String(day).padStart(2, "0")}`;
       const scheduledCount = activeHabits.filter((h: any) => isHabitScheduledForDate(h, dateStr, timezone)).length;
-      const rec = monthCompletionsByDate.get(dateStr) || { completed: 0, skipped: 0 };
+      const rec = monthCompletionsByDate.get(dateStr) || { completed: 0, skipped: 0, frozen: 0 };
+      const isDateFrozen = rec.frozen > 0 || (user.streakFreezes?.usedDates || []).includes(dateStr);
 
       let status = "none";
       if (scheduledCount > 0) {
@@ -256,6 +363,8 @@ export async function GET(req: NextRequest) {
           status = "completed";
         } else if (rec.completed > 0) {
           status = "partial";
+        } else if (isDateFrozen) {
+          status = "frozen";
         } else if (dateStr < todayDateStr) {
           status = "missed";
         } else {
@@ -422,6 +531,7 @@ export async function GET(req: NextRequest) {
         goals: activeGoals,
         recentActivity,
         consistencyMatrix,
+        autoFreezeAlert,
       },
     });
   } catch (error) {

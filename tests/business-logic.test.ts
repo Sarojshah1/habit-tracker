@@ -90,6 +90,51 @@ describe("Streak Calculation Engine", () => {
     expect(result.currentStreak).toBe(2);
     expect(result.longestStreak).toBe(5);
   });
+
+  it("preserves active streak when yesterday was shielded by a streak freeze", () => {
+    // 17-day streak up to yesterday (2026-09-28)
+    // Yesterday (2026-09-29) was frozen
+    // Today (2026-09-30) is pending
+    const completionDates = [
+      "2026-09-12", "2026-09-13", "2026-09-14", "2026-09-15",
+      "2026-09-16", "2026-09-17", "2026-09-18", "2026-09-19",
+      "2026-09-20", "2026-09-21", "2026-09-22", "2026-09-23",
+      "2026-09-24", "2026-09-25", "2026-09-26", "2026-09-27",
+      "2026-09-28",
+    ];
+    const frozenDates = ["2026-09-29"];
+    const todayDate = "2026-09-30";
+
+    const result = calculateOverallStreaks(completionDates, todayDate, frozenDates);
+    expect(result.currentStreak).toBe(17);
+    expect(result.longestStreak).toBe(17);
+  });
+
+  it("increments streak when completing habits today after a frozen yesterday", () => {
+    const completionDates = [
+      "2026-09-12", "2026-09-13", "2026-09-14", "2026-09-15",
+      "2026-09-16", "2026-09-17", "2026-09-18", "2026-09-19",
+      "2026-09-20", "2026-09-21", "2026-09-22", "2026-09-23",
+      "2026-09-24", "2026-09-25", "2026-09-26", "2026-09-27",
+      "2026-09-28", "2026-09-30", // Completed today!
+    ];
+    const frozenDates = ["2026-09-29"];
+    const todayDate = "2026-09-30";
+
+    const result = calculateOverallStreaks(completionDates, todayDate, frozenDates);
+    expect(result.currentStreak).toBe(18);
+    expect(result.longestStreak).toBe(18);
+  });
+
+  it("preserves streak when today is shielded by a streak freeze", () => {
+    const completionDates = ["2026-09-10", "2026-09-11"];
+    const frozenDates = ["2026-09-12"]; // Froze today
+    const todayDate = "2026-09-12";
+
+    const result = calculateOverallStreaks(completionDates, todayDate, frozenDates);
+    expect(result.currentStreak).toBe(2);
+    expect(result.longestStreak).toBe(2);
+  });
 });
 
 describe("Habit Scheduling & Completion Rates", () => {
